@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  os:
+    image: bwtang/xv6-env
+    container_name: riscv64-new
+    volumes:
+      - ./:/riscv64
+    working_dir: /riscv64
+    command: bash
+    cpus: '1'  # 限制最多使用 1 个 CPU 的算力
+    restart: unless-stopped
+    stdin_open: true
+    tty: true

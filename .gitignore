@@ -1,0 +1,10 @@
+# Ignore the build directory
+build/
+tools/out/
+user/out/
+# Ignore other common generated files and directories (optional)
+*.o
+*.asm
+*.sym
+*.d
+virtio_disk.img

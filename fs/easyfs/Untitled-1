@@ -1,0 +1,38 @@
+1、fs
+    1. 文件系统初始化
+    2. 解挂文件系统
+
+2、super block
+    1. 读出
+    2. 初始化
+    3. 写回
+    4. 挂载根
+    5. 分配 inode
+    6. 回收 inode
+    7. 分配 block
+    8. 回收 block
+    9. 查询 inode
+
+    10.内核线程处理脏的 inode
+
+3、inode
+    0. d_inode 填充 m_inode
+    1. 创建 m_inode
+    2. 释放 m_inode
+    3. (解)引用 m_inode
+
+    1. 创建磁盘 d_inode
+    4. 删除磁盘 d_inode
+    3. 更新磁盘 d_inode
+    4. 查询磁盘 d_inode
+    
+    5. 读出文件信息
+    6. 写回文件信息 { 涉及 2-7: 分配 block }
+    7. 截断文件信息
+
+4、dentry
+    1. mkdir
+    2. rmdir
+    3. touch
+    4. rm
+
