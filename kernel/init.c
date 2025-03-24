@@ -6,7 +6,6 @@
 #include "dev/devs.h"
 
 struct thread_info *init_t;
-extern pagetable_t kernel_pagetable;
 
 // 内存虚拟块设备
 extern void mvirt_blk_dev_init();

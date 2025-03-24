@@ -60,25 +60,20 @@ static struct page *buddy_alloc(const int order)
                 // 寻找下一级的伙伴(这里的伙伴存在的话一定是空闲的)
                 buddy_page = find_buddy(page, j - 1);
                 if (!buddy_page)
-                    break;
+                   goto bad;
 
                 // 加到下一级的链表中
                 list_add_head(&buddy_page->buddy, &Buddy.free_lists[j - 1]);
             }
             // 循环接受，该 page 也就是这个被拆分大块的起始地址（现在变成小块了）
             spin_unlock(&Buddy.lock);
-
-            spin_lock(&page->lock);
-            if (page->is_use == 1)
-                panic("page->is_use\n");
-            else
-                page->is_use = 1;
-            spin_unlock(&page->lock);
             return page;
         }
     }
+bad:
     // 没有找到
     spin_unlock(&Buddy.lock);
+    panic("BUDDY!");
     return NULL;
 }
 
@@ -107,9 +102,6 @@ static void buddy_free(struct page *pg, const int order)
         // page 始终为位置更低的，这样最后的 page 就是最后大块的头儿
         page = page < buddy_page ? page : buddy_page;
     }
-    spin_lock(&page->lock);
-    page->is_use = 0;
-    spin_unlock(&page->lock);
     list_add_head(&page->buddy, &Buddy.free_lists[level]);
     spin_unlock(&Buddy.lock);
 }
@@ -197,6 +189,16 @@ inline void __free_page(void *addr)
     free_pages(PA2PG(addr), 0);
 }
 
+void mm_debug()
+{
+    for (int i = 0; i < MAX_LEVEL; i++)
+    {
+        uint len = list_len(&Buddy.free_lists[i]);
+        printk("{ L: %d, N: %d }\t", i, len);
+    }
+    printk("\n");
+}
+
 // 内存管理初始化: page、buddy、kmem_cache、kmalloc
 void mm_init()
 {
@@ -205,4 +207,7 @@ void mm_init()
     kmem_cache_init();
     kmalloc_init();
     printk("mm_init ok\n");
+    mm_debug();
 }
+
+

@@ -14,7 +14,7 @@
 #include "std/stdio.h"
 
 // 内核页表
-pagetable_t kernel_pagetable;
+static pagetable_t kernel_pagetable;
 extern struct vm_area_struct *find_vma(struct mm_struct *mm, uint64 addr);
 extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
 
@@ -289,6 +289,10 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
 
 void page_fault_handler(uint64 fault_addr, uint64 scause)
 {
+    if(fault_addr == 0x3b00000002){
+        printk("page");
+        return;
+    }
     assert(intr_get() == 0, "page_fault_handler intr on!\n");
     struct thread_info *th = myproc();
 
@@ -307,8 +311,8 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
 #endif
     v = find_vma(mm, fault_addr);
     if (!v) {
-        panic("page_fault_handler: illegal addr %p\n",
-              fault_addr);  // TODO 杀死进程，不过我们暂时先报错
+        panic("page_fault_handler: illegal addr %p, scause: %p\n",
+              fault_addr,scause);  // TODO 杀死进程，不过我们暂时先报错
     }
 
     switch (scause) {

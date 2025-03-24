@@ -62,7 +62,8 @@
     "syscall.h": "c",
     "elf.h": "c",
     "conf.h": "c",
-    "signal.h": "c"
+    "signal.h": "c",
+    "typeinfo": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

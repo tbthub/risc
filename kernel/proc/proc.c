@@ -75,27 +75,27 @@ static inline void mm_init(struct mm_struct *mm)
     mm->next_map = USER_MAP_TOP;
 }
 
-static int th_table_init(struct th_table_struct *th_table)
-{
-    th_table->array = kmalloc(sizeof(struct thread_info *) * MAX_THREADS_PER_TASK, 0);
-    if (!th_table->array) {
-        panic("th_table_init\n");
-        return -ENOMEM;
-    }
-    spin_init(&th_table->lock, "th_table");
-    sem_init(&th_table->main_thread_wait, 0, "th_table");
-    th_table->num = 1;
-    th_table->alloc = 0;
-    return 0;
-}
+// static int th_table_init(struct th_table_struct *th_table)
+// {
+//     th_table->array = kmalloc(sizeof(struct thread_info *) * MAX_THREADS_PER_TASK, 0);
+//     if (!th_table->array) {
+//         panic("th_table_init\n");
+//         return -ENOMEM;
+//     }
+//     spin_init(&th_table->lock, "th_table");
+//     sem_init(&th_table->main_thread_wait, 0, "th_table");
+//     th_table->num = 1;
+//     th_table->alloc = 0;
+//     return 0;
+// }
 
-static void th_table_free(struct th_table_struct *th_table)
-{
-    if (!th_table->array)
-        return;
+// static void th_table_free(struct th_table_struct *th_table)
+// {
+//     if (!th_table->array)
+//         return;
 
-    kfree(th_table->array);
-}
+//     kfree(th_table->array);
+// }
 
 // TODO 后面支持多线程需要
 // static int th_table_alloc(struct th_table_struct *th_table)
@@ -137,7 +137,7 @@ static inline void task_struct_init(struct task_struct *task)
     mm_init(&task->mm);
     sig_init(&task->sigs);
     files_init(&task->files);
-    th_table_init(&task->th_table);
+    // th_table_init(&task->th_table);
 }
 
 static inline void thread_info_init(struct thread_info *thread)
@@ -146,6 +146,7 @@ static inline void thread_info_init(struct thread_info *thread)
     spin_init(&thread->lock, "thread");
     thread->flags = 0;
     thread->state = USED;
+    thread->tid = 0;
 
     thread->parent = NULL;
     INIT_LIST_HEAD(&thread->child);
@@ -185,8 +186,8 @@ static struct thread_info *alloc_thread()
     // 不会并发冲突
     thread->task = task;
     thread->tid = 0;
-    task->th_table.array[0] = thread;
-    task->th_table.alloc = 1;
+    // task->th_table.array[0] = thread;
+    // task->th_table.alloc = 1;
 
     spin_lock(&Proc.lock);
     thread->pid = thread->pid == 0 ? Proc.pids++ : thread->pid;
@@ -200,7 +201,7 @@ static struct thread_info *alloc_thread()
 // 在 scheduler 中获取了锁，这里需要释放
 static void forkret()
 {
-    printk("forkret, pid: %d",myproc()->pid);
+    // printk("forkret, pid: %d",myproc()->pid);
     spin_unlock(&myproc()->lock);
     usertrapret();
 }
@@ -475,6 +476,7 @@ int do_fork()
         panic("do_fork uthread_struct_init\n");
 
     printk("[fork] pa-pid: %d, child-pid: %d\n", pa->pid, ch->pid);
+
     copy_proc(ch, pa);
 
     ch->parent = pa;
@@ -536,9 +538,9 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
             return NULL;
         else  // 堵塞,继续while循环获取锁
         {
-            printk("[wait] sleep wait child, pid:%d\n", cur->pid);
+            // printk("[wait] sleep wait child, pid:%d\n", cur->pid);
             sem_wait(&cur->child_exit_sem);
-            printk("[wait] wake form child, pid:%d\n", cur->pid);
+            // printk("[wait] wake form child, pid:%d\n", cur->pid);
         }
     }
 }
@@ -585,7 +587,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
     struct task_struct *task = t->task;
     // 主线程
     if (t->tid == 0) {
-        th_table_free(&task->th_table);
+        // th_table_free(&task->th_table);
 
         fd_close_all(&task->files);
 

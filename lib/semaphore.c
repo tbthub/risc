@@ -30,9 +30,9 @@ void sem_wait(semaphore_t *sem)
         fifo_push(&sem->waiters, &thread->sched);
         
         spin_unlock(&sem->lock);
-        printk("sem wait on, %d,intr:%d\n",thread->pid,intr_get());
+        // printk("sem wait on, %d,intr:%d\n",thread->pid,intr_get());
         sched(intr);
-	    printk("sem wait up,%d, intr: %d\n",thread->pid,intr_get());
+	    // printk("sem wait up,%d, intr: %d\n",thread->pid,intr_get());
     }
     else
     {

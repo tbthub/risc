@@ -155,7 +155,6 @@ static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
 void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags)
 {
 	spin_init(&cache->lock, "slab");
-	spin_lock(&cache->lock);
 
 	strncpy(cache->name, name, CACHE_MAX_NAME_LEN);
 	cache->flags = flags;
@@ -168,7 +167,6 @@ void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, 
 	cache_cpu_init(cache);
 
 	list_add_head(&cache->list, &kmem_cache_list);
-	spin_unlock(&cache->lock);
 }
 
 // 这里暂时还有一点问题
@@ -207,13 +205,13 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
 	if (list_empty(&cache->list))
 		panic("kmem_cache_alloc: '%s' has already been freed!\n", cache->name);
 
-	int _cpuid;
 	struct slab *slab;
 	struct slab *cpu_slab;
 	void *addr;
-
-	_cpuid = cpuid();
-	cpu_slab = cache->cache_cpu[_cpuid];
+	
+	push_off();
+	cpu_slab = cache->cache_cpu[cpuid()];
+	pop_off();
 
 	// 如果当前还有可用的，直接弹出即可
 	if (is_slab_partial(cpu_slab, cache)) {

@@ -43,12 +43,14 @@ void main()
           
           proc_init();
           sched_init();
-
+          
           kvm_init_hart();
           trap_inithart();
           plic_inithart();
           
+          printk("111\n");
           init_s();
+          printk("111\n");
           
 
           // printk("hart 0 init_s ok\n");

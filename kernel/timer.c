@@ -183,9 +183,9 @@ static timer_t *timer_create(void (*callback)(void *), void *args, uint64 during
 static void timer_waker_up(void *args)
 {
     struct thread_info *t = (struct thread_info *)args;
-    printk("timer_waker_up: pid:%d, %p\n",t->pid,args);
+    // printk("timer_waker_up: pid:%d, %p\n",t->pid,args);
     // printk("tw: %p, twt :%p\n",tw,tw->thread);
-    printk("timer_waker_up: tw->thread, %d\n",t->pid);
+    // printk("timer_waker_up: tw->thread, %d\n",t->pid);
     wakeup_process(t);
 }
 
@@ -195,7 +195,7 @@ void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
     thread->state = SLEEPING;
     timer_create(timer_waker_up,thread,down_time, 1, TIMER_NO_BLOCK);
     sched(0);
-    printk("I wake %d\n",thread->pid);
+    // printk("I wake %d\n",thread->pid);
     // 被唤醒后返回，从这里继续
 }
 
@@ -204,9 +204,9 @@ extern void send_sig(int sig, pid_t pid);
 int do_sleep(uint64 ticks)
 {
     struct thread_info *t = myproc();
-    printk("[sleep] pid:%d\n", t->pid);
+    // printk("[sleep] pid:%d\n", t->pid);
     assert(t != NULL, "do_sleep\n");
     thread_timer_sleep(t, ticks);
-    printk("[sleep] end pid:%d\n", t->pid);
+    // printk("[sleep] end pid:%d\n", t->pid);
     return 0;
 }

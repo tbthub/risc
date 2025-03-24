@@ -174,7 +174,7 @@ __attribute__((noreturn)) void usertrapret()
     x |= SSTATUS_SPIE;  // enable interrupts in user mode
     w_sstatus(x);
 
-    printk("[u-ret] pid:%d\n", p->pid);
+    // printk("[u-ret] pid:%d\n", p->pid);
     userret();
 }
 
@@ -272,8 +272,8 @@ void kerneltrap()
     w_sepc(sepc);        // 将原来的 sepc
                          // 值写回寄存器，以便异常返回时能够继续原来的代码执行。
     w_sstatus(sstatus);  //  恢复 sstatus 的状态，以确保内核的状态和之前一致。
-    if (myproc())
-        printk("[k-ret] %p, pid:%d\n", scause, myproc()->pid);
+    // if (myproc())
+        // printk("[k-ret] %p, pid:%d\n", scause, myproc()->pid);
 }
 
 // 用户 trap 处理函数 user_trap
@@ -292,7 +292,7 @@ void usertrap()
 
     // (位于进程上下文的，别忘记了:-)
     struct thread_info *p = myproc();
-    printk("[u-trap]: c: %d, %p, pid:%d\n", cpuid(), scause, p->pid);
+    // printk("[u-trap]: c: %d, %p, pid:%d\n", cpuid(), scause, p->pid);
     assert(p != NULL, "usertrap: p is NULL\n");
     p->tf->epc = sepc;
 

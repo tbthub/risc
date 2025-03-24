@@ -77,35 +77,40 @@ void sched(int old_intr)
     // printk("Thread %s switch to scheduler in sched\n", thread->name);
     swtch(&thread->context, &mycpu()->context);
     assert(intr_get() == 0, "sched intr_get\n");
-    printk("sched2-%d,thart: %d, chart: %d \n", thread->pid, thread->cpu_id, cpuid());
+    // printk("sched2-%d,thart: %d, chart: %d \n", thread->pid, thread->cpu_id, cpuid());
 
     // printk("sched3-%d\n", thread->pid);
 
     // printk("Thread %s releasing lock on cpu %d ret sched\n", thread->name, cpuid());
     push_off();
     if (thread->tf) {
-        printk("sched3.5-%d\n", thread->pid);
+        // printk("sched3.5-%d\n", thread->pid);
         spin_lock(&thread->task->mm.lock);
-        printk("sched3.55-%d\n", thread->pid);
+        // printk("sched3.55-%d\n", thread->pid);
         // 如果发生了进程切换
+        // if(thread->pid == 40)
+        //     {
+        //         printk("40\n");
+        //     }
         if (r_satp() != MAKE_SATP(thread->task->mm.pgd)) {
             
-            printk("sched3.55-%d\n", thread->pid);
+            // printk("sched3.55-%d\n", thread->pid);
             printk("sched3.56-%d-%p-%p-%d\n", thread->pid,r_satp(),MAKE_SATP(thread->task->mm.pgd),cpuid());
             sfence_vma();
+            
             w_satp(MAKE_SATP(thread->task->mm.pgd));
             printk("sched3.57-%d\n", thread->pid);
             sfence_vma();
-            printk("sched3.58-%d\n", thread->pid);
+            // printk("sched3.58-%d\n", thread->pid);
             
         }
         pop_off();
         spin_unlock(&thread->task->mm.lock);
-        printk("sched3.7-%d\n", thread->pid);
+        // printk("sched3.7-%d\n", thread->pid);
     }
-    printk("sched3.6-%d\n", thread->pid);
+    // printk("sched3.6-%d\n", thread->pid);
     mycpu()->intena = intena;
-    printk("sched4-%d thart: %d, cid:%d intr:%d\n", thread->pid, thread->cpu_id, cpuid(), intr_get());
+    // printk("sched4-%d thart: %d, cid:%d intr:%d\n", thread->pid, thread->cpu_id, cpuid(), intr_get());
 
     spin_unlock(&thread->lock);
     // printk("sched5-%d thart: %d, cid:%d intr:%d \n", thread->pid, thread->cpu_id, cpuid(),intr_get());
@@ -126,7 +131,7 @@ void yield()
 {
     // printk("intr status: %d\n",intr_get());
     // printk("-----------timer interrupt yield!!!--------------\n");
-    printk("yield pid:%d\n", myproc()->pid);
+    // printk("yield pid:%d\n", myproc()->pid);
     struct thread_info *thread = myproc();
     // printk("Thread %s acquiring lock on cpu %d in yield\n", thread->name, cpuid());
     spin_lock(&thread->lock);
@@ -135,7 +140,7 @@ void yield()
     add_runnable_task(thread);
     // list_add_tail(&thread->sched, &mycpu()->sched_list.run);
     sched(0);
-    printk("sched5-%d (yield)\n", thread->pid);
+    // printk("sched5-%d (yield)\n", thread->pid);
 }
 
 void scheduler()
@@ -144,9 +149,9 @@ void scheduler()
     intr_on();
     while (1) {
         // printk("A");
-        printk("S%d", cpuid());
+        // printk("S%d", cpuid());
         spin_lock(&cpu->sched_list.lock);
-        printk("A%d", cpuid());
+        // printk("A%d", cpuid());
         struct thread_info *next = pick_next_task(&cpu->sched_list.run);
         if (next) {
             // 找到下一个线程，从就绪列表摘下
@@ -154,16 +159,15 @@ void scheduler()
             // 但是我们走 sleep 时候要主动让出CPU，在信号量中有对进程加锁，因此这里交换回来要解锁
             // 同理,我们在交换出去的时候加锁
             // printk("Thread %s acquiring lock on cpu %d in scheduler\n", next->name, cpuid());
-            printk("132\n");
+            // printk("132\n");
             spin_lock(&next->lock);
-            printk("132\n");
             // printk("pick thread name: %s\n", next->name);
             list_del_init(&next->sched);
-            spin_unlock(&cpu->sched_list.lock);
-
-            next->state = RUNNING;
-            next->cpu_id = cpuid();
             cpu->thread = next;
+            next->cpu_id = cpuid();
+            next->state = RUNNING;
+            
+            spin_unlock(&cpu->sched_list.lock);
 #ifdef DEBUG_TASK_ON_CPU
             printk("pid: %d, \tname: %s, in running on hart %d\n", next->pid, next->name, cpuid());
 #endif
@@ -201,10 +205,10 @@ void sched_init()
 
 void wakeup_process(struct thread_info *thread)
 {
-    printk("Thread %s acquiring lock on cpu %d in wakeup\n", thread->name, cpuid());
-    printk("w1\n");
+    // printk("Thread %s acquiring lock on cpu %d in wakeup\n", thread->name, cpuid());
+    // printk("w1\n");
     spin_lock(&thread->lock);
-    printk("w2\n");
+    // printk("w2\n");
 
     // 确保不在任何队列中，我们要将其加入到就绪队列
     assert(list_len(&thread->sched) == 0, "wakeup_process\n");
