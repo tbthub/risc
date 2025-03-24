@@ -53,10 +53,13 @@ static struct work_struct *work_queue_pop()
 {
     push_off();
     int cid = cpuid();
-    pop_off();
     printk("hart %d wait\n", cpuid());
+    pop_off();
+
+    // ! sem 会切换CPU
     sem_wait(&work_queue[cid].count);
-    printk("hart %d run\n", cpuid());
+    printk("hart %d run\n", cid);
+
     spin_lock(&work_queue[cid].lock);
     struct list_head *node = fifo_pop(&work_queue[cid].queue);
     spin_unlock(&work_queue[cid].lock);
@@ -64,6 +67,7 @@ static struct work_struct *work_queue_pop()
         return NULL;
     }
     struct work_struct *w = list_entry(node, struct work_struct, list);
+    printk("worl: %p,%p\n",w->func,w->args);
     return w;
 }
 
@@ -76,6 +80,11 @@ static __attribute__((noreturn)) void kthread_work_handler()
 {
     for (;;) {
         struct work_struct *w = work_queue_pop();
+        printk("work get 1 %d\n",myproc()->pid);
+        if (w == NULL || (uint64)w->func < 0x1000 || (uint64)w->args < 0x1000)
+            panic("SSSSSSSSSSS\n");
+        printk("work get 2 %d\n",myproc()->pid);
+        printk("worl 2: %p,%p\n",(uint64)w->func,(uint64)w->args);
         w->func(w->args);
         work_free(w);
     }
@@ -95,6 +104,8 @@ void work_queue_push(void (*func)(void *), void *args)
 {
     push_off();
     int cid = cpuid();
+    printk("wake hart: %d\n", cpuid());
+
     struct work_struct *w = work_alloc(func, args);
     if (!w) {
         panic("work push w is NULL\n");
@@ -106,6 +117,5 @@ void work_queue_push(void (*func)(void *), void *args)
     spin_unlock(&work_queue[cid].lock);
 
     sem_signal(&work_queue[cid].count);
-    printk("wake hart: %d\n", cpuid());
     pop_off();
 }

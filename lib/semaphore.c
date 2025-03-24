@@ -28,16 +28,19 @@ void sem_wait(semaphore_t *sem)
         spin_lock(&thread->lock);
         thread->state = SLEEPING;
         fifo_push(&sem->waiters, &thread->sched);
-
+        
         spin_unlock(&sem->lock);
+        printk("sem wait on, %d,intr:%d\n",thread->pid,intr_get());
         sched(intr);
-	printk("sem wait up,%d\n",thread->pid);
+	    printk("sem wait up,%d, intr: %d\n",thread->pid,intr_get());
     }
     else
     {
         // 如果信号量大于 0，则直接释放锁
         spin_unlock(&sem->lock);
     }
+    // if(intr == 1)
+    // intr_on();
 }
 
 void sem_signal(semaphore_t *sem)

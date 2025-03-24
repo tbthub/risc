@@ -1,9 +1,10 @@
 #include "lib/spinlock.h"
+
 #include "core/proc.h"
-#include "std/stddef.h"
-#include "riscv.h"
 #include "defs.h"
 #include "lib/string.h"
+#include "riscv.h"
+#include "std/stddef.h"
 
 void spin_init(spinlock_t *lock, const char *name)
 {
@@ -32,17 +33,15 @@ void pop_off()
 {
     uint64 sp1 = r_sp();
     // 如果中断已经打开
-    if (intr_get())
-    {
-        
+    if (intr_get()) {
         // struct thread_info *t = c->thread;
         // if (!t)
         // {
-            // printk("user");
+        // printk("user");
         // }
         // else
         // {
-            // printk("kernel");
+        // printk("kernel");
         // }
         panic("spinlock pop_off: intr on! hart: %d\n", cpuid());
     }
@@ -52,11 +51,13 @@ void pop_off()
         panic("spinlock pop_off: cpu->noff less than 1! hart: %d\n", cpuid());
 
     c->noff -= 1;
-    if (c->noff == 0 && c->intena)
+    if (c->noff == 0 && c->intena) {
+        // printk("spi intr on: %d\n", cpuid());
         intr_on();
+    }
 
-    uint64 sp2 =  r_sp();
-    assert(sp1 == sp2,"sp\n");
+    uint64 sp2 = r_sp();
+    assert(sp1 == sp2, "sp\n");
 }
 
 // 需要在进制中断的情况下调用（cpu_id）
@@ -67,6 +68,7 @@ int holding(spinlock_t *lock)
 
 void spin_lock(spinlock_t *lock)
 {
+    uint64 a = 0;
     push_off();
     if (holding(lock))
         panic("spinlock: already held when trying to lock\n - name: %s, cpu: %d, thread name: %s\n", lock->name, cpuid(), myproc()->name);
@@ -76,8 +78,12 @@ void spin_lock(spinlock_t *lock)
     //   a5 = 1 (SPIN_LOCK_LOCKED)
     //   s1 = locked
     //   amoswap.w.aq a5, a5, (s1)
-    while (__sync_lock_test_and_set(&lock->lock, SPIN_LOCKED) != 0)
-        ;
+    while (__sync_lock_test_and_set(&lock->lock, SPIN_LOCKED) != 0) {
+        a++;
+        if (a > 0xAAAAAA) {
+            panic("spin maybe!!\n");
+        }
+    }
     lock->cpuid = cpuid();
     // Tell the C compiler and the processor to not move loads or stores
     // past this point, to ensure that the critical section's memory

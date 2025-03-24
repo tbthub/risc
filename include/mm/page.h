@@ -31,6 +31,7 @@ struct page
     struct list_head buddy;
     struct slab *slab;
     spinlock_t lock;
+    int is_use;
 };
 
 struct mem_map_struct

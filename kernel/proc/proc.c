@@ -36,14 +36,14 @@ __attribute__((noreturn)) int64 do_exit(int exit_code);
 // 退出（ZOMBIE）后重新调度
 static void quit()
 {
-    struct cpu *cpu = mycpu();
-    struct thread_info *thread = cpu->thread;
+    // struct cpu *cpu = mycpu();
+    // struct thread_info *thread = cpu->thread;
 
-    spin_lock(&cpu->sched_list.lock);
-    list_add_tail(&thread->sched, &cpu->sched_list.out);
-    spin_unlock(&cpu->sched_list.lock);
+    // spin_lock(&cpu->sched_list.lock);
+    // list_add_tail(&thread->sched, &cpu->sched_list.out);
+    // spin_unlock(&cpu->sched_list.lock);
 
-    do_exit(0);
+    // do_exit(0);
 
     // sched();
     // printk("sched5-%d (quit)\n", thread->pid);
@@ -200,6 +200,7 @@ static struct thread_info *alloc_thread()
 // 在 scheduler 中获取了锁，这里需要释放
 static void forkret()
 {
+    printk("forkret, pid: %d",myproc()->pid);
     spin_unlock(&myproc()->lock);
     usertrapret();
 }
@@ -467,7 +468,6 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 int do_fork()
 {
-    intr_off();
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();

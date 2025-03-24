@@ -63,7 +63,8 @@ static void timer_intr()
         // printk("sched8-%d (intr_handler, intr status: %d)\n", myproc()->pid,
         // intr_get());
         yield();
-        // printk("sched6-%d (timer_intr)\n", cur->pid);
+        // printk("ti intr,pid: %d\n",cur->pid)
+        printk("sched6-%d (timer_intr)\n", cur->pid);
     }
 }
 
@@ -255,8 +256,8 @@ void kerneltrap()
                                    // 包含状态标志，例如当前的运行模式
     uint64 scause = r_scause();    // scause: 保存 scause 寄存器的值，scause
     // 指示了异常或中断的原因
-    if (myproc())
-        printk("[k-trap]  c: %d, %p, pid:%d\n", cpuid(), scause, myproc()->pid);
+    // if (myproc())
+        // printk("[k-trap]  c: %d, %p,t:%p pid:%d, name:%s\n", cpuid(), scause,myproc(), myproc()->pid,myproc()->name);
     // printk("[ktrap] %p\n", scause);
     assert((sstatus & SSTATUS_SPP) != 0, "kerneltrap: not from supervisor mode %d", sstatus & SSTATUS_SPP);
     assert(intr_get() == 0,

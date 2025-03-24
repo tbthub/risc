@@ -49,7 +49,8 @@ static void timer_wake(timer_t *t)
     if (t->block == TIMER_NO_BLOCK)  // 不堵塞的话，直接使用工作队列就行
     {
         // printk("no_block -> work_queue\n");
-        work_queue_push(t->callback, t->args);
+        // work_queue_push(t->callback, t->args);
+        t->callback(t->args);
     }
     else if (t->block == TIMER_BLOCK)  // 会堵塞，则创建内核线程
     {
@@ -81,6 +82,8 @@ static void timer_try_wake()
     spin_lock(&ct->lock);
     list_for_each_entry_safe(t, tmp, &ct->list, list)
     {
+        if(t == NULL)
+            panic("t == NULL\n");
         // printk("%d,%d\n", sys_ticks, t->init_time + t->during_time);
         if (sys_ticks >= t->init_time + t->during_time)  // 到期了
         {
@@ -108,8 +111,8 @@ inline void time_update()
 
     if (cpuid() == 0)
         sys_ticks++;
-    printk("t%d", cpuid());
-    timer_try_wake();
+    // printk("t%d", cpuid());
+    // timer_try_wake();
 
     // if (cpuid() == 0) {
     //     sys_ticks++;
@@ -118,10 +121,10 @@ inline void time_update()
     // // TODO 应该会差
     // // 1,2或者更多个（如果此时cpu还在关中断）时钟周期，但是这样可以大大减少唤醒次数
     // // TODO 这里没有必要对 sys_ticks 强加锁
-    // if (sys_ticks % 3 == 0) {
-    //     printk("t%d ",cpuid());
-    //     timer_try_wake();
-    // }
+    if (sys_ticks % 3 == 0) {
+        // printk("t%d ",cpuid());
+        timer_try_wake();
+    }
 }
 
 // 需要在关中断情况下执行
@@ -177,29 +180,22 @@ static timer_t *timer_create(void (*callback)(void *), void *args, uint64 during
 //     // 被唤醒后返回，从这里继续
 // }
 
-struct timer_waker
-{
-    struct thread_info *thread;
-};
-
 static void timer_waker_up(void *args)
 {
-    struct timer_waker *tw = (struct timer_waker *)args;
-    wakeup_process(tw->thread);
-    kfree(tw);
+    struct thread_info *t = (struct thread_info *)args;
+    printk("timer_waker_up: pid:%d, %p\n",t->pid,args);
+    // printk("tw: %p, twt :%p\n",tw,tw->thread);
+    printk("timer_waker_up: tw->thread, %d\n",t->pid);
+    wakeup_process(t);
 }
 
 void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
 {
-    int intr = intr_get();
-    struct thread_info *p = myproc();
-    spin_lock(&p->lock);
-    struct timer_waker *tw = kmalloc(sizeof(struct timer_waker), 0);
-    tw->thread = p;
-    p->state = SLEEPING;
-    timer_create(timer_waker_up,tw,down_time, 1, TIMER_NO_BLOCK);
-    sched(intr);
-
+    spin_lock(&thread->lock);
+    thread->state = SLEEPING;
+    timer_create(timer_waker_up,thread,down_time, 1, TIMER_NO_BLOCK);
+    sched(0);
+    printk("I wake %d\n",thread->pid);
     // 被唤醒后返回，从这里继续
 }
 
