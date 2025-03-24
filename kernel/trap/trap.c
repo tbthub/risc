@@ -49,7 +49,7 @@ static void timer_intr()
     struct thread_info *cur = myproc();
     if (!cur) {
         // 当前没有进程，正在开中断的情况下等待
-        w_stimecmp(r_time() + 20000);
+        w_stimecmp(r_time() + 8000);
         return;
     }
 
@@ -117,7 +117,7 @@ static void excep_handler(uint64 scause)
 {
     switch (scause) {
     case E_SYSCALL:
-        intr_on();
+        // intr_on();
         syscall();
         break;
 
@@ -127,6 +127,9 @@ static void excep_handler(uint64 scause)
         page_fault_handler(r_stval(), scause);
         break;
     default:
+        if (r_scause() == 2) {
+            printk("13\n");
+        }
         // struct thread_info *t = myproc();
         // printk("pid: %d, unknown scause\n",t->pid);
         // if (t)
@@ -216,7 +219,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     if (mm->pgd)
         free_user_memory(mm);
     alloc_user_pgd(mm);
-    
+
     if (argv) {
         struct vm_area_struct *v = vma_alloc_proghdr(USER_ARGS_PAGE, USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + USER_ARGV_MAX_SIZE) * PGSIZE - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_args_ops);
         vma_insert(mm, v);
@@ -253,7 +256,7 @@ void kerneltrap()
     uint64 scause = r_scause();    // scause: 保存 scause 寄存器的值，scause
     // 指示了异常或中断的原因
     if (myproc())
-        printk("[k-trap] %p, pid:%d\n", scause, myproc()->pid);
+        printk("[k-trap]  c: %d, %p, pid:%d\n", cpuid(), scause, myproc()->pid);
     // printk("[ktrap] %p\n", scause);
     assert((sstatus & SSTATUS_SPP) != 0, "kerneltrap: not from supervisor mode %d", sstatus & SSTATUS_SPP);
     assert(intr_get() == 0,
@@ -269,7 +272,7 @@ void kerneltrap()
                          // 值写回寄存器，以便异常返回时能够继续原来的代码执行。
     w_sstatus(sstatus);  //  恢复 sstatus 的状态，以确保内核的状态和之前一致。
     if (myproc())
-    printk("[k-ret] %p, pid:%d\n", scause, myproc()->pid);
+        printk("[k-ret] %p, pid:%d\n", scause, myproc()->pid);
 }
 
 // 用户 trap 处理函数 user_trap
@@ -288,7 +291,7 @@ void usertrap()
 
     // (位于进程上下文的，别忘记了:-)
     struct thread_info *p = myproc();
-    printk("[u-trap]: %p, pid:%d\n", scause, p->pid);
+    printk("[u-trap]: c: %d, %p, pid:%d\n", cpuid(), scause, p->pid);
     assert(p != NULL, "usertrap: p is NULL\n");
     p->tf->epc = sepc;
 

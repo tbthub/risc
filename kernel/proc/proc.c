@@ -467,6 +467,7 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 int do_fork()
 {
+    intr_off();
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();
@@ -609,7 +610,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
         printk("[exit] end pid: %d, thread: %s exit\n", t->pid, t->name);
 #endif
         
-        sched();
+        sched(1);
         // 不会在回来了
         panic("exit ret\n");
         __builtin_unreachable();

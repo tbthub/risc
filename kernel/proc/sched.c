@@ -62,7 +62,7 @@ static void add_runnable_task(struct thread_info *thread)
     spin_unlock(&cpus[cpuid].sched_list.lock);
 }
 
-void sched(void)
+void sched(int old_intr)
 {
     int intena;
     struct thread_info *thread = myproc();
@@ -74,7 +74,7 @@ void sched(void)
     intena = mycpu()->intena;
     // printk("Thread %s switch to scheduler in sched\n", thread->name);
     swtch(&thread->context, &mycpu()->context);
-    // printk("sched2-%d,hart: %d\n", thread->pid,thread->cpu_id);
+    printk("sched2-%d,hart: %d\n", thread->pid,thread->cpu_id);
 
     assert(intr_get() == 0, "sched intr_get\n");
     // printk("sched3-%d\n", thread->pid);
@@ -93,8 +93,12 @@ void sched(void)
     }
 
     mycpu()->intena = intena;
-    // printk("sched4-%d\n", thread->pid);
+    printk("sched4-%d hart: %d\n\n", thread->pid,cpuid());
     spin_unlock(&thread->lock);
+    // 回来默认是关中断的
+    if(old_intr == 1){
+        intr_on();
+    }
 }
 
 // 从进程上下文切换到调度线程（主线程）, 进程交换上下文后中断返回
@@ -102,22 +106,21 @@ void yield()
 {
     // printk("intr status: %d\n",intr_get());
     // printk("-----------timer interrupt yield!!!--------------\n");
+    int intr = intr_get();
     struct thread_info *thread = myproc();
-
     // printk("Thread %s acquiring lock on cpu %d in yield\n", thread->name, cpuid());
     spin_lock(&thread->lock);
     thread->ticks = 10;
     thread->state = RUNNABLE;
     add_runnable_task(thread);
     // list_add_tail(&thread->sched, &mycpu()->sched_list.run);
-    sched();
+    sched(intr);
     // printk("sched5-%d (yield)\n", thread->pid);
 }
 
 void scheduler()
 {
     struct cpu *cpu = mycpu();
-
     intr_on();
     while (1) {
         intr_off();
@@ -128,9 +131,9 @@ void scheduler()
             // 原则上每个CPU有自己的调度队列，不会出现多个CPU同时调度一个线程的情况
             // 但是我们走 sleep 时候要主动让出CPU，在信号量中有对进程加锁，因此这里交换回来要解锁
             // 同理,我们在交换出去的时候加锁
+            printk("Thread %s acquiring lock on cpu %d in scheduler\n", next->name, cpuid());
             spin_lock(&next->lock);
-            // printk("Thread %s acquiring lock on cpu %d in scheduler\n", next->name, cpuid());
-            // printk("pick thread name: %s\n", next->name);
+            printk("pick thread name: %s\n", next->name);
             list_del_init(&next->sched);
             spin_unlock(&cpu->sched_list.lock);
 
@@ -218,11 +221,12 @@ struct thread_info *kthread_create(void (*func)(void *), void *args, const char 
 
 int64 do_pause()
 {
+    int intr = intr_get();
     struct thread_info *thread = myproc();
     spin_lock(&thread->lock);
     thread->state = RUNNABLE;
     add_runnable_task(thread);
-    sched();
+    sched(intr);
     return 0;
 }
 

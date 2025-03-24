@@ -5,13 +5,13 @@ int main()
     while (1) {
         pid = fork();
         if (pid == 0) {
-            exec("/sh", NULL);
+            while (1)
+                sleep(1000);
         }
         else if (pid > 0) {
-            waitpid(-1, NULL, 0);
+            sleep(300);
         }
-        else {
-            debug(100);
-        }
+        else
+            debug(0);
     }
 }

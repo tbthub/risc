@@ -26,7 +26,8 @@ void flush_bhash(void *args)
 
         while (1)
         {
-                thread_timer_sleep(myproc(), 2500);
+		struct thread_info *p  = myproc();
+                thread_timer_sleep(p, 2500);
 #ifdef DEBUG_FLUSH
                 printk("%s flush on hart: %d\n", bhash->gd->dev->name, cpuid());
 #endif

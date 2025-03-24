@@ -47,8 +47,11 @@ void *kmalloc(int size, uint32 flags)
 		       MAX_KMALLOC);
 		return NULL;
 	}
-
-	uint32 order = calculate_order((uint32)size) - 4;
+	uint32 order = 0;
+	if(size < 16)
+		order = 0;
+	else
+		order = calculate_order((uint32)size) - 4;
 	void *addr = kmem_cache_alloc(kmalloc_caches[order]);
 
 	if (!addr)

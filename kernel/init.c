@@ -26,14 +26,15 @@ static void init_thread(void *a)
     work_queue_init();
     virtio_disk_init();
     efs_mount(&virtio_disk);
+
+#ifdef CONF_MKFS
+    mkfs_tmp_test();
+    while (1) {
+        thread_timer_sleep(myproc(), 100);
+    }
+#endif
+
     kswapd_init();
-
-    // mkfs_tmp_test();
-    // while (1) {
-    //     thread_timer_sleep(myproc(), 100);
-    // }
-
-
     struct thread_info *p = myproc();
     // 在设置 tf 之前都是位于直接使用的内核页表，
     spin_lock(&p->lock);

@@ -15,7 +15,7 @@ struct sched_struct
 
 #define NO_CPU_AFF -1
 
-extern void sched();
+extern void sched(int);
 extern void yield();
 extern void scheduler();
 

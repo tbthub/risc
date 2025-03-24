@@ -11,7 +11,7 @@ int main()
             waitpid(-1, NULL, 0);
         }
         else {
-            debug();
+            debug(0);
         }
     }
 }
