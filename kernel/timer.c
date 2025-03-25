@@ -149,19 +149,15 @@ void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
 {
     spin_lock(&thread->lock);
     thread->state = SLEEPING;
-    timer_create(timer_waker_up,thread,down_time, 1, TIMER_BLOCK);
+    timer_create(timer_waker_up,thread,down_time, 1, TIMER_NO_BLOCK);
     sched();
     // 被唤醒后返回，从这里继续
 }
 
-// TODO
-extern void send_sig(int sig, pid_t pid);
 int do_sleep(uint64 ticks)
 {
     struct thread_info *t = myproc();
-    // printk("[sleep] pid:%d\n", t->pid);
     assert(t != NULL, "do_sleep\n");
     thread_timer_sleep(t, ticks);
-    // printk("[sleep] end pid:%d\n", t->pid);
     return 0;
 }

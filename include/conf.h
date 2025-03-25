@@ -17,7 +17,7 @@
 // #define DEBUG_BIO          // 显示 bio 请求链
 // #define DEBUG_GEN_BUF      // 显示 gendisk buf 读写情况
 // #define DEBUG_TASK_ADD_CPU // 显示任务添加到所在的 cpuid
-// #define DEBUG_TASK_ON_CPU  // 显示当前 CPU 上运行的线程名
+#define DEBUG_TASK_ON_CPU  // 显示当前 CPU 上运行的线程名
 // #define DEBUG_RQ           // 显示 IO 请求
 // #define DEBUG_COW          // 显示 COW
 // #define DEBUG_PF           // 显示缺页

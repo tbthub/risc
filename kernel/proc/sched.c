@@ -75,8 +75,6 @@ void sched()
     swtch(&thread->context, &mycpu()->context);
     assert(intr_get() == 0, "sched intr_get\n");
 
-
-    push_off();
     if (thread->tf) {
         spin_lock(&thread->task->mm.lock);
         // 如果发生了进程切换
@@ -85,7 +83,6 @@ void sched()
             w_satp(MAKE_SATP(thread->task->mm.pgd));
             sfence_vma();
         }
-        pop_off();
         spin_unlock(&thread->task->mm.lock);
     }
     mycpu()->intena = intena;
