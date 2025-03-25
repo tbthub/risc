@@ -59,9 +59,9 @@ void mutex_test()
         mutex_init_zero(&mutex3, "test3");
         mutex_init_zero(&mutex4, "test4");
 
-        kthread_create(thread1,NULL, "thread_A",NO_CPU_AFF);
-        kthread_create(thread2,NULL, "thread_B",NO_CPU_AFF);
-        kthread_create(thread3,NULL, "thread_C",NO_CPU_AFF);
-        kthread_create(thread4,NULL, "thread_D",NO_CPU_AFF);
+        kthread_create(get_init(),thread1,NULL, "thread_A",NO_CPU_AFF);
+        kthread_create(get_init(),thread2,NULL, "thread_B",NO_CPU_AFF);
+        kthread_create(get_init(),thread3,NULL, "thread_C",NO_CPU_AFF);
+        kthread_create(get_init(),thread4,NULL, "thread_D",NO_CPU_AFF);
     }
 }

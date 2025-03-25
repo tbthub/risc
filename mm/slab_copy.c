@@ -56,9 +56,9 @@ static struct slab *slab_create(struct kmem_cache *cache)
     slab->kc = cache;
     slab->inuse = 0;
     sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
-    printk("slab objs: %p\n",slab->objs);
+    // printk("slab objs: %p\n",slab->objs);
     for (uint i = 0; i < cache->count_per_slab; i++) {
-        printk("sstack push: %p\n", (uint64)((char *)slab->objs + i * cache->size));
+        // printk("sstack push: %p\n", (uint64)((char *)slab->objs + i * cache->size));
         sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
     }
 
@@ -222,7 +222,6 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     // 如果 part_slabs 为空，则说明现在已经没有空闲的slab可用了，于是新添一个
     // 新添的这个第一次分配一定还有剩余的，弹出一个地址返回即可
     if (list_empty(&cache->part_slabs)) {
-        printk("add slab\n");
         slab = kmem_cache_add_slab(cache);
         addr = obj_pop(slab);
         spin_unlock(&cache->lock);

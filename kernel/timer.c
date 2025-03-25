@@ -27,12 +27,6 @@ __attribute__((unused)) void debug_cpu_timer_list()
     }
 }
 
-//struct thread_down
-//{
-//    struct thread_info *thread;
- //   semaphore_t sem;
-//};
-
 inline void time_init()
 {
     sys_ticks = 0;
@@ -48,14 +42,11 @@ static void timer_wake(timer_t *t)
 {
     if (t->block == TIMER_NO_BLOCK)  // 不堵塞的话，直接使用工作队列就行
     {
-        // printk("no_block -> work_queue\n");
-        // work_queue_push(t->callback, t->args);
-        t->callback(t->args);
+        work_queue_push(t->callback, t->args);
     }
     else if (t->block == TIMER_BLOCK)  // 会堵塞，则创建内核线程
     {
-        // printk("block -> thread\n");
-        kthread_create(t->callback, t->args, "ktimer", NO_CPU_AFF);
+        kthread_create(get_init(),t->callback, t->args, "ktimer", NO_CPU_AFF);
     }
     else
         printk("timer.c [timer_wake]: TIMER_NO_BLOCK?TIMER_BLOCK");
@@ -111,18 +102,12 @@ inline void time_update()
 
     if (cpuid() == 0)
         sys_ticks++;
-    // printk("t%d", cpuid());
-    // timer_try_wake();
-
-    // if (cpuid() == 0) {
-    //     sys_ticks++;
-    // }
-    // // TODO 每个cpu每3次唤醒一次，这样来说实际上是有点不能及时唤醒的，
-    // // TODO 应该会差
-    // // 1,2或者更多个（如果此时cpu还在关中断）时钟周期，但是这样可以大大减少唤醒次数
-    // // TODO 这里没有必要对 sys_ticks 强加锁
+    
+    // 每个cpu每3次唤醒一次，这样来说实际上是有点不能及时唤醒的，
+    // 应该会差
+    // 1,2或者更多个（如果此时cpu还在关中断）时钟周期，但是这样可以大大减少唤醒次数
+    // 这里没有必要对 sys_ticks 强加锁
     if (sys_ticks % 3 == 0) {
-        // printk("t%d ",cpuid());
         timer_try_wake();
     }
 }
@@ -134,7 +119,6 @@ static void assign_cpu(timer_t *t)
     spin_lock(&ct->lock);
     list_add_head(&t->list, &ct->list);
     spin_unlock(&ct->lock);
-    // printk("timer: %p assign_cpu-> %d\n", t->callback, cpuid());
 }
 
 // 创建的内核定时器 需要在关中断情况下执行
@@ -155,37 +139,9 @@ static timer_t *timer_create(void (*callback)(void *), void *args, uint64 during
     return t;
 }
 
-// static void thread_time_up(void *args)
-// {
-//     struct thread_down *td = (struct thread_down *)args;
-//     sem_signal(&td->sem);
-//     kfree(td);
-// }
-
-// 让线程自己堵塞 down_time，也就是 sleep
-// 该函数会创建一个定时器执行 thread_time_up ，在一定时间后信号唤醒
-// 唤醒函数只执行一次
-// void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
-// {
-//     // printk("000\n");
-//     struct thread_down *td = (struct thread_down *)kmalloc(sizeof(struct thread_down), 0);
-//     if (!td)
-//         panic("thread_timer_sleep\n");
-//     // printk("111\n");
-//     sem_init(&td->sem, 0, "timer-s sem");
-//     td->thread = thread;
-//     timer_create(thread_time_up, td, down_time, 1, TIMER_NO_BLOCK);
-//     sem_wait(&td->sem);
-
-//     // 被唤醒后返回，从这里继续
-// }
-
 static void timer_waker_up(void *args)
 {
     struct thread_info *t = (struct thread_info *)args;
-    // printk("timer_waker_up: pid:%d, %p\n",t->pid,args);
-    // printk("tw: %p, twt :%p\n",tw,tw->thread);
-    // printk("timer_waker_up: tw->thread, %d\n",t->pid);
     wakeup_process(t);
 }
 
@@ -193,9 +149,8 @@ void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
 {
     spin_lock(&thread->lock);
     thread->state = SLEEPING;
-    timer_create(timer_waker_up,thread,down_time, 1, TIMER_NO_BLOCK);
-    sched(0);
-    // printk("I wake %d\n",thread->pid);
+    timer_create(timer_waker_up,thread,down_time, 1, TIMER_BLOCK);
+    sched();
     // 被唤醒后返回，从这里继续
 }
 

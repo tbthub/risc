@@ -188,13 +188,12 @@ static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, 
 
     // * 注意，必须先获取到进程的锁之后才能去 kswap_wake
     // ＊ 你也不想我这边还没进入调度那边就已经完成了吧，为了避免不必要的麻烦
-    int intr = intr_get();
     spin_lock(&t->lock);
     t->state = SLEEPING;
 
     kswap_wake(t, v, fault_addr);
 
-    sched(intr);  // 会去运行其他的线程
+    sched();  // 会去运行其他的线程
     // 定时器处理结束后唤醒，让其上调度队列，然后经过调度回到这里
 }
 

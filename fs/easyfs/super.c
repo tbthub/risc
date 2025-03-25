@@ -176,7 +176,7 @@ void efs_sb_init()
 {
 	efs_sb_read();
 	efs_sb_fill();
-	kthread_create(efs_sync, NULL, "efs_sync", NO_CPU_AFF);
+	kthread_create(myproc(),efs_sync, NULL, "efs_sync", NO_CPU_AFF);
 }
 
 // 上面的函数都是初始化时使用，内核中已经确保不需要加锁。

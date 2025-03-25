@@ -25,7 +25,8 @@ static struct
 } Proc;
 
 struct cpu cpus[NCPU];
-extern struct thread_info *init_t;
+struct thread_info *init_t;
+
 extern void usertrapret() __attribute__((noreturn));
 extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
@@ -33,20 +34,24 @@ extern void files_init(struct files_struct *files);
 extern void sig_release_all(struct signal *s);
 __attribute__((noreturn)) int64 do_exit(int exit_code);
 
+struct thread_info *get_init()
+{
+    return init_t;
+}
+
 // 退出（ZOMBIE）后重新调度
 static void quit()
 {
-    // struct cpu *cpu = mycpu();
-    // struct thread_info *thread = cpu->thread;
+    struct cpu *cpu = mycpu();
+    struct thread_info *thread = cpu->thread;
 
-    // spin_lock(&cpu->sched_list.lock);
-    // list_add_tail(&thread->sched, &cpu->sched_list.out);
-    // spin_unlock(&cpu->sched_list.lock);
+    spin_lock(&cpu->sched_list.lock);
+    list_add_tail(&thread->sched, &cpu->sched_list.out);
+    spin_unlock(&cpu->sched_list.lock);
 
-    // do_exit(0);
+    do_exit(0);
 
-    // sched();
-    // printk("sched5-%d (quit)\n", thread->pid);
+    sched();
 }
 
 // 线程出口函数，由 thread_entry 执行完 func 后调用
@@ -511,7 +516,6 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
 
     while (1) {
         spin_lock(&cur->lock);
-        // printk("wait len: %d\n", list_len(&cur->child));
         list_for_each_entry_safe(t, tmp, &cur->child, sibling)
         {
             spin_lock(&t->lock);
@@ -538,9 +542,7 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
             return NULL;
         else  // 堵塞,继续while循环获取锁
         {
-            // printk("[wait] sleep wait child, pid:%d\n", cur->pid);
             sem_wait(&cur->child_exit_sem);
-            // printk("[wait] wake form child, pid:%d\n", cur->pid);
         }
     }
 }
@@ -576,7 +578,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
     // (exit) 回收 trapframe，如果有的话
     // (exit) 唤醒父进程的 child_exit_sem
     // (exit) 进入调度器，且不应该再回来
-    intr_off();
+
     // TODO 发给所有子线程并睡眠在上
     struct thread_info *t = myproc();
     printk("[exit], pid: %d\n", t->pid);
@@ -612,7 +614,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
         printk("[exit] end pid: %d, thread: %s exit\n", t->pid, t->name);
 #endif
         
-        sched(1);
+        sched();
         // 不会在回来了
         panic("exit ret\n");
         __builtin_unreachable();

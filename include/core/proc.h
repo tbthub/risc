@@ -168,6 +168,7 @@ extern struct thread_info *myproc(void);
 extern struct thread_info *find_proc(int _pid);
 extern struct thread_info *kthread_struct_init();
 extern struct thread_info *uthread_struct_init();
+extern struct thread_info *get_init();
 
 #define KERNEL_STACK_TOP(t) ((uint64)t + 2 * PGSIZE - 16)
 

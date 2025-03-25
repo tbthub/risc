@@ -32,6 +32,6 @@
 //     // if (cpuid() == 0)
 //     // {
 //     //     sem_init(&user_syswake_sem, 0, "xxx");
-//     //     kthread_create(__user_syswake_test, NULL, "xxx", NO_CPU_AFF);
+//     //     kthread_create(get_init(),__user_syswake_test, NULL, "xxx", NO_CPU_AFF);
 //     // }
 // }

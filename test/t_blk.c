@@ -54,5 +54,5 @@ static void blk_test()
 
 void block_func_test()
 {
-    kthread_create(blk_test, NULL, "blk_test",NO_CPU_AFF);
+    kthread_create(get_init(),blk_test, NULL, "blk_test",NO_CPU_AFF);
 }

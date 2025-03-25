@@ -18,7 +18,6 @@ void sem_wait(semaphore_t *sem)
     if(!sem){
         panic("sem wait is NULL\n");
     }
-    int intr = intr_get();
     spin_lock(&sem->lock);
     atomic_dec(&sem->value);
     if (atomic_read(&sem->value) < 0)
@@ -31,7 +30,7 @@ void sem_wait(semaphore_t *sem)
         
         spin_unlock(&sem->lock);
         // printk("sem wait on, %d,intr:%d\n",thread->pid,intr_get());
-        sched(intr);
+        sched();
 	    // printk("sem wait up,%d, intr: %d\n",thread->pid,intr_get());
     }
     else
@@ -39,8 +38,6 @@ void sem_wait(semaphore_t *sem)
         // 如果信号量大于 0，则直接释放锁
         spin_unlock(&sem->lock);
     }
-    // if(intr == 1)
-    // intr_on();
 }
 
 void sem_signal(semaphore_t *sem)

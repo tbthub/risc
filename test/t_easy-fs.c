@@ -401,5 +401,5 @@
 
 // void easy_fs_test()
 // {
-//     kthread_create(__easy_fs_test, NULL, "easy_fs_test",NO_CPU_AFF);
+//     kthread_create(get_init(),__easy_fs_test, NULL, "easy_fs_test",NO_CPU_AFF);
 // }

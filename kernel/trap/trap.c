@@ -60,11 +60,7 @@ static void timer_intr()
 
     // 到期就让出 CPU
     if (cur->ticks == 0) {
-        // printk("sched8-%d (intr_handler, intr status: %d)\n", myproc()->pid,
-        // intr_get());
         yield();
-        // printk("ti intr,pid: %d\n",cur->pid)
-        printk("sched6-%d (timer_intr)\n", cur->pid);
     }
 }
 
@@ -255,10 +251,6 @@ void kerneltrap()
     uint64 sstatus = r_sstatus();  // sstatus: 保存当前的 sstatus 寄存器的值，sstatus
                                    // 包含状态标志，例如当前的运行模式
     uint64 scause = r_scause();    // scause: 保存 scause 寄存器的值，scause
-    // 指示了异常或中断的原因
-    // if (myproc())
-        // printk("[k-trap]  c: %d, %p,t:%p pid:%d, name:%s\n", cpuid(), scause,myproc(), myproc()->pid,myproc()->name);
-    // printk("[ktrap] %p\n", scause);
     assert((sstatus & SSTATUS_SPP) != 0, "kerneltrap: not from supervisor mode %d", sstatus & SSTATUS_SPP);
     assert(intr_get() == 0,
            "kerneltrap: interrupts enabled");  // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
@@ -272,8 +264,6 @@ void kerneltrap()
     w_sepc(sepc);        // 将原来的 sepc
                          // 值写回寄存器，以便异常返回时能够继续原来的代码执行。
     w_sstatus(sstatus);  //  恢复 sstatus 的状态，以确保内核的状态和之前一致。
-    // if (myproc())
-        // printk("[k-ret] %p, pid:%d\n", scause, myproc()->pid);
 }
 
 // 用户 trap 处理函数 user_trap
@@ -292,7 +282,6 @@ void usertrap()
 
     // (位于进程上下文的，别忘记了:-)
     struct thread_info *p = myproc();
-    // printk("[u-trap]: c: %d, %p, pid:%d\n", cpuid(), scause, p->pid);
     assert(p != NULL, "usertrap: p is NULL\n");
     p->tf->epc = sepc;
 

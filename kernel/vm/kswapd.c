@@ -70,5 +70,5 @@ void kswapd_init()
     fifo_init(&kswap.queue);
     sem_init(&kswap.sem, 0, "kswap-sem");
 
-    kthread_create(kswapd, NULL, "kswapd", NO_CPU_AFF);
+    kthread_create(get_init(),kswapd, NULL, "kswapd", NO_CPU_AFF);
 }

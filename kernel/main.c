@@ -37,27 +37,23 @@ void main()
 
           cons_init();
           mm_init();
-          t_mem_test();
-          asm volatile("wfi");
 
-          // kvm_init();
-          // trap_init();
-          // plic_init();
+          kvm_init();
+          trap_init();
+          plic_init();
           
-          // proc_init();
-          // sched_init();
+          proc_init();
+          sched_init();
           
-          // kvm_init_hart();
-          // trap_inithart();
-          // plic_inithart();
+          kvm_init_hart();
+          trap_inithart();
+          plic_inithart();
           
-          // printk("111\n");
-          // init_s();
-          // printk("111\n");
+          init_s();
           
 
-          // printk("hart 0 init_s ok\n");
-          // printk("xv6 kernel is booting\n");
+          printk("hart 0 init_s ok\n");
+          printk("xv6 kernel is booting\n");
 
           __sync_synchronize();
           started = 1;

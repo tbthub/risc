@@ -5,7 +5,7 @@
 #include "dev/blk/buf.h"
 #include "dev/devs.h"
 
-struct thread_info *init_t;
+extern struct thread_info *init_t;
 
 // 内存虚拟块设备
 extern void mvirt_blk_dev_init();
@@ -46,5 +46,5 @@ static void init_thread(void *a)
 
 void init_s()
 {
-    init_t = kthread_create(init_thread, NULL, "init_t", NO_CPU_AFF);
+    init_t = kthread_create(NULL,init_thread, NULL, "init_t", NO_CPU_AFF);
 }

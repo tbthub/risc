@@ -1,14 +1,6051 @@
-riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/mm/mm.o mm/mm.c
-riscv64-unknown-elf-ld -z max-page-size=4096   -T ./boot/kernel.ld -o build/Kernel  ./build/boot/start.o  ./build/drive/virtio/virtio_disk.o  ./build/drive/uart.o  ./build/drive/mydev.o  ./build/drive/blk/mvir_blk.o  ./build/drive/plic.o  ./build/fs/easyfs/fs.o  ./build/fs/easyfs/super.o  ./build/fs/easyfs/inode.o  ./build/fs/easyfs/dentry.o  ./build/test/t_test_mm.o  ./build/test/t_kmem_cache.o  ./build/test/t_mkfs_tmp.o  ./build/test/t_timer.o  ./build/test/t_hash.o  ./build/test/t_thread.o  ./build/test/t_easy-fs.o  ./build/test/t_blk.o  ./build/test/t_semaphore_t.o  ./build/test/t_buf.o  ./build/test/t_sleeplock.o  ./build/test/t_mutex_t.o  ./build/test/t_workq.o  ./build/test/t_bitmap.o  ./build/test/t_mm.o  ./build/test/t_user_syswake.o  ./build/lib/bitmap.o  ./build/lib/print.o  ./build/lib/hash.o  ./build/lib/rbtree.o  ./build/lib/semaphore.o  ./build/lib/spinlock.o  ./build/lib/math.o  ./build/lib/string.o  ./build/lib/sleeplock.o  ./build/lib/lru.o  ./build/lib/mutex.o  ./build/kernel/trap/temp.o  ./build/kernel/trap/sysfile.o  ./build/kernel/trap/syscall.o  ./build/kernel/trap/trap.o  ./build/kernel/timer.o  ./build/kernel/work.o  ./build/kernel/dev/devs.o  ./build/kernel/dev/char/console.o  ./build/kernel/dev/blk/blk_dev.o  ./build/kernel/dev/blk/buf.o  ./build/kernel/dev/blk/bio.o  ./build/kernel/dev/blk/flush.o  ./build/kernel/dev/blk/gendisk.o  ./build/kernel/dev/blk/request.o  ./build/kernel/file.o  ./build/kernel/vm/vma.o  ./build/kernel/vm/kswapd.o  ./build/kernel/vm/vm.o  ./build/kernel/init.o  ./build/kernel/new_work.o  ./build/kernel/proc/signal.o  ./build/kernel/proc/sched.o  ./build/kernel/proc/proc.o  ./build/kernel/proc/elf.o  ./build/kernel/main.o  ./build/mm/kmalloc.o  ./build/mm/mm.o  ./build/mm/page.o  ./build/mm/slab.o  ./build/mm/slab_copy.o  ./build/boot/entry.o  ./build/kernel/trap/uservec.o  ./build/kernel/trap/kernelvec.o  ./build/kernel/swtch.o 
-# riscv64-unknown-elf-objcopy -S -O binary build/Kernel ./build/Kernel_BIN
-riscv64-unknown-elf-objdump -j .text -S build/Kernel > ./build/kernel.asm
-riscv64-unknown-elf-objdump -t build/Kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > ./build/kernel.sym
-qemu-system-riscv64 -machine virt -bios none -kernel ./build/Kernel -m 128M -smp 4 -nographic -serial mon:stdio -global virtio-mmio.force-legacy=false -drive file=virtio_disk.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0 -S -gdb tcp::25000
-12
+qemu-system-riscv64 -machine virt -bios none -kernel ./build/Kernel -m 128M -smp 4 -nographic -serial mon:stdio -global virtio-mmio.force-legacy=false -drive file=virtio_disk.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+order: 9
+order: 3
+order: 2
+order: 0
+slab objs: 0x0000000087ffb000
+sstack push: 0x0000000087ffb000
+sstack push: 0x0000000087ffb200
+sstack push: 0x0000000087ffb400
+sstack push: 0x0000000087ffb600
+sstack push: 0x0000000087ffb800
+sstack push: 0x0000000087ffba00
+sstack push: 0x0000000087ffbc00
+sstack push: 0x0000000087ffbe00
+slab objs: 0x0000000087ff9000
+sstack push: 0x0000000087ff9000
+sstack push: 0x0000000087ff9200
+sstack push: 0x0000000087ff9400
+sstack push: 0x0000000087ff9600
+sstack push: 0x0000000087ff9800
+sstack push: 0x0000000087ff9a00
+sstack push: 0x0000000087ff9c00
+sstack push: 0x0000000087ff9e00
+slab objs: 0x0000000087ff3000
+sstack push: 0x0000000087ff3000
+sstack push: 0x0000000087ff3200
+sstack push: 0x0000000087ff3400
+sstack push: 0x0000000087ff3600
+sstack push: 0x0000000087ff3800
+sstack push: 0x0000000087ff3a00
+sstack push: 0x0000000087ff3c00
+sstack push: 0x0000000087ff3e00
+slab objs: 0x0000000087ff1000
+sstack push: 0x0000000087ff1000
+sstack push: 0x0000000087ff1200
+sstack push: 0x0000000087ff1400
+sstack push: 0x0000000087ff1600
+sstack push: 0x0000000087ff1800
+sstack push: 0x0000000087ff1a00
+sstack push: 0x0000000087ff1c00
+sstack push: 0x0000000087ff1e00
+slab objs: 0x0000000087df3000
+sstack push: 0x0000000087df3000
+sstack push: 0x0000000087df5000
+sstack push: 0x0000000087df7000
+sstack push: 0x0000000087df9000
+slab objs: 0x0000000087dfb000
+sstack push: 0x0000000087dfb000
+sstack push: 0x0000000087dfd000
+sstack push: 0x0000000087dff000
+sstack push: 0x0000000087e01000
+slab objs: 0x0000000087de3000
+sstack push: 0x0000000087de3000
+sstack push: 0x0000000087de5000
+sstack push: 0x0000000087de7000
+sstack push: 0x0000000087de9000
+slab objs: 0x0000000087deb000
+sstack push: 0x0000000087deb000
+sstack push: 0x0000000087ded000
+sstack push: 0x0000000087def000
+sstack push: 0x0000000087df1000
+slab objs: 0x0000000087dd3000
+sstack push: 0x0000000087dd3000
+sstack push: 0x0000000087dd3100
+sstack push: 0x0000000087dd3200
+sstack push: 0x0000000087dd3300
+sstack push: 0x0000000087dd3400
+sstack push: 0x0000000087dd3500
+sstack push: 0x0000000087dd3600
+sstack push: 0x0000000087dd3700
+sstack push: 0x0000000087dd3800
+sstack push: 0x0000000087dd3900
+sstack push: 0x0000000087dd3a00
+sstack push: 0x0000000087dd3b00
+sstack push: 0x0000000087dd3c00
+sstack push: 0x0000000087dd3d00
+sstack push: 0x0000000087dd3e00
+sstack push: 0x0000000087dd3f00
+slab objs: 0x0000000087dd1000
+sstack push: 0x0000000087dd1000
+sstack push: 0x0000000087dd1100
+sstack push: 0x0000000087dd1200
+sstack push: 0x0000000087dd1300
+sstack push: 0x0000000087dd1400
+sstack push: 0x0000000087dd1500
+sstack push: 0x0000000087dd1600
+sstack push: 0x0000000087dd1700
+sstack push: 0x0000000087dd1800
+sstack push: 0x0000000087dd1900
+sstack push: 0x0000000087dd1a00
+sstack push: 0x0000000087dd1b00
+sstack push: 0x0000000087dd1c00
+sstack push: 0x0000000087dd1d00
+sstack push: 0x0000000087dd1e00
+sstack push: 0x0000000087dd1f00
+slab objs: 0x0000000087dd7000
+sstack push: 0x0000000087dd7000
+sstack push: 0x0000000087dd7100
+sstack push: 0x0000000087dd7200
+sstack push: 0x0000000087dd7300
+sstack push: 0x0000000087dd7400
+sstack push: 0x0000000087dd7500
+sstack push: 0x0000000087dd7600
+sstack push: 0x0000000087dd7700
+sstack push: 0x0000000087dd7800
+sstack push: 0x0000000087dd7900
+sstack push: 0x0000000087dd7a00
+sstack push: 0x0000000087dd7b00
+sstack push: 0x0000000087dd7c00
+sstack push: 0x0000000087dd7d00
+sstack push: 0x0000000087dd7e00
+sstack push: 0x0000000087dd7f00
+slab objs: 0x0000000087dd5000
+sstack push: 0x0000000087dd5000
+sstack push: 0x0000000087dd5100
+sstack push: 0x0000000087dd5200
+sstack push: 0x0000000087dd5300
+sstack push: 0x0000000087dd5400
+sstack push: 0x0000000087dd5500
+sstack push: 0x0000000087dd5600
+sstack push: 0x0000000087dd5700
+sstack push: 0x0000000087dd5800
+sstack push: 0x0000000087dd5900
+sstack push: 0x0000000087dd5a00
+sstack push: 0x0000000087dd5b00
+sstack push: 0x0000000087dd5c00
+sstack push: 0x0000000087dd5d00
+sstack push: 0x0000000087dd5e00
+sstack push: 0x0000000087dd5f00
+slab objs: 0x0000000087ddb000
+sstack push: 0x0000000087ddb000
+sstack push: 0x0000000087ddb020
+sstack push: 0x0000000087ddb040
+sstack push: 0x0000000087ddb060
+sstack push: 0x0000000087ddb080
+sstack push: 0x0000000087ddb0a0
+sstack push: 0x0000000087ddb0c0
+sstack push: 0x0000000087ddb0e0
+sstack push: 0x0000000087ddb100
+sstack push: 0x0000000087ddb120
+sstack push: 0x0000000087ddb140
+sstack push: 0x0000000087ddb160
+sstack push: 0x0000000087ddb180
+sstack push: 0x0000000087ddb1a0
+sstack push: 0x0000000087ddb1c0
+sstack push: 0x0000000087ddb1e0
+sstack push: 0x0000000087ddb200
+sstack push: 0x0000000087ddb220
+sstack push: 0x0000000087ddb240
+sstack push: 0x0000000087ddb260
+sstack push: 0x0000000087ddb280
+sstack push: 0x0000000087ddb2a0
+sstack push: 0x0000000087ddb2c0
+sstack push: 0x0000000087ddb2e0
+sstack push: 0x0000000087ddb300
+sstack push: 0x0000000087ddb320
+sstack push: 0x0000000087ddb340
+sstack push: 0x0000000087ddb360
+sstack push: 0x0000000087ddb380
+sstack push: 0x0000000087ddb3a0
+sstack push: 0x0000000087ddb3c0
+sstack push: 0x0000000087ddb3e0
+sstack push: 0x0000000087ddb400
+sstack push: 0x0000000087ddb420
+sstack push: 0x0000000087ddb440
+sstack push: 0x0000000087ddb460
+sstack push: 0x0000000087ddb480
+sstack push: 0x0000000087ddb4a0
+sstack push: 0x0000000087ddb4c0
+sstack push: 0x0000000087ddb4e0
+sstack push: 0x0000000087ddb500
+sstack push: 0x0000000087ddb520
+sstack push: 0x0000000087ddb540
+sstack push: 0x0000000087ddb560
+sstack push: 0x0000000087ddb580
+sstack push: 0x0000000087ddb5a0
+sstack push: 0x0000000087ddb5c0
+sstack push: 0x0000000087ddb5e0
+sstack push: 0x0000000087ddb600
+sstack push: 0x0000000087ddb620
+sstack push: 0x0000000087ddb640
+sstack push: 0x0000000087ddb660
+sstack push: 0x0000000087ddb680
+sstack push: 0x0000000087ddb6a0
+sstack push: 0x0000000087ddb6c0
+sstack push: 0x0000000087ddb6e0
+sstack push: 0x0000000087ddb700
+sstack push: 0x0000000087ddb720
+sstack push: 0x0000000087ddb740
+sstack push: 0x0000000087ddb760
+sstack push: 0x0000000087ddb780
+sstack push: 0x0000000087ddb7a0
+sstack push: 0x0000000087ddb7c0
+sstack push: 0x0000000087ddb7e0
+sstack push: 0x0000000087ddb800
+sstack push: 0x0000000087ddb820
+sstack push: 0x0000000087ddb840
+sstack push: 0x0000000087ddb860
+sstack push: 0x0000000087ddb880
+sstack push: 0x0000000087ddb8a0
+sstack push: 0x0000000087ddb8c0
+sstack push: 0x0000000087ddb8e0
+sstack push: 0x0000000087ddb900
+sstack push: 0x0000000087ddb920
+sstack push: 0x0000000087ddb940
+sstack push: 0x0000000087ddb960
+sstack push: 0x0000000087ddb980
+sstack push: 0x0000000087ddb9a0
+sstack push: 0x0000000087ddb9c0
+sstack push: 0x0000000087ddb9e0
+sstack push: 0x0000000087ddba00
+sstack push: 0x0000000087ddba20
+sstack push: 0x0000000087ddba40
+sstack push: 0x0000000087ddba60
+sstack push: 0x0000000087ddba80
+sstack push: 0x0000000087ddbaa0
+sstack push: 0x0000000087ddbac0
+sstack push: 0x0000000087ddbae0
+sstack push: 0x0000000087ddbb00
+sstack push: 0x0000000087ddbb20
+sstack push: 0x0000000087ddbb40
+sstack push: 0x0000000087ddbb60
+sstack push: 0x0000000087ddbb80
+sstack push: 0x0000000087ddbba0
+sstack push: 0x0000000087ddbbc0
+sstack push: 0x0000000087ddbbe0
+sstack push: 0x0000000087ddbc00
+sstack push: 0x0000000087ddbc20
+sstack push: 0x0000000087ddbc40
+sstack push: 0x0000000087ddbc60
+sstack push: 0x0000000087ddbc80
+sstack push: 0x0000000087ddbca0
+sstack push: 0x0000000087ddbcc0
+sstack push: 0x0000000087ddbce0
+sstack push: 0x0000000087ddbd00
+sstack push: 0x0000000087ddbd20
+sstack push: 0x0000000087ddbd40
+sstack push: 0x0000000087ddbd60
+sstack push: 0x0000000087ddbd80
+sstack push: 0x0000000087ddbda0
+sstack push: 0x0000000087ddbdc0
+sstack push: 0x0000000087ddbde0
+sstack push: 0x0000000087ddbe00
+sstack push: 0x0000000087ddbe20
+sstack push: 0x0000000087ddbe40
+sstack push: 0x0000000087ddbe60
+sstack push: 0x0000000087ddbe80
+sstack push: 0x0000000087ddbea0
+sstack push: 0x0000000087ddbec0
+sstack push: 0x0000000087ddbee0
+sstack push: 0x0000000087ddbf00
+sstack push: 0x0000000087ddbf20
+sstack push: 0x0000000087ddbf40
+sstack push: 0x0000000087ddbf60
+sstack push: 0x0000000087ddbf80
+sstack push: 0x0000000087ddbfa0
+sstack push: 0x0000000087ddbfc0
+sstack push: 0x0000000087ddbfe0
+slab objs: 0x0000000087dd9000
+sstack push: 0x0000000087dd9000
+sstack push: 0x0000000087dd9020
+sstack push: 0x0000000087dd9040
+sstack push: 0x0000000087dd9060
+sstack push: 0x0000000087dd9080
+sstack push: 0x0000000087dd90a0
+sstack push: 0x0000000087dd90c0
+sstack push: 0x0000000087dd90e0
+sstack push: 0x0000000087dd9100
+sstack push: 0x0000000087dd9120
+sstack push: 0x0000000087dd9140
+sstack push: 0x0000000087dd9160
+sstack push: 0x0000000087dd9180
+sstack push: 0x0000000087dd91a0
+sstack push: 0x0000000087dd91c0
+sstack push: 0x0000000087dd91e0
+sstack push: 0x0000000087dd9200
+sstack push: 0x0000000087dd9220
+sstack push: 0x0000000087dd9240
+sstack push: 0x0000000087dd9260
+sstack push: 0x0000000087dd9280
+sstack push: 0x0000000087dd92a0
+sstack push: 0x0000000087dd92c0
+sstack push: 0x0000000087dd92e0
+sstack push: 0x0000000087dd9300
+sstack push: 0x0000000087dd9320
+sstack push: 0x0000000087dd9340
+sstack push: 0x0000000087dd9360
+sstack push: 0x0000000087dd9380
+sstack push: 0x0000000087dd93a0
+sstack push: 0x0000000087dd93c0
+sstack push: 0x0000000087dd93e0
+sstack push: 0x0000000087dd9400
+sstack push: 0x0000000087dd9420
+sstack push: 0x0000000087dd9440
+sstack push: 0x0000000087dd9460
+sstack push: 0x0000000087dd9480
+sstack push: 0x0000000087dd94a0
+sstack push: 0x0000000087dd94c0
+sstack push: 0x0000000087dd94e0
+sstack push: 0x0000000087dd9500
+sstack push: 0x0000000087dd9520
+sstack push: 0x0000000087dd9540
+sstack push: 0x0000000087dd9560
+sstack push: 0x0000000087dd9580
+sstack push: 0x0000000087dd95a0
+sstack push: 0x0000000087dd95c0
+sstack push: 0x0000000087dd95e0
+sstack push: 0x0000000087dd9600
+sstack push: 0x0000000087dd9620
+sstack push: 0x0000000087dd9640
+sstack push: 0x0000000087dd9660
+sstack push: 0x0000000087dd9680
+sstack push: 0x0000000087dd96a0
+sstack push: 0x0000000087dd96c0
+sstack push: 0x0000000087dd96e0
+sstack push: 0x0000000087dd9700
+sstack push: 0x0000000087dd9720
+sstack push: 0x0000000087dd9740
+sstack push: 0x0000000087dd9760
+sstack push: 0x0000000087dd9780
+sstack push: 0x0000000087dd97a0
+sstack push: 0x0000000087dd97c0
+sstack push: 0x0000000087dd97e0
+sstack push: 0x0000000087dd9800
+sstack push: 0x0000000087dd9820
+sstack push: 0x0000000087dd9840
+sstack push: 0x0000000087dd9860
+sstack push: 0x0000000087dd9880
+sstack push: 0x0000000087dd98a0
+sstack push: 0x0000000087dd98c0
+sstack push: 0x0000000087dd98e0
+sstack push: 0x0000000087dd9900
+sstack push: 0x0000000087dd9920
+sstack push: 0x0000000087dd9940
+sstack push: 0x0000000087dd9960
+sstack push: 0x0000000087dd9980
+sstack push: 0x0000000087dd99a0
+sstack push: 0x0000000087dd99c0
+sstack push: 0x0000000087dd99e0
+sstack push: 0x0000000087dd9a00
+sstack push: 0x0000000087dd9a20
+sstack push: 0x0000000087dd9a40
+sstack push: 0x0000000087dd9a60
+sstack push: 0x0000000087dd9a80
+sstack push: 0x0000000087dd9aa0
+sstack push: 0x0000000087dd9ac0
+sstack push: 0x0000000087dd9ae0
+sstack push: 0x0000000087dd9b00
+sstack push: 0x0000000087dd9b20
+sstack push: 0x0000000087dd9b40
+sstack push: 0x0000000087dd9b60
+sstack push: 0x0000000087dd9b80
+sstack push: 0x0000000087dd9ba0
+sstack push: 0x0000000087dd9bc0
+sstack push: 0x0000000087dd9be0
+sstack push: 0x0000000087dd9c00
+sstack push: 0x0000000087dd9c20
+sstack push: 0x0000000087dd9c40
+sstack push: 0x0000000087dd9c60
+sstack push: 0x0000000087dd9c80
+sstack push: 0x0000000087dd9ca0
+sstack push: 0x0000000087dd9cc0
+sstack push: 0x0000000087dd9ce0
+sstack push: 0x0000000087dd9d00
+sstack push: 0x0000000087dd9d20
+sstack push: 0x0000000087dd9d40
+sstack push: 0x0000000087dd9d60
+sstack push: 0x0000000087dd9d80
+sstack push: 0x0000000087dd9da0
+sstack push: 0x0000000087dd9dc0
+sstack push: 0x0000000087dd9de0
+sstack push: 0x0000000087dd9e00
+sstack push: 0x0000000087dd9e20
+sstack push: 0x0000000087dd9e40
+sstack push: 0x0000000087dd9e60
+sstack push: 0x0000000087dd9e80
+sstack push: 0x0000000087dd9ea0
+sstack push: 0x0000000087dd9ec0
+sstack push: 0x0000000087dd9ee0
+sstack push: 0x0000000087dd9f00
+sstack push: 0x0000000087dd9f20
+sstack push: 0x0000000087dd9f40
+sstack push: 0x0000000087dd9f60
+sstack push: 0x0000000087dd9f80
+sstack push: 0x0000000087dd9fa0
+sstack push: 0x0000000087dd9fc0
+sstack push: 0x0000000087dd9fe0
+slab objs: 0x0000000087ddf000
+sstack push: 0x0000000087ddf000
+sstack push: 0x0000000087ddf020
+sstack push: 0x0000000087ddf040
+sstack push: 0x0000000087ddf060
+sstack push: 0x0000000087ddf080
+sstack push: 0x0000000087ddf0a0
+sstack push: 0x0000000087ddf0c0
+sstack push: 0x0000000087ddf0e0
+sstack push: 0x0000000087ddf100
+sstack push: 0x0000000087ddf120
+sstack push: 0x0000000087ddf140
+sstack push: 0x0000000087ddf160
+sstack push: 0x0000000087ddf180
+sstack push: 0x0000000087ddf1a0
+sstack push: 0x0000000087ddf1c0
+sstack push: 0x0000000087ddf1e0
+sstack push: 0x0000000087ddf200
+sstack push: 0x0000000087ddf220
+sstack push: 0x0000000087ddf240
+sstack push: 0x0000000087ddf260
+sstack push: 0x0000000087ddf280
+sstack push: 0x0000000087ddf2a0
+sstack push: 0x0000000087ddf2c0
+sstack push: 0x0000000087ddf2e0
+sstack push: 0x0000000087ddf300
+sstack push: 0x0000000087ddf320
+sstack push: 0x0000000087ddf340
+sstack push: 0x0000000087ddf360
+sstack push: 0x0000000087ddf380
+sstack push: 0x0000000087ddf3a0
+sstack push: 0x0000000087ddf3c0
+sstack push: 0x0000000087ddf3e0
+sstack push: 0x0000000087ddf400
+sstack push: 0x0000000087ddf420
+sstack push: 0x0000000087ddf440
+sstack push: 0x0000000087ddf460
+sstack push: 0x0000000087ddf480
+sstack push: 0x0000000087ddf4a0
+sstack push: 0x0000000087ddf4c0
+sstack push: 0x0000000087ddf4e0
+sstack push: 0x0000000087ddf500
+sstack push: 0x0000000087ddf520
+sstack push: 0x0000000087ddf540
+sstack push: 0x0000000087ddf560
+sstack push: 0x0000000087ddf580
+sstack push: 0x0000000087ddf5a0
+sstack push: 0x0000000087ddf5c0
+sstack push: 0x0000000087ddf5e0
+sstack push: 0x0000000087ddf600
+sstack push: 0x0000000087ddf620
+sstack push: 0x0000000087ddf640
+sstack push: 0x0000000087ddf660
+sstack push: 0x0000000087ddf680
+sstack push: 0x0000000087ddf6a0
+sstack push: 0x0000000087ddf6c0
+sstack push: 0x0000000087ddf6e0
+sstack push: 0x0000000087ddf700
+sstack push: 0x0000000087ddf720
+sstack push: 0x0000000087ddf740
+sstack push: 0x0000000087ddf760
+sstack push: 0x0000000087ddf780
+sstack push: 0x0000000087ddf7a0
+sstack push: 0x0000000087ddf7c0
+sstack push: 0x0000000087ddf7e0
+sstack push: 0x0000000087ddf800
+sstack push: 0x0000000087ddf820
+sstack push: 0x0000000087ddf840
+sstack push: 0x0000000087ddf860
+sstack push: 0x0000000087ddf880
+sstack push: 0x0000000087ddf8a0
+sstack push: 0x0000000087ddf8c0
+sstack push: 0x0000000087ddf8e0
+sstack push: 0x0000000087ddf900
+sstack push: 0x0000000087ddf920
+sstack push: 0x0000000087ddf940
+sstack push: 0x0000000087ddf960
+sstack push: 0x0000000087ddf980
+sstack push: 0x0000000087ddf9a0
+sstack push: 0x0000000087ddf9c0
+sstack push: 0x0000000087ddf9e0
+sstack push: 0x0000000087ddfa00
+sstack push: 0x0000000087ddfa20
+sstack push: 0x0000000087ddfa40
+sstack push: 0x0000000087ddfa60
+sstack push: 0x0000000087ddfa80
+sstack push: 0x0000000087ddfaa0
+sstack push: 0x0000000087ddfac0
+sstack push: 0x0000000087ddfae0
+sstack push: 0x0000000087ddfb00
+sstack push: 0x0000000087ddfb20
+sstack push: 0x0000000087ddfb40
+sstack push: 0x0000000087ddfb60
+sstack push: 0x0000000087ddfb80
+sstack push: 0x0000000087ddfba0
+sstack push: 0x0000000087ddfbc0
+sstack push: 0x0000000087ddfbe0
+sstack push: 0x0000000087ddfc00
+sstack push: 0x0000000087ddfc20
+sstack push: 0x0000000087ddfc40
+sstack push: 0x0000000087ddfc60
+sstack push: 0x0000000087ddfc80
+sstack push: 0x0000000087ddfca0
+sstack push: 0x0000000087ddfcc0
+sstack push: 0x0000000087ddfce0
+sstack push: 0x0000000087ddfd00
+sstack push: 0x0000000087ddfd20
+sstack push: 0x0000000087ddfd40
+sstack push: 0x0000000087ddfd60
+sstack push: 0x0000000087ddfd80
+sstack push: 0x0000000087ddfda0
+sstack push: 0x0000000087ddfdc0
+sstack push: 0x0000000087ddfde0
+sstack push: 0x0000000087ddfe00
+sstack push: 0x0000000087ddfe20
+sstack push: 0x0000000087ddfe40
+sstack push: 0x0000000087ddfe60
+sstack push: 0x0000000087ddfe80
+sstack push: 0x0000000087ddfea0
+sstack push: 0x0000000087ddfec0
+sstack push: 0x0000000087ddfee0
+sstack push: 0x0000000087ddff00
+sstack push: 0x0000000087ddff20
+sstack push: 0x0000000087ddff40
+sstack push: 0x0000000087ddff60
+sstack push: 0x0000000087ddff80
+sstack push: 0x0000000087ddffa0
+sstack push: 0x0000000087ddffc0
+sstack push: 0x0000000087ddffe0
+slab objs: 0x0000000087ddd000
+sstack push: 0x0000000087ddd000
+sstack push: 0x0000000087ddd020
+sstack push: 0x0000000087ddd040
+sstack push: 0x0000000087ddd060
+sstack push: 0x0000000087ddd080
+sstack push: 0x0000000087ddd0a0
+sstack push: 0x0000000087ddd0c0
+sstack push: 0x0000000087ddd0e0
+sstack push: 0x0000000087ddd100
+sstack push: 0x0000000087ddd120
+sstack push: 0x0000000087ddd140
+sstack push: 0x0000000087ddd160
+sstack push: 0x0000000087ddd180
+sstack push: 0x0000000087ddd1a0
+sstack push: 0x0000000087ddd1c0
+sstack push: 0x0000000087ddd1e0
+sstack push: 0x0000000087ddd200
+sstack push: 0x0000000087ddd220
+sstack push: 0x0000000087ddd240
+sstack push: 0x0000000087ddd260
+sstack push: 0x0000000087ddd280
+sstack push: 0x0000000087ddd2a0
+sstack push: 0x0000000087ddd2c0
+sstack push: 0x0000000087ddd2e0
+sstack push: 0x0000000087ddd300
+sstack push: 0x0000000087ddd320
+sstack push: 0x0000000087ddd340
+sstack push: 0x0000000087ddd360
+sstack push: 0x0000000087ddd380
+sstack push: 0x0000000087ddd3a0
+sstack push: 0x0000000087ddd3c0
+sstack push: 0x0000000087ddd3e0
+sstack push: 0x0000000087ddd400
+sstack push: 0x0000000087ddd420
+sstack push: 0x0000000087ddd440
+sstack push: 0x0000000087ddd460
+sstack push: 0x0000000087ddd480
+sstack push: 0x0000000087ddd4a0
+sstack push: 0x0000000087ddd4c0
+sstack push: 0x0000000087ddd4e0
+sstack push: 0x0000000087ddd500
+sstack push: 0x0000000087ddd520
+sstack push: 0x0000000087ddd540
+sstack push: 0x0000000087ddd560
+sstack push: 0x0000000087ddd580
+sstack push: 0x0000000087ddd5a0
+sstack push: 0x0000000087ddd5c0
+sstack push: 0x0000000087ddd5e0
+sstack push: 0x0000000087ddd600
+sstack push: 0x0000000087ddd620
+sstack push: 0x0000000087ddd640
+sstack push: 0x0000000087ddd660
+sstack push: 0x0000000087ddd680
+sstack push: 0x0000000087ddd6a0
+sstack push: 0x0000000087ddd6c0
+sstack push: 0x0000000087ddd6e0
+sstack push: 0x0000000087ddd700
+sstack push: 0x0000000087ddd720
+sstack push: 0x0000000087ddd740
+sstack push: 0x0000000087ddd760
+sstack push: 0x0000000087ddd780
+sstack push: 0x0000000087ddd7a0
+sstack push: 0x0000000087ddd7c0
+sstack push: 0x0000000087ddd7e0
+sstack push: 0x0000000087ddd800
+sstack push: 0x0000000087ddd820
+sstack push: 0x0000000087ddd840
+sstack push: 0x0000000087ddd860
+sstack push: 0x0000000087ddd880
+sstack push: 0x0000000087ddd8a0
+sstack push: 0x0000000087ddd8c0
+sstack push: 0x0000000087ddd8e0
+sstack push: 0x0000000087ddd900
+sstack push: 0x0000000087ddd920
+sstack push: 0x0000000087ddd940
+sstack push: 0x0000000087ddd960
+sstack push: 0x0000000087ddd980
+sstack push: 0x0000000087ddd9a0
+sstack push: 0x0000000087ddd9c0
+sstack push: 0x0000000087ddd9e0
+sstack push: 0x0000000087ddda00
+sstack push: 0x0000000087ddda20
+sstack push: 0x0000000087ddda40
+sstack push: 0x0000000087ddda60
+sstack push: 0x0000000087ddda80
+sstack push: 0x0000000087dddaa0
+sstack push: 0x0000000087dddac0
+sstack push: 0x0000000087dddae0
+sstack push: 0x0000000087dddb00
+sstack push: 0x0000000087dddb20
+sstack push: 0x0000000087dddb40
+sstack push: 0x0000000087dddb60
+sstack push: 0x0000000087dddb80
+sstack push: 0x0000000087dddba0
+sstack push: 0x0000000087dddbc0
+sstack push: 0x0000000087dddbe0
+sstack push: 0x0000000087dddc00
+sstack push: 0x0000000087dddc20
+sstack push: 0x0000000087dddc40
+sstack push: 0x0000000087dddc60
+sstack push: 0x0000000087dddc80
+sstack push: 0x0000000087dddca0
+sstack push: 0x0000000087dddcc0
+sstack push: 0x0000000087dddce0
+sstack push: 0x0000000087dddd00
+sstack push: 0x0000000087dddd20
+sstack push: 0x0000000087dddd40
+sstack push: 0x0000000087dddd60
+sstack push: 0x0000000087dddd80
+sstack push: 0x0000000087dddda0
+sstack push: 0x0000000087ddddc0
+sstack push: 0x0000000087dddde0
+sstack push: 0x0000000087ddde00
+sstack push: 0x0000000087ddde20
+sstack push: 0x0000000087ddde40
+sstack push: 0x0000000087ddde60
+sstack push: 0x0000000087ddde80
+sstack push: 0x0000000087dddea0
+sstack push: 0x0000000087dddec0
+sstack push: 0x0000000087dddee0
+sstack push: 0x0000000087dddf00
+sstack push: 0x0000000087dddf20
+sstack push: 0x0000000087dddf40
+sstack push: 0x0000000087dddf60
+sstack push: 0x0000000087dddf80
+sstack push: 0x0000000087dddfa0
+sstack push: 0x0000000087dddfc0
+sstack push: 0x0000000087dddfe0
+slab objs: 0x0000000087dc3000
+sstack push: 0x0000000087dc3000
+sstack push: 0x0000000087dc3040
+sstack push: 0x0000000087dc3080
+sstack push: 0x0000000087dc30c0
+sstack push: 0x0000000087dc3100
+sstack push: 0x0000000087dc3140
+sstack push: 0x0000000087dc3180
+sstack push: 0x0000000087dc31c0
+sstack push: 0x0000000087dc3200
+sstack push: 0x0000000087dc3240
+sstack push: 0x0000000087dc3280
+sstack push: 0x0000000087dc32c0
+sstack push: 0x0000000087dc3300
+sstack push: 0x0000000087dc3340
+sstack push: 0x0000000087dc3380
+sstack push: 0x0000000087dc33c0
+sstack push: 0x0000000087dc3400
+sstack push: 0x0000000087dc3440
+sstack push: 0x0000000087dc3480
+sstack push: 0x0000000087dc34c0
+sstack push: 0x0000000087dc3500
+sstack push: 0x0000000087dc3540
+sstack push: 0x0000000087dc3580
+sstack push: 0x0000000087dc35c0
+sstack push: 0x0000000087dc3600
+sstack push: 0x0000000087dc3640
+sstack push: 0x0000000087dc3680
+sstack push: 0x0000000087dc36c0
+sstack push: 0x0000000087dc3700
+sstack push: 0x0000000087dc3740
+sstack push: 0x0000000087dc3780
+sstack push: 0x0000000087dc37c0
+sstack push: 0x0000000087dc3800
+sstack push: 0x0000000087dc3840
+sstack push: 0x0000000087dc3880
+sstack push: 0x0000000087dc38c0
+sstack push: 0x0000000087dc3900
+sstack push: 0x0000000087dc3940
+sstack push: 0x0000000087dc3980
+sstack push: 0x0000000087dc39c0
+sstack push: 0x0000000087dc3a00
+sstack push: 0x0000000087dc3a40
+sstack push: 0x0000000087dc3a80
+sstack push: 0x0000000087dc3ac0
+sstack push: 0x0000000087dc3b00
+sstack push: 0x0000000087dc3b40
+sstack push: 0x0000000087dc3b80
+sstack push: 0x0000000087dc3bc0
+sstack push: 0x0000000087dc3c00
+sstack push: 0x0000000087dc3c40
+sstack push: 0x0000000087dc3c80
+sstack push: 0x0000000087dc3cc0
+sstack push: 0x0000000087dc3d00
+sstack push: 0x0000000087dc3d40
+sstack push: 0x0000000087dc3d80
+sstack push: 0x0000000087dc3dc0
+sstack push: 0x0000000087dc3e00
+sstack push: 0x0000000087dc3e40
+sstack push: 0x0000000087dc3e80
+sstack push: 0x0000000087dc3ec0
+sstack push: 0x0000000087dc3f00
+sstack push: 0x0000000087dc3f40
+sstack push: 0x0000000087dc3f80
+sstack push: 0x0000000087dc3fc0
+slab objs: 0x0000000087dc1000
+sstack push: 0x0000000087dc1000
+sstack push: 0x0000000087dc1040
+sstack push: 0x0000000087dc1080
+sstack push: 0x0000000087dc10c0
+sstack push: 0x0000000087dc1100
+sstack push: 0x0000000087dc1140
+sstack push: 0x0000000087dc1180
+sstack push: 0x0000000087dc11c0
+sstack push: 0x0000000087dc1200
+sstack push: 0x0000000087dc1240
+sstack push: 0x0000000087dc1280
+sstack push: 0x0000000087dc12c0
+sstack push: 0x0000000087dc1300
+sstack push: 0x0000000087dc1340
+sstack push: 0x0000000087dc1380
+sstack push: 0x0000000087dc13c0
+sstack push: 0x0000000087dc1400
+sstack push: 0x0000000087dc1440
+sstack push: 0x0000000087dc1480
+sstack push: 0x0000000087dc14c0
+sstack push: 0x0000000087dc1500
+sstack push: 0x0000000087dc1540
+sstack push: 0x0000000087dc1580
+sstack push: 0x0000000087dc15c0
+sstack push: 0x0000000087dc1600
+sstack push: 0x0000000087dc1640
+sstack push: 0x0000000087dc1680
+sstack push: 0x0000000087dc16c0
+sstack push: 0x0000000087dc1700
+sstack push: 0x0000000087dc1740
+sstack push: 0x0000000087dc1780
+sstack push: 0x0000000087dc17c0
+sstack push: 0x0000000087dc1800
+sstack push: 0x0000000087dc1840
+sstack push: 0x0000000087dc1880
+sstack push: 0x0000000087dc18c0
+sstack push: 0x0000000087dc1900
+sstack push: 0x0000000087dc1940
+sstack push: 0x0000000087dc1980
+sstack push: 0x0000000087dc19c0
+sstack push: 0x0000000087dc1a00
+sstack push: 0x0000000087dc1a40
+sstack push: 0x0000000087dc1a80
+sstack push: 0x0000000087dc1ac0
+sstack push: 0x0000000087dc1b00
+sstack push: 0x0000000087dc1b40
+sstack push: 0x0000000087dc1b80
+sstack push: 0x0000000087dc1bc0
+sstack push: 0x0000000087dc1c00
+sstack push: 0x0000000087dc1c40
+sstack push: 0x0000000087dc1c80
+sstack push: 0x0000000087dc1cc0
+sstack push: 0x0000000087dc1d00
+sstack push: 0x0000000087dc1d40
+sstack push: 0x0000000087dc1d80
+sstack push: 0x0000000087dc1dc0
+sstack push: 0x0000000087dc1e00
+sstack push: 0x0000000087dc1e40
+sstack push: 0x0000000087dc1e80
+sstack push: 0x0000000087dc1ec0
+sstack push: 0x0000000087dc1f00
+sstack push: 0x0000000087dc1f40
+sstack push: 0x0000000087dc1f80
+sstack push: 0x0000000087dc1fc0
+slab objs: 0x0000000087dc7000
+sstack push: 0x0000000087dc7000
+sstack push: 0x0000000087dc7040
+sstack push: 0x0000000087dc7080
+sstack push: 0x0000000087dc70c0
+sstack push: 0x0000000087dc7100
+sstack push: 0x0000000087dc7140
+sstack push: 0x0000000087dc7180
+sstack push: 0x0000000087dc71c0
+sstack push: 0x0000000087dc7200
+sstack push: 0x0000000087dc7240
+sstack push: 0x0000000087dc7280
+sstack push: 0x0000000087dc72c0
+sstack push: 0x0000000087dc7300
+sstack push: 0x0000000087dc7340
+sstack push: 0x0000000087dc7380
+sstack push: 0x0000000087dc73c0
+sstack push: 0x0000000087dc7400
+sstack push: 0x0000000087dc7440
+sstack push: 0x0000000087dc7480
+sstack push: 0x0000000087dc74c0
+sstack push: 0x0000000087dc7500
+sstack push: 0x0000000087dc7540
+sstack push: 0x0000000087dc7580
+sstack push: 0x0000000087dc75c0
+sstack push: 0x0000000087dc7600
+sstack push: 0x0000000087dc7640
+sstack push: 0x0000000087dc7680
+sstack push: 0x0000000087dc76c0
+sstack push: 0x0000000087dc7700
+sstack push: 0x0000000087dc7740
+sstack push: 0x0000000087dc7780
+sstack push: 0x0000000087dc77c0
+sstack push: 0x0000000087dc7800
+sstack push: 0x0000000087dc7840
+sstack push: 0x0000000087dc7880
+sstack push: 0x0000000087dc78c0
+sstack push: 0x0000000087dc7900
+sstack push: 0x0000000087dc7940
+sstack push: 0x0000000087dc7980
+sstack push: 0x0000000087dc79c0
+sstack push: 0x0000000087dc7a00
+sstack push: 0x0000000087dc7a40
+sstack push: 0x0000000087dc7a80
+sstack push: 0x0000000087dc7ac0
+sstack push: 0x0000000087dc7b00
+sstack push: 0x0000000087dc7b40
+sstack push: 0x0000000087dc7b80
+sstack push: 0x0000000087dc7bc0
+sstack push: 0x0000000087dc7c00
+sstack push: 0x0000000087dc7c40
+sstack push: 0x0000000087dc7c80
+sstack push: 0x0000000087dc7cc0
+sstack push: 0x0000000087dc7d00
+sstack push: 0x0000000087dc7d40
+sstack push: 0x0000000087dc7d80
+sstack push: 0x0000000087dc7dc0
+sstack push: 0x0000000087dc7e00
+sstack push: 0x0000000087dc7e40
+sstack push: 0x0000000087dc7e80
+sstack push: 0x0000000087dc7ec0
+sstack push: 0x0000000087dc7f00
+sstack push: 0x0000000087dc7f40
+sstack push: 0x0000000087dc7f80
+sstack push: 0x0000000087dc7fc0
+slab objs: 0x0000000087dc5000
+sstack push: 0x0000000087dc5000
+sstack push: 0x0000000087dc5040
+sstack push: 0x0000000087dc5080
+sstack push: 0x0000000087dc50c0
+sstack push: 0x0000000087dc5100
+sstack push: 0x0000000087dc5140
+sstack push: 0x0000000087dc5180
+sstack push: 0x0000000087dc51c0
+sstack push: 0x0000000087dc5200
+sstack push: 0x0000000087dc5240
+sstack push: 0x0000000087dc5280
+sstack push: 0x0000000087dc52c0
+sstack push: 0x0000000087dc5300
+sstack push: 0x0000000087dc5340
+sstack push: 0x0000000087dc5380
+sstack push: 0x0000000087dc53c0
+sstack push: 0x0000000087dc5400
+sstack push: 0x0000000087dc5440
+sstack push: 0x0000000087dc5480
+sstack push: 0x0000000087dc54c0
+sstack push: 0x0000000087dc5500
+sstack push: 0x0000000087dc5540
+sstack push: 0x0000000087dc5580
+sstack push: 0x0000000087dc55c0
+sstack push: 0x0000000087dc5600
+sstack push: 0x0000000087dc5640
+sstack push: 0x0000000087dc5680
+sstack push: 0x0000000087dc56c0
+sstack push: 0x0000000087dc5700
+sstack push: 0x0000000087dc5740
+sstack push: 0x0000000087dc5780
+sstack push: 0x0000000087dc57c0
+sstack push: 0x0000000087dc5800
+sstack push: 0x0000000087dc5840
+sstack push: 0x0000000087dc5880
+sstack push: 0x0000000087dc58c0
+sstack push: 0x0000000087dc5900
+sstack push: 0x0000000087dc5940
+sstack push: 0x0000000087dc5980
+sstack push: 0x0000000087dc59c0
+sstack push: 0x0000000087dc5a00
+sstack push: 0x0000000087dc5a40
+sstack push: 0x0000000087dc5a80
+sstack push: 0x0000000087dc5ac0
+sstack push: 0x0000000087dc5b00
+sstack push: 0x0000000087dc5b40
+sstack push: 0x0000000087dc5b80
+sstack push: 0x0000000087dc5bc0
+sstack push: 0x0000000087dc5c00
+sstack push: 0x0000000087dc5c40
+sstack push: 0x0000000087dc5c80
+sstack push: 0x0000000087dc5cc0
+sstack push: 0x0000000087dc5d00
+sstack push: 0x0000000087dc5d40
+sstack push: 0x0000000087dc5d80
+sstack push: 0x0000000087dc5dc0
+sstack push: 0x0000000087dc5e00
+sstack push: 0x0000000087dc5e40
+sstack push: 0x0000000087dc5e80
+sstack push: 0x0000000087dc5ec0
+sstack push: 0x0000000087dc5f00
+sstack push: 0x0000000087dc5f40
+sstack push: 0x0000000087dc5f80
+sstack push: 0x0000000087dc5fc0
+slab objs: 0x0000000087dcb000
+sstack push: 0x0000000087dcb000
+sstack push: 0x0000000087dcb100
+sstack push: 0x0000000087dcb200
+sstack push: 0x0000000087dcb300
+sstack push: 0x0000000087dcb400
+sstack push: 0x0000000087dcb500
+sstack push: 0x0000000087dcb600
+sstack push: 0x0000000087dcb700
+sstack push: 0x0000000087dcb800
+sstack push: 0x0000000087dcb900
+sstack push: 0x0000000087dcba00
+sstack push: 0x0000000087dcbb00
+sstack push: 0x0000000087dcbc00
+sstack push: 0x0000000087dcbd00
+sstack push: 0x0000000087dcbe00
+sstack push: 0x0000000087dcbf00
+slab objs: 0x0000000087dc9000
+sstack push: 0x0000000087dc9000
+sstack push: 0x0000000087dc9100
+sstack push: 0x0000000087dc9200
+sstack push: 0x0000000087dc9300
+sstack push: 0x0000000087dc9400
+sstack push: 0x0000000087dc9500
+sstack push: 0x0000000087dc9600
+sstack push: 0x0000000087dc9700
+sstack push: 0x0000000087dc9800
+sstack push: 0x0000000087dc9900
+sstack push: 0x0000000087dc9a00
+sstack push: 0x0000000087dc9b00
+sstack push: 0x0000000087dc9c00
+sstack push: 0x0000000087dc9d00
+sstack push: 0x0000000087dc9e00
+sstack push: 0x0000000087dc9f00
+slab objs: 0x0000000087dcf000
+sstack push: 0x0000000087dcf000
+sstack push: 0x0000000087dcf100
+sstack push: 0x0000000087dcf200
+sstack push: 0x0000000087dcf300
+sstack push: 0x0000000087dcf400
+sstack push: 0x0000000087dcf500
+sstack push: 0x0000000087dcf600
+sstack push: 0x0000000087dcf700
+sstack push: 0x0000000087dcf800
+sstack push: 0x0000000087dcf900
+sstack push: 0x0000000087dcfa00
+sstack push: 0x0000000087dcfb00
+sstack push: 0x0000000087dcfc00
+sstack push: 0x0000000087dcfd00
+sstack push: 0x0000000087dcfe00
+sstack push: 0x0000000087dcff00
+slab objs: 0x0000000087dcd000
+sstack push: 0x0000000087dcd000
+sstack push: 0x0000000087dcd100
+sstack push: 0x0000000087dcd200
+sstack push: 0x0000000087dcd300
+sstack push: 0x0000000087dcd400
+sstack push: 0x0000000087dcd500
+sstack push: 0x0000000087dcd600
+sstack push: 0x0000000087dcd700
+sstack push: 0x0000000087dcd800
+sstack push: 0x0000000087dcd900
+sstack push: 0x0000000087dcda00
+sstack push: 0x0000000087dcdb00
+sstack push: 0x0000000087dcdc00
+sstack push: 0x0000000087dcdd00
+sstack push: 0x0000000087dcde00
+sstack push: 0x0000000087dcdf00
+slab objs: 0x0000000087db3000
+sstack push: 0x0000000087db3000
+sstack push: 0x0000000087db3100
+sstack push: 0x0000000087db3200
+sstack push: 0x0000000087db3300
+sstack push: 0x0000000087db3400
+sstack push: 0x0000000087db3500
+sstack push: 0x0000000087db3600
+sstack push: 0x0000000087db3700
+sstack push: 0x0000000087db3800
+sstack push: 0x0000000087db3900
+sstack push: 0x0000000087db3a00
+sstack push: 0x0000000087db3b00
+sstack push: 0x0000000087db3c00
+sstack push: 0x0000000087db3d00
+sstack push: 0x0000000087db3e00
+sstack push: 0x0000000087db3f00
+slab objs: 0x0000000087db1000
+sstack push: 0x0000000087db1000
+sstack push: 0x0000000087db1100
+sstack push: 0x0000000087db1200
+sstack push: 0x0000000087db1300
+sstack push: 0x0000000087db1400
+sstack push: 0x0000000087db1500
+sstack push: 0x0000000087db1600
+sstack push: 0x0000000087db1700
+sstack push: 0x0000000087db1800
+sstack push: 0x0000000087db1900
+sstack push: 0x0000000087db1a00
+sstack push: 0x0000000087db1b00
+sstack push: 0x0000000087db1c00
+sstack push: 0x0000000087db1d00
+sstack push: 0x0000000087db1e00
+sstack push: 0x0000000087db1f00
+slab objs: 0x0000000087db7000
+sstack push: 0x0000000087db7000
+sstack push: 0x0000000087db7100
+sstack push: 0x0000000087db7200
+sstack push: 0x0000000087db7300
+sstack push: 0x0000000087db7400
+sstack push: 0x0000000087db7500
+sstack push: 0x0000000087db7600
+sstack push: 0x0000000087db7700
+sstack push: 0x0000000087db7800
+sstack push: 0x0000000087db7900
+sstack push: 0x0000000087db7a00
+sstack push: 0x0000000087db7b00
+sstack push: 0x0000000087db7c00
+sstack push: 0x0000000087db7d00
+sstack push: 0x0000000087db7e00
+sstack push: 0x0000000087db7f00
+slab objs: 0x0000000087db5000
+sstack push: 0x0000000087db5000
+sstack push: 0x0000000087db5100
+sstack push: 0x0000000087db5200
+sstack push: 0x0000000087db5300
+sstack push: 0x0000000087db5400
+sstack push: 0x0000000087db5500
+sstack push: 0x0000000087db5600
+sstack push: 0x0000000087db5700
+sstack push: 0x0000000087db5800
+sstack push: 0x0000000087db5900
+sstack push: 0x0000000087db5a00
+sstack push: 0x0000000087db5b00
+sstack push: 0x0000000087db5c00
+sstack push: 0x0000000087db5d00
+sstack push: 0x0000000087db5e00
+sstack push: 0x0000000087db5f00
+slab objs: 0x0000000087dbb000
+sstack push: 0x0000000087dbb000
+sstack push: 0x0000000087dbb080
+sstack push: 0x0000000087dbb100
+sstack push: 0x0000000087dbb180
+sstack push: 0x0000000087dbb200
+sstack push: 0x0000000087dbb280
+sstack push: 0x0000000087dbb300
+sstack push: 0x0000000087dbb380
+sstack push: 0x0000000087dbb400
+sstack push: 0x0000000087dbb480
+sstack push: 0x0000000087dbb500
+sstack push: 0x0000000087dbb580
+sstack push: 0x0000000087dbb600
+sstack push: 0x0000000087dbb680
+sstack push: 0x0000000087dbb700
+sstack push: 0x0000000087dbb780
+sstack push: 0x0000000087dbb800
+sstack push: 0x0000000087dbb880
+sstack push: 0x0000000087dbb900
+sstack push: 0x0000000087dbb980
+sstack push: 0x0000000087dbba00
+sstack push: 0x0000000087dbba80
+sstack push: 0x0000000087dbbb00
+sstack push: 0x0000000087dbbb80
+sstack push: 0x0000000087dbbc00
+sstack push: 0x0000000087dbbc80
+sstack push: 0x0000000087dbbd00
+sstack push: 0x0000000087dbbd80
+sstack push: 0x0000000087dbbe00
+sstack push: 0x0000000087dbbe80
+sstack push: 0x0000000087dbbf00
+sstack push: 0x0000000087dbbf80
+slab objs: 0x0000000087db9000
+sstack push: 0x0000000087db9000
+sstack push: 0x0000000087db9080
+sstack push: 0x0000000087db9100
+sstack push: 0x0000000087db9180
+sstack push: 0x0000000087db9200
+sstack push: 0x0000000087db9280
+sstack push: 0x0000000087db9300
+sstack push: 0x0000000087db9380
+sstack push: 0x0000000087db9400
+sstack push: 0x0000000087db9480
+sstack push: 0x0000000087db9500
+sstack push: 0x0000000087db9580
+sstack push: 0x0000000087db9600
+sstack push: 0x0000000087db9680
+sstack push: 0x0000000087db9700
+sstack push: 0x0000000087db9780
+sstack push: 0x0000000087db9800
+sstack push: 0x0000000087db9880
+sstack push: 0x0000000087db9900
+sstack push: 0x0000000087db9980
+sstack push: 0x0000000087db9a00
+sstack push: 0x0000000087db9a80
+sstack push: 0x0000000087db9b00
+sstack push: 0x0000000087db9b80
+sstack push: 0x0000000087db9c00
+sstack push: 0x0000000087db9c80
+sstack push: 0x0000000087db9d00
+sstack push: 0x0000000087db9d80
+sstack push: 0x0000000087db9e00
+sstack push: 0x0000000087db9e80
+sstack push: 0x0000000087db9f00
+sstack push: 0x0000000087db9f80
+slab objs: 0x0000000087dbf000
+sstack push: 0x0000000087dbf000
+sstack push: 0x0000000087dbf080
+sstack push: 0x0000000087dbf100
+sstack push: 0x0000000087dbf180
+sstack push: 0x0000000087dbf200
+sstack push: 0x0000000087dbf280
+sstack push: 0x0000000087dbf300
+sstack push: 0x0000000087dbf380
+sstack push: 0x0000000087dbf400
+sstack push: 0x0000000087dbf480
+sstack push: 0x0000000087dbf500
+sstack push: 0x0000000087dbf580
+sstack push: 0x0000000087dbf600
+sstack push: 0x0000000087dbf680
+sstack push: 0x0000000087dbf700
+sstack push: 0x0000000087dbf780
+sstack push: 0x0000000087dbf800
+sstack push: 0x0000000087dbf880
+sstack push: 0x0000000087dbf900
+sstack push: 0x0000000087dbf980
+sstack push: 0x0000000087dbfa00
+sstack push: 0x0000000087dbfa80
+sstack push: 0x0000000087dbfb00
+sstack push: 0x0000000087dbfb80
+sstack push: 0x0000000087dbfc00
+sstack push: 0x0000000087dbfc80
+sstack push: 0x0000000087dbfd00
+sstack push: 0x0000000087dbfd80
+sstack push: 0x0000000087dbfe00
+sstack push: 0x0000000087dbfe80
+sstack push: 0x0000000087dbff00
+sstack push: 0x0000000087dbff80
+slab objs: 0x0000000087dbd000
+sstack push: 0x0000000087dbd000
+sstack push: 0x0000000087dbd080
+sstack push: 0x0000000087dbd100
+sstack push: 0x0000000087dbd180
+sstack push: 0x0000000087dbd200
+sstack push: 0x0000000087dbd280
+sstack push: 0x0000000087dbd300
+sstack push: 0x0000000087dbd380
+sstack push: 0x0000000087dbd400
+sstack push: 0x0000000087dbd480
+sstack push: 0x0000000087dbd500
+sstack push: 0x0000000087dbd580
+sstack push: 0x0000000087dbd600
+sstack push: 0x0000000087dbd680
+sstack push: 0x0000000087dbd700
+sstack push: 0x0000000087dbd780
+sstack push: 0x0000000087dbd800
+sstack push: 0x0000000087dbd880
+sstack push: 0x0000000087dbd900
+sstack push: 0x0000000087dbd980
+sstack push: 0x0000000087dbda00
+sstack push: 0x0000000087dbda80
+sstack push: 0x0000000087dbdb00
+sstack push: 0x0000000087dbdb80
+sstack push: 0x0000000087dbdc00
+sstack push: 0x0000000087dbdc80
+sstack push: 0x0000000087dbdd00
+sstack push: 0x0000000087dbdd80
+sstack push: 0x0000000087dbde00
+sstack push: 0x0000000087dbde80
+sstack push: 0x0000000087dbdf00
+sstack push: 0x0000000087dbdf80
+slab objs: 0x0000000087da3000
+sstack push: 0x0000000087da3000
+sstack push: 0x0000000087da3200
+sstack push: 0x0000000087da3400
+sstack push: 0x0000000087da3600
+sstack push: 0x0000000087da3800
+sstack push: 0x0000000087da3a00
+sstack push: 0x0000000087da3c00
+sstack push: 0x0000000087da3e00
+slab objs: 0x0000000087da1000
+sstack push: 0x0000000087da1000
+sstack push: 0x0000000087da1200
+sstack push: 0x0000000087da1400
+sstack push: 0x0000000087da1600
+sstack push: 0x0000000087da1800
+sstack push: 0x0000000087da1a00
+sstack push: 0x0000000087da1c00
+sstack push: 0x0000000087da1e00
+slab objs: 0x0000000087da7000
+sstack push: 0x0000000087da7000
+sstack push: 0x0000000087da7200
+sstack push: 0x0000000087da7400
+sstack push: 0x0000000087da7600
+sstack push: 0x0000000087da7800
+sstack push: 0x0000000087da7a00
+sstack push: 0x0000000087da7c00
+sstack push: 0x0000000087da7e00
+slab objs: 0x0000000087da5000
+sstack push: 0x0000000087da5000
+sstack push: 0x0000000087da5200
+sstack push: 0x0000000087da5400
+sstack push: 0x0000000087da5600
+sstack push: 0x0000000087da5800
+sstack push: 0x0000000087da5a00
+sstack push: 0x0000000087da5c00
+sstack push: 0x0000000087da5e00
+slab objs: 0x0000000087dab000
+sstack push: 0x0000000087dab000
+sstack push: 0x0000000087dab040
+sstack push: 0x0000000087dab080
+sstack push: 0x0000000087dab0c0
+sstack push: 0x0000000087dab100
+sstack push: 0x0000000087dab140
+sstack push: 0x0000000087dab180
+sstack push: 0x0000000087dab1c0
+sstack push: 0x0000000087dab200
+sstack push: 0x0000000087dab240
+sstack push: 0x0000000087dab280
+sstack push: 0x0000000087dab2c0
+sstack push: 0x0000000087dab300
+sstack push: 0x0000000087dab340
+sstack push: 0x0000000087dab380
+sstack push: 0x0000000087dab3c0
+sstack push: 0x0000000087dab400
+sstack push: 0x0000000087dab440
+sstack push: 0x0000000087dab480
+sstack push: 0x0000000087dab4c0
+sstack push: 0x0000000087dab500
+sstack push: 0x0000000087dab540
+sstack push: 0x0000000087dab580
+sstack push: 0x0000000087dab5c0
+sstack push: 0x0000000087dab600
+sstack push: 0x0000000087dab640
+sstack push: 0x0000000087dab680
+sstack push: 0x0000000087dab6c0
+sstack push: 0x0000000087dab700
+sstack push: 0x0000000087dab740
+sstack push: 0x0000000087dab780
+sstack push: 0x0000000087dab7c0
+sstack push: 0x0000000087dab800
+sstack push: 0x0000000087dab840
+sstack push: 0x0000000087dab880
+sstack push: 0x0000000087dab8c0
+sstack push: 0x0000000087dab900
+sstack push: 0x0000000087dab940
+sstack push: 0x0000000087dab980
+sstack push: 0x0000000087dab9c0
+sstack push: 0x0000000087daba00
+sstack push: 0x0000000087daba40
+sstack push: 0x0000000087daba80
+sstack push: 0x0000000087dabac0
+sstack push: 0x0000000087dabb00
+sstack push: 0x0000000087dabb40
+sstack push: 0x0000000087dabb80
+sstack push: 0x0000000087dabbc0
+sstack push: 0x0000000087dabc00
+sstack push: 0x0000000087dabc40
+sstack push: 0x0000000087dabc80
+sstack push: 0x0000000087dabcc0
+sstack push: 0x0000000087dabd00
+sstack push: 0x0000000087dabd40
+sstack push: 0x0000000087dabd80
+sstack push: 0x0000000087dabdc0
+sstack push: 0x0000000087dabe00
+sstack push: 0x0000000087dabe40
+sstack push: 0x0000000087dabe80
+sstack push: 0x0000000087dabec0
+sstack push: 0x0000000087dabf00
+sstack push: 0x0000000087dabf40
+sstack push: 0x0000000087dabf80
+sstack push: 0x0000000087dabfc0
+slab objs: 0x0000000087da9000
+sstack push: 0x0000000087da9000
+sstack push: 0x0000000087da9040
+sstack push: 0x0000000087da9080
+sstack push: 0x0000000087da90c0
+sstack push: 0x0000000087da9100
+sstack push: 0x0000000087da9140
+sstack push: 0x0000000087da9180
+sstack push: 0x0000000087da91c0
+sstack push: 0x0000000087da9200
+sstack push: 0x0000000087da9240
+sstack push: 0x0000000087da9280
+sstack push: 0x0000000087da92c0
+sstack push: 0x0000000087da9300
+sstack push: 0x0000000087da9340
+sstack push: 0x0000000087da9380
+sstack push: 0x0000000087da93c0
+sstack push: 0x0000000087da9400
+sstack push: 0x0000000087da9440
+sstack push: 0x0000000087da9480
+sstack push: 0x0000000087da94c0
+sstack push: 0x0000000087da9500
+sstack push: 0x0000000087da9540
+sstack push: 0x0000000087da9580
+sstack push: 0x0000000087da95c0
+sstack push: 0x0000000087da9600
+sstack push: 0x0000000087da9640
+sstack push: 0x0000000087da9680
+sstack push: 0x0000000087da96c0
+sstack push: 0x0000000087da9700
+sstack push: 0x0000000087da9740
+sstack push: 0x0000000087da9780
+sstack push: 0x0000000087da97c0
+sstack push: 0x0000000087da9800
+sstack push: 0x0000000087da9840
+sstack push: 0x0000000087da9880
+sstack push: 0x0000000087da98c0
+sstack push: 0x0000000087da9900
+sstack push: 0x0000000087da9940
+sstack push: 0x0000000087da9980
+sstack push: 0x0000000087da99c0
+sstack push: 0x0000000087da9a00
+sstack push: 0x0000000087da9a40
+sstack push: 0x0000000087da9a80
+sstack push: 0x0000000087da9ac0
+sstack push: 0x0000000087da9b00
+sstack push: 0x0000000087da9b40
+sstack push: 0x0000000087da9b80
+sstack push: 0x0000000087da9bc0
+sstack push: 0x0000000087da9c00
+sstack push: 0x0000000087da9c40
+sstack push: 0x0000000087da9c80
+sstack push: 0x0000000087da9cc0
+sstack push: 0x0000000087da9d00
+sstack push: 0x0000000087da9d40
+sstack push: 0x0000000087da9d80
+sstack push: 0x0000000087da9dc0
+sstack push: 0x0000000087da9e00
+sstack push: 0x0000000087da9e40
+sstack push: 0x0000000087da9e80
+sstack push: 0x0000000087da9ec0
+sstack push: 0x0000000087da9f00
+sstack push: 0x0000000087da9f40
+sstack push: 0x0000000087da9f80
+sstack push: 0x0000000087da9fc0
+slab objs: 0x0000000087daf000
+sstack push: 0x0000000087daf000
+sstack push: 0x0000000087daf040
+sstack push: 0x0000000087daf080
+sstack push: 0x0000000087daf0c0
+sstack push: 0x0000000087daf100
+sstack push: 0x0000000087daf140
+sstack push: 0x0000000087daf180
+sstack push: 0x0000000087daf1c0
+sstack push: 0x0000000087daf200
+sstack push: 0x0000000087daf240
+sstack push: 0x0000000087daf280
+sstack push: 0x0000000087daf2c0
+sstack push: 0x0000000087daf300
+sstack push: 0x0000000087daf340
+sstack push: 0x0000000087daf380
+sstack push: 0x0000000087daf3c0
+sstack push: 0x0000000087daf400
+sstack push: 0x0000000087daf440
+sstack push: 0x0000000087daf480
+sstack push: 0x0000000087daf4c0
+sstack push: 0x0000000087daf500
+sstack push: 0x0000000087daf540
+sstack push: 0x0000000087daf580
+sstack push: 0x0000000087daf5c0
+sstack push: 0x0000000087daf600
+sstack push: 0x0000000087daf640
+sstack push: 0x0000000087daf680
+sstack push: 0x0000000087daf6c0
+sstack push: 0x0000000087daf700
+sstack push: 0x0000000087daf740
+sstack push: 0x0000000087daf780
+sstack push: 0x0000000087daf7c0
+sstack push: 0x0000000087daf800
+sstack push: 0x0000000087daf840
+sstack push: 0x0000000087daf880
+sstack push: 0x0000000087daf8c0
+sstack push: 0x0000000087daf900
+sstack push: 0x0000000087daf940
+sstack push: 0x0000000087daf980
+sstack push: 0x0000000087daf9c0
+sstack push: 0x0000000087dafa00
+sstack push: 0x0000000087dafa40
+sstack push: 0x0000000087dafa80
+sstack push: 0x0000000087dafac0
+sstack push: 0x0000000087dafb00
+sstack push: 0x0000000087dafb40
+sstack push: 0x0000000087dafb80
+sstack push: 0x0000000087dafbc0
+sstack push: 0x0000000087dafc00
+sstack push: 0x0000000087dafc40
+sstack push: 0x0000000087dafc80
+sstack push: 0x0000000087dafcc0
+sstack push: 0x0000000087dafd00
+sstack push: 0x0000000087dafd40
+sstack push: 0x0000000087dafd80
+sstack push: 0x0000000087dafdc0
+sstack push: 0x0000000087dafe00
+sstack push: 0x0000000087dafe40
+sstack push: 0x0000000087dafe80
+sstack push: 0x0000000087dafec0
+sstack push: 0x0000000087daff00
+sstack push: 0x0000000087daff40
+sstack push: 0x0000000087daff80
+sstack push: 0x0000000087daffc0
+slab objs: 0x0000000087dad000
+sstack push: 0x0000000087dad000
+sstack push: 0x0000000087dad040
+sstack push: 0x0000000087dad080
+sstack push: 0x0000000087dad0c0
+sstack push: 0x0000000087dad100
+sstack push: 0x0000000087dad140
+sstack push: 0x0000000087dad180
+sstack push: 0x0000000087dad1c0
+sstack push: 0x0000000087dad200
+sstack push: 0x0000000087dad240
+sstack push: 0x0000000087dad280
+sstack push: 0x0000000087dad2c0
+sstack push: 0x0000000087dad300
+sstack push: 0x0000000087dad340
+sstack push: 0x0000000087dad380
+sstack push: 0x0000000087dad3c0
+sstack push: 0x0000000087dad400
+sstack push: 0x0000000087dad440
+sstack push: 0x0000000087dad480
+sstack push: 0x0000000087dad4c0
+sstack push: 0x0000000087dad500
+sstack push: 0x0000000087dad540
+sstack push: 0x0000000087dad580
+sstack push: 0x0000000087dad5c0
+sstack push: 0x0000000087dad600
+sstack push: 0x0000000087dad640
+sstack push: 0x0000000087dad680
+sstack push: 0x0000000087dad6c0
+sstack push: 0x0000000087dad700
+sstack push: 0x0000000087dad740
+sstack push: 0x0000000087dad780
+sstack push: 0x0000000087dad7c0
+sstack push: 0x0000000087dad800
+sstack push: 0x0000000087dad840
+sstack push: 0x0000000087dad880
+sstack push: 0x0000000087dad8c0
+sstack push: 0x0000000087dad900
+sstack push: 0x0000000087dad940
+sstack push: 0x0000000087dad980
+sstack push: 0x0000000087dad9c0
+sstack push: 0x0000000087dada00
+sstack push: 0x0000000087dada40
+sstack push: 0x0000000087dada80
+sstack push: 0x0000000087dadac0
+sstack push: 0x0000000087dadb00
+sstack push: 0x0000000087dadb40
+sstack push: 0x0000000087dadb80
+sstack push: 0x0000000087dadbc0
+sstack push: 0x0000000087dadc00
+sstack push: 0x0000000087dadc40
+sstack push: 0x0000000087dadc80
+sstack push: 0x0000000087dadcc0
+sstack push: 0x0000000087dadd00
+sstack push: 0x0000000087dadd40
+sstack push: 0x0000000087dadd80
+sstack push: 0x0000000087daddc0
+sstack push: 0x0000000087dade00
+sstack push: 0x0000000087dade40
+sstack push: 0x0000000087dade80
+sstack push: 0x0000000087dadec0
+sstack push: 0x0000000087dadf00
+sstack push: 0x0000000087dadf40
+sstack push: 0x0000000087dadf80
+sstack push: 0x0000000087dadfc0
+slab objs: 0x0000000087d93000
+sstack push: 0x0000000087d93000
+sstack push: 0x0000000087d93010
+sstack push: 0x0000000087d93020
+sstack push: 0x0000000087d93030
+sstack push: 0x0000000087d93040
+sstack push: 0x0000000087d93050
+sstack push: 0x0000000087d93060
+sstack push: 0x0000000087d93070
+sstack push: 0x0000000087d93080
+sstack push: 0x0000000087d93090
+sstack push: 0x0000000087d930a0
+sstack push: 0x0000000087d930b0
+sstack push: 0x0000000087d930c0
+sstack push: 0x0000000087d930d0
+sstack push: 0x0000000087d930e0
+sstack push: 0x0000000087d930f0
+sstack push: 0x0000000087d93100
+sstack push: 0x0000000087d93110
+sstack push: 0x0000000087d93120
+sstack push: 0x0000000087d93130
+sstack push: 0x0000000087d93140
+sstack push: 0x0000000087d93150
+sstack push: 0x0000000087d93160
+sstack push: 0x0000000087d93170
+sstack push: 0x0000000087d93180
+sstack push: 0x0000000087d93190
+sstack push: 0x0000000087d931a0
+sstack push: 0x0000000087d931b0
+sstack push: 0x0000000087d931c0
+sstack push: 0x0000000087d931d0
+sstack push: 0x0000000087d931e0
+sstack push: 0x0000000087d931f0
+sstack push: 0x0000000087d93200
+sstack push: 0x0000000087d93210
+sstack push: 0x0000000087d93220
+sstack push: 0x0000000087d93230
+sstack push: 0x0000000087d93240
+sstack push: 0x0000000087d93250
+sstack push: 0x0000000087d93260
+sstack push: 0x0000000087d93270
+sstack push: 0x0000000087d93280
+sstack push: 0x0000000087d93290
+sstack push: 0x0000000087d932a0
+sstack push: 0x0000000087d932b0
+sstack push: 0x0000000087d932c0
+sstack push: 0x0000000087d932d0
+sstack push: 0x0000000087d932e0
+sstack push: 0x0000000087d932f0
+sstack push: 0x0000000087d93300
+sstack push: 0x0000000087d93310
+sstack push: 0x0000000087d93320
+sstack push: 0x0000000087d93330
+sstack push: 0x0000000087d93340
+sstack push: 0x0000000087d93350
+sstack push: 0x0000000087d93360
+sstack push: 0x0000000087d93370
+sstack push: 0x0000000087d93380
+sstack push: 0x0000000087d93390
+sstack push: 0x0000000087d933a0
+sstack push: 0x0000000087d933b0
+sstack push: 0x0000000087d933c0
+sstack push: 0x0000000087d933d0
+sstack push: 0x0000000087d933e0
+sstack push: 0x0000000087d933f0
+sstack push: 0x0000000087d93400
+sstack push: 0x0000000087d93410
+sstack push: 0x0000000087d93420
+sstack push: 0x0000000087d93430
+sstack push: 0x0000000087d93440
+sstack push: 0x0000000087d93450
+sstack push: 0x0000000087d93460
+sstack push: 0x0000000087d93470
+sstack push: 0x0000000087d93480
+sstack push: 0x0000000087d93490
+sstack push: 0x0000000087d934a0
+sstack push: 0x0000000087d934b0
+sstack push: 0x0000000087d934c0
+sstack push: 0x0000000087d934d0
+sstack push: 0x0000000087d934e0
+sstack push: 0x0000000087d934f0
+sstack push: 0x0000000087d93500
+sstack push: 0x0000000087d93510
+sstack push: 0x0000000087d93520
+sstack push: 0x0000000087d93530
+sstack push: 0x0000000087d93540
+sstack push: 0x0000000087d93550
+sstack push: 0x0000000087d93560
+sstack push: 0x0000000087d93570
+sstack push: 0x0000000087d93580
+sstack push: 0x0000000087d93590
+sstack push: 0x0000000087d935a0
+sstack push: 0x0000000087d935b0
+sstack push: 0x0000000087d935c0
+sstack push: 0x0000000087d935d0
+sstack push: 0x0000000087d935e0
+sstack push: 0x0000000087d935f0
+sstack push: 0x0000000087d93600
+sstack push: 0x0000000087d93610
+sstack push: 0x0000000087d93620
+sstack push: 0x0000000087d93630
+sstack push: 0x0000000087d93640
+sstack push: 0x0000000087d93650
+sstack push: 0x0000000087d93660
+sstack push: 0x0000000087d93670
+sstack push: 0x0000000087d93680
+sstack push: 0x0000000087d93690
+sstack push: 0x0000000087d936a0
+sstack push: 0x0000000087d936b0
+sstack push: 0x0000000087d936c0
+sstack push: 0x0000000087d936d0
+sstack push: 0x0000000087d936e0
+sstack push: 0x0000000087d936f0
+sstack push: 0x0000000087d93700
+sstack push: 0x0000000087d93710
+sstack push: 0x0000000087d93720
+sstack push: 0x0000000087d93730
+sstack push: 0x0000000087d93740
+sstack push: 0x0000000087d93750
+sstack push: 0x0000000087d93760
+sstack push: 0x0000000087d93770
+sstack push: 0x0000000087d93780
+sstack push: 0x0000000087d93790
+sstack push: 0x0000000087d937a0
+sstack push: 0x0000000087d937b0
+sstack push: 0x0000000087d937c0
+sstack push: 0x0000000087d937d0
+sstack push: 0x0000000087d937e0
+sstack push: 0x0000000087d937f0
+sstack push: 0x0000000087d93800
+sstack push: 0x0000000087d93810
+sstack push: 0x0000000087d93820
+sstack push: 0x0000000087d93830
+sstack push: 0x0000000087d93840
+sstack push: 0x0000000087d93850
+sstack push: 0x0000000087d93860
+sstack push: 0x0000000087d93870
+sstack push: 0x0000000087d93880
+sstack push: 0x0000000087d93890
+sstack push: 0x0000000087d938a0
+sstack push: 0x0000000087d938b0
+sstack push: 0x0000000087d938c0
+sstack push: 0x0000000087d938d0
+sstack push: 0x0000000087d938e0
+sstack push: 0x0000000087d938f0
+sstack push: 0x0000000087d93900
+sstack push: 0x0000000087d93910
+sstack push: 0x0000000087d93920
+sstack push: 0x0000000087d93930
+sstack push: 0x0000000087d93940
+sstack push: 0x0000000087d93950
+sstack push: 0x0000000087d93960
+sstack push: 0x0000000087d93970
+sstack push: 0x0000000087d93980
+sstack push: 0x0000000087d93990
+sstack push: 0x0000000087d939a0
+sstack push: 0x0000000087d939b0
+sstack push: 0x0000000087d939c0
+sstack push: 0x0000000087d939d0
+sstack push: 0x0000000087d939e0
+sstack push: 0x0000000087d939f0
+sstack push: 0x0000000087d93a00
+sstack push: 0x0000000087d93a10
+sstack push: 0x0000000087d93a20
+sstack push: 0x0000000087d93a30
+sstack push: 0x0000000087d93a40
+sstack push: 0x0000000087d93a50
+sstack push: 0x0000000087d93a60
+sstack push: 0x0000000087d93a70
+sstack push: 0x0000000087d93a80
+sstack push: 0x0000000087d93a90
+sstack push: 0x0000000087d93aa0
+sstack push: 0x0000000087d93ab0
+sstack push: 0x0000000087d93ac0
+sstack push: 0x0000000087d93ad0
+sstack push: 0x0000000087d93ae0
+sstack push: 0x0000000087d93af0
+sstack push: 0x0000000087d93b00
+sstack push: 0x0000000087d93b10
+sstack push: 0x0000000087d93b20
+sstack push: 0x0000000087d93b30
+sstack push: 0x0000000087d93b40
+sstack push: 0x0000000087d93b50
+sstack push: 0x0000000087d93b60
+sstack push: 0x0000000087d93b70
+sstack push: 0x0000000087d93b80
+sstack push: 0x0000000087d93b90
+sstack push: 0x0000000087d93ba0
+sstack push: 0x0000000087d93bb0
+sstack push: 0x0000000087d93bc0
+sstack push: 0x0000000087d93bd0
+sstack push: 0x0000000087d93be0
+sstack push: 0x0000000087d93bf0
+sstack push: 0x0000000087d93c00
+sstack push: 0x0000000087d93c10
+sstack push: 0x0000000087d93c20
+sstack push: 0x0000000087d93c30
+sstack push: 0x0000000087d93c40
+sstack push: 0x0000000087d93c50
+sstack push: 0x0000000087d93c60
+sstack push: 0x0000000087d93c70
+sstack push: 0x0000000087d93c80
+sstack push: 0x0000000087d93c90
+sstack push: 0x0000000087d93ca0
+sstack push: 0x0000000087d93cb0
+sstack push: 0x0000000087d93cc0
+sstack push: 0x0000000087d93cd0
+sstack push: 0x0000000087d93ce0
+sstack push: 0x0000000087d93cf0
+sstack push: 0x0000000087d93d00
+sstack push: 0x0000000087d93d10
+sstack push: 0x0000000087d93d20
+sstack push: 0x0000000087d93d30
+sstack push: 0x0000000087d93d40
+sstack push: 0x0000000087d93d50
+sstack push: 0x0000000087d93d60
+sstack push: 0x0000000087d93d70
+sstack push: 0x0000000087d93d80
+sstack push: 0x0000000087d93d90
+sstack push: 0x0000000087d93da0
+sstack push: 0x0000000087d93db0
+sstack push: 0x0000000087d93dc0
+sstack push: 0x0000000087d93dd0
+sstack push: 0x0000000087d93de0
+sstack push: 0x0000000087d93df0
+sstack push: 0x0000000087d93e00
+sstack push: 0x0000000087d93e10
+sstack push: 0x0000000087d93e20
+sstack push: 0x0000000087d93e30
+sstack push: 0x0000000087d93e40
+sstack push: 0x0000000087d93e50
+sstack push: 0x0000000087d93e60
+sstack push: 0x0000000087d93e70
+sstack push: 0x0000000087d93e80
+sstack push: 0x0000000087d93e90
+sstack push: 0x0000000087d93ea0
+sstack push: 0x0000000087d93eb0
+sstack push: 0x0000000087d93ec0
+sstack push: 0x0000000087d93ed0
+sstack push: 0x0000000087d93ee0
+sstack push: 0x0000000087d93ef0
+sstack push: 0x0000000087d93f00
+sstack push: 0x0000000087d93f10
+sstack push: 0x0000000087d93f20
+sstack push: 0x0000000087d93f30
+sstack push: 0x0000000087d93f40
+sstack push: 0x0000000087d93f50
+sstack push: 0x0000000087d93f60
+sstack push: 0x0000000087d93f70
+sstack push: 0x0000000087d93f80
+sstack push: 0x0000000087d93f90
+sstack push: 0x0000000087d93fa0
+sstack push: 0x0000000087d93fb0
+sstack push: 0x0000000087d93fc0
+sstack push: 0x0000000087d93fd0
+sstack push: 0x0000000087d93fe0
+sstack push: 0x0000000087d93ff0
+slab objs: 0x0000000087d91000
+sstack push: 0x0000000087d91000
+sstack push: 0x0000000087d91010
+sstack push: 0x0000000087d91020
+sstack push: 0x0000000087d91030
+sstack push: 0x0000000087d91040
+sstack push: 0x0000000087d91050
+sstack push: 0x0000000087d91060
+sstack push: 0x0000000087d91070
+sstack push: 0x0000000087d91080
+sstack push: 0x0000000087d91090
+sstack push: 0x0000000087d910a0
+sstack push: 0x0000000087d910b0
+sstack push: 0x0000000087d910c0
+sstack push: 0x0000000087d910d0
+sstack push: 0x0000000087d910e0
+sstack push: 0x0000000087d910f0
+sstack push: 0x0000000087d91100
+sstack push: 0x0000000087d91110
+sstack push: 0x0000000087d91120
+sstack push: 0x0000000087d91130
+sstack push: 0x0000000087d91140
+sstack push: 0x0000000087d91150
+sstack push: 0x0000000087d91160
+sstack push: 0x0000000087d91170
+sstack push: 0x0000000087d91180
+sstack push: 0x0000000087d91190
+sstack push: 0x0000000087d911a0
+sstack push: 0x0000000087d911b0
+sstack push: 0x0000000087d911c0
+sstack push: 0x0000000087d911d0
+sstack push: 0x0000000087d911e0
+sstack push: 0x0000000087d911f0
+sstack push: 0x0000000087d91200
+sstack push: 0x0000000087d91210
+sstack push: 0x0000000087d91220
+sstack push: 0x0000000087d91230
+sstack push: 0x0000000087d91240
+sstack push: 0x0000000087d91250
+sstack push: 0x0000000087d91260
+sstack push: 0x0000000087d91270
+sstack push: 0x0000000087d91280
+sstack push: 0x0000000087d91290
+sstack push: 0x0000000087d912a0
+sstack push: 0x0000000087d912b0
+sstack push: 0x0000000087d912c0
+sstack push: 0x0000000087d912d0
+sstack push: 0x0000000087d912e0
+sstack push: 0x0000000087d912f0
+sstack push: 0x0000000087d91300
+sstack push: 0x0000000087d91310
+sstack push: 0x0000000087d91320
+sstack push: 0x0000000087d91330
+sstack push: 0x0000000087d91340
+sstack push: 0x0000000087d91350
+sstack push: 0x0000000087d91360
+sstack push: 0x0000000087d91370
+sstack push: 0x0000000087d91380
+sstack push: 0x0000000087d91390
+sstack push: 0x0000000087d913a0
+sstack push: 0x0000000087d913b0
+sstack push: 0x0000000087d913c0
+sstack push: 0x0000000087d913d0
+sstack push: 0x0000000087d913e0
+sstack push: 0x0000000087d913f0
+sstack push: 0x0000000087d91400
+sstack push: 0x0000000087d91410
+sstack push: 0x0000000087d91420
+sstack push: 0x0000000087d91430
+sstack push: 0x0000000087d91440
+sstack push: 0x0000000087d91450
+sstack push: 0x0000000087d91460
+sstack push: 0x0000000087d91470
+sstack push: 0x0000000087d91480
+sstack push: 0x0000000087d91490
+sstack push: 0x0000000087d914a0
+sstack push: 0x0000000087d914b0
+sstack push: 0x0000000087d914c0
+sstack push: 0x0000000087d914d0
+sstack push: 0x0000000087d914e0
+sstack push: 0x0000000087d914f0
+sstack push: 0x0000000087d91500
+sstack push: 0x0000000087d91510
+sstack push: 0x0000000087d91520
+sstack push: 0x0000000087d91530
+sstack push: 0x0000000087d91540
+sstack push: 0x0000000087d91550
+sstack push: 0x0000000087d91560
+sstack push: 0x0000000087d91570
+sstack push: 0x0000000087d91580
+sstack push: 0x0000000087d91590
+sstack push: 0x0000000087d915a0
+sstack push: 0x0000000087d915b0
+sstack push: 0x0000000087d915c0
+sstack push: 0x0000000087d915d0
+sstack push: 0x0000000087d915e0
+sstack push: 0x0000000087d915f0
+sstack push: 0x0000000087d91600
+sstack push: 0x0000000087d91610
+sstack push: 0x0000000087d91620
+sstack push: 0x0000000087d91630
+sstack push: 0x0000000087d91640
+sstack push: 0x0000000087d91650
+sstack push: 0x0000000087d91660
+sstack push: 0x0000000087d91670
+sstack push: 0x0000000087d91680
+sstack push: 0x0000000087d91690
+sstack push: 0x0000000087d916a0
+sstack push: 0x0000000087d916b0
+sstack push: 0x0000000087d916c0
+sstack push: 0x0000000087d916d0
+sstack push: 0x0000000087d916e0
+sstack push: 0x0000000087d916f0
+sstack push: 0x0000000087d91700
+sstack push: 0x0000000087d91710
+sstack push: 0x0000000087d91720
+sstack push: 0x0000000087d91730
+sstack push: 0x0000000087d91740
+sstack push: 0x0000000087d91750
+sstack push: 0x0000000087d91760
+sstack push: 0x0000000087d91770
+sstack push: 0x0000000087d91780
+sstack push: 0x0000000087d91790
+sstack push: 0x0000000087d917a0
+sstack push: 0x0000000087d917b0
+sstack push: 0x0000000087d917c0
+sstack push: 0x0000000087d917d0
+sstack push: 0x0000000087d917e0
+sstack push: 0x0000000087d917f0
+sstack push: 0x0000000087d91800
+sstack push: 0x0000000087d91810
+sstack push: 0x0000000087d91820
+sstack push: 0x0000000087d91830
+sstack push: 0x0000000087d91840
+sstack push: 0x0000000087d91850
+sstack push: 0x0000000087d91860
+sstack push: 0x0000000087d91870
+sstack push: 0x0000000087d91880
+sstack push: 0x0000000087d91890
+sstack push: 0x0000000087d918a0
+sstack push: 0x0000000087d918b0
+sstack push: 0x0000000087d918c0
+sstack push: 0x0000000087d918d0
+sstack push: 0x0000000087d918e0
+sstack push: 0x0000000087d918f0
+sstack push: 0x0000000087d91900
+sstack push: 0x0000000087d91910
+sstack push: 0x0000000087d91920
+sstack push: 0x0000000087d91930
+sstack push: 0x0000000087d91940
+sstack push: 0x0000000087d91950
+sstack push: 0x0000000087d91960
+sstack push: 0x0000000087d91970
+sstack push: 0x0000000087d91980
+sstack push: 0x0000000087d91990
+sstack push: 0x0000000087d919a0
+sstack push: 0x0000000087d919b0
+sstack push: 0x0000000087d919c0
+sstack push: 0x0000000087d919d0
+sstack push: 0x0000000087d919e0
+sstack push: 0x0000000087d919f0
+sstack push: 0x0000000087d91a00
+sstack push: 0x0000000087d91a10
+sstack push: 0x0000000087d91a20
+sstack push: 0x0000000087d91a30
+sstack push: 0x0000000087d91a40
+sstack push: 0x0000000087d91a50
+sstack push: 0x0000000087d91a60
+sstack push: 0x0000000087d91a70
+sstack push: 0x0000000087d91a80
+sstack push: 0x0000000087d91a90
+sstack push: 0x0000000087d91aa0
+sstack push: 0x0000000087d91ab0
+sstack push: 0x0000000087d91ac0
+sstack push: 0x0000000087d91ad0
+sstack push: 0x0000000087d91ae0
+sstack push: 0x0000000087d91af0
+sstack push: 0x0000000087d91b00
+sstack push: 0x0000000087d91b10
+sstack push: 0x0000000087d91b20
+sstack push: 0x0000000087d91b30
+sstack push: 0x0000000087d91b40
+sstack push: 0x0000000087d91b50
+sstack push: 0x0000000087d91b60
+sstack push: 0x0000000087d91b70
+sstack push: 0x0000000087d91b80
+sstack push: 0x0000000087d91b90
+sstack push: 0x0000000087d91ba0
+sstack push: 0x0000000087d91bb0
+sstack push: 0x0000000087d91bc0
+sstack push: 0x0000000087d91bd0
+sstack push: 0x0000000087d91be0
+sstack push: 0x0000000087d91bf0
+sstack push: 0x0000000087d91c00
+sstack push: 0x0000000087d91c10
+sstack push: 0x0000000087d91c20
+sstack push: 0x0000000087d91c30
+sstack push: 0x0000000087d91c40
+sstack push: 0x0000000087d91c50
+sstack push: 0x0000000087d91c60
+sstack push: 0x0000000087d91c70
+sstack push: 0x0000000087d91c80
+sstack push: 0x0000000087d91c90
+sstack push: 0x0000000087d91ca0
+sstack push: 0x0000000087d91cb0
+sstack push: 0x0000000087d91cc0
+sstack push: 0x0000000087d91cd0
+sstack push: 0x0000000087d91ce0
+sstack push: 0x0000000087d91cf0
+sstack push: 0x0000000087d91d00
+sstack push: 0x0000000087d91d10
+sstack push: 0x0000000087d91d20
+sstack push: 0x0000000087d91d30
+sstack push: 0x0000000087d91d40
+sstack push: 0x0000000087d91d50
+sstack push: 0x0000000087d91d60
+sstack push: 0x0000000087d91d70
+sstack push: 0x0000000087d91d80
+sstack push: 0x0000000087d91d90
+sstack push: 0x0000000087d91da0
+sstack push: 0x0000000087d91db0
+sstack push: 0x0000000087d91dc0
+sstack push: 0x0000000087d91dd0
+sstack push: 0x0000000087d91de0
+sstack push: 0x0000000087d91df0
+sstack push: 0x0000000087d91e00
+sstack push: 0x0000000087d91e10
+sstack push: 0x0000000087d91e20
+sstack push: 0x0000000087d91e30
+sstack push: 0x0000000087d91e40
+sstack push: 0x0000000087d91e50
+sstack push: 0x0000000087d91e60
+sstack push: 0x0000000087d91e70
+sstack push: 0x0000000087d91e80
+sstack push: 0x0000000087d91e90
+sstack push: 0x0000000087d91ea0
+sstack push: 0x0000000087d91eb0
+sstack push: 0x0000000087d91ec0
+sstack push: 0x0000000087d91ed0
+sstack push: 0x0000000087d91ee0
+sstack push: 0x0000000087d91ef0
+sstack push: 0x0000000087d91f00
+sstack push: 0x0000000087d91f10
+sstack push: 0x0000000087d91f20
+sstack push: 0x0000000087d91f30
+sstack push: 0x0000000087d91f40
+sstack push: 0x0000000087d91f50
+sstack push: 0x0000000087d91f60
+sstack push: 0x0000000087d91f70
+sstack push: 0x0000000087d91f80
+sstack push: 0x0000000087d91f90
+sstack push: 0x0000000087d91fa0
+sstack push: 0x0000000087d91fb0
+sstack push: 0x0000000087d91fc0
+sstack push: 0x0000000087d91fd0
+sstack push: 0x0000000087d91fe0
+sstack push: 0x0000000087d91ff0
+slab objs: 0x0000000087d97000
+sstack push: 0x0000000087d97000
+sstack push: 0x0000000087d97010
+sstack push: 0x0000000087d97020
+sstack push: 0x0000000087d97030
+sstack push: 0x0000000087d97040
+sstack push: 0x0000000087d97050
+sstack push: 0x0000000087d97060
+sstack push: 0x0000000087d97070
+sstack push: 0x0000000087d97080
+sstack push: 0x0000000087d97090
+sstack push: 0x0000000087d970a0
+sstack push: 0x0000000087d970b0
+sstack push: 0x0000000087d970c0
+sstack push: 0x0000000087d970d0
+sstack push: 0x0000000087d970e0
+sstack push: 0x0000000087d970f0
+sstack push: 0x0000000087d97100
+sstack push: 0x0000000087d97110
+sstack push: 0x0000000087d97120
+sstack push: 0x0000000087d97130
+sstack push: 0x0000000087d97140
+sstack push: 0x0000000087d97150
+sstack push: 0x0000000087d97160
+sstack push: 0x0000000087d97170
+sstack push: 0x0000000087d97180
+sstack push: 0x0000000087d97190
+sstack push: 0x0000000087d971a0
+sstack push: 0x0000000087d971b0
+sstack push: 0x0000000087d971c0
+sstack push: 0x0000000087d971d0
+sstack push: 0x0000000087d971e0
+sstack push: 0x0000000087d971f0
+sstack push: 0x0000000087d97200
+sstack push: 0x0000000087d97210
+sstack push: 0x0000000087d97220
+sstack push: 0x0000000087d97230
+sstack push: 0x0000000087d97240
+sstack push: 0x0000000087d97250
+sstack push: 0x0000000087d97260
+sstack push: 0x0000000087d97270
+sstack push: 0x0000000087d97280
+sstack push: 0x0000000087d97290
+sstack push: 0x0000000087d972a0
+sstack push: 0x0000000087d972b0
+sstack push: 0x0000000087d972c0
+sstack push: 0x0000000087d972d0
+sstack push: 0x0000000087d972e0
+sstack push: 0x0000000087d972f0
+sstack push: 0x0000000087d97300
+sstack push: 0x0000000087d97310
+sstack push: 0x0000000087d97320
+sstack push: 0x0000000087d97330
+sstack push: 0x0000000087d97340
+sstack push: 0x0000000087d97350
+sstack push: 0x0000000087d97360
+sstack push: 0x0000000087d97370
+sstack push: 0x0000000087d97380
+sstack push: 0x0000000087d97390
+sstack push: 0x0000000087d973a0
+sstack push: 0x0000000087d973b0
+sstack push: 0x0000000087d973c0
+sstack push: 0x0000000087d973d0
+sstack push: 0x0000000087d973e0
+sstack push: 0x0000000087d973f0
+sstack push: 0x0000000087d97400
+sstack push: 0x0000000087d97410
+sstack push: 0x0000000087d97420
+sstack push: 0x0000000087d97430
+sstack push: 0x0000000087d97440
+sstack push: 0x0000000087d97450
+sstack push: 0x0000000087d97460
+sstack push: 0x0000000087d97470
+sstack push: 0x0000000087d97480
+sstack push: 0x0000000087d97490
+sstack push: 0x0000000087d974a0
+sstack push: 0x0000000087d974b0
+sstack push: 0x0000000087d974c0
+sstack push: 0x0000000087d974d0
+sstack push: 0x0000000087d974e0
+sstack push: 0x0000000087d974f0
+sstack push: 0x0000000087d97500
+sstack push: 0x0000000087d97510
+sstack push: 0x0000000087d97520
+sstack push: 0x0000000087d97530
+sstack push: 0x0000000087d97540
+sstack push: 0x0000000087d97550
+sstack push: 0x0000000087d97560
+sstack push: 0x0000000087d97570
+sstack push: 0x0000000087d97580
+sstack push: 0x0000000087d97590
+sstack push: 0x0000000087d975a0
+sstack push: 0x0000000087d975b0
+sstack push: 0x0000000087d975c0
+sstack push: 0x0000000087d975d0
+sstack push: 0x0000000087d975e0
+sstack push: 0x0000000087d975f0
+sstack push: 0x0000000087d97600
+sstack push: 0x0000000087d97610
+sstack push: 0x0000000087d97620
+sstack push: 0x0000000087d97630
+sstack push: 0x0000000087d97640
+sstack push: 0x0000000087d97650
+sstack push: 0x0000000087d97660
+sstack push: 0x0000000087d97670
+sstack push: 0x0000000087d97680
+sstack push: 0x0000000087d97690
+sstack push: 0x0000000087d976a0
+sstack push: 0x0000000087d976b0
+sstack push: 0x0000000087d976c0
+sstack push: 0x0000000087d976d0
+sstack push: 0x0000000087d976e0
+sstack push: 0x0000000087d976f0
+sstack push: 0x0000000087d97700
+sstack push: 0x0000000087d97710
+sstack push: 0x0000000087d97720
+sstack push: 0x0000000087d97730
+sstack push: 0x0000000087d97740
+sstack push: 0x0000000087d97750
+sstack push: 0x0000000087d97760
+sstack push: 0x0000000087d97770
+sstack push: 0x0000000087d97780
+sstack push: 0x0000000087d97790
+sstack push: 0x0000000087d977a0
+sstack push: 0x0000000087d977b0
+sstack push: 0x0000000087d977c0
+sstack push: 0x0000000087d977d0
+sstack push: 0x0000000087d977e0
+sstack push: 0x0000000087d977f0
+sstack push: 0x0000000087d97800
+sstack push: 0x0000000087d97810
+sstack push: 0x0000000087d97820
+sstack push: 0x0000000087d97830
+sstack push: 0x0000000087d97840
+sstack push: 0x0000000087d97850
+sstack push: 0x0000000087d97860
+sstack push: 0x0000000087d97870
+sstack push: 0x0000000087d97880
+sstack push: 0x0000000087d97890
+sstack push: 0x0000000087d978a0
+sstack push: 0x0000000087d978b0
+sstack push: 0x0000000087d978c0
+sstack push: 0x0000000087d978d0
+sstack push: 0x0000000087d978e0
+sstack push: 0x0000000087d978f0
+sstack push: 0x0000000087d97900
+sstack push: 0x0000000087d97910
+sstack push: 0x0000000087d97920
+sstack push: 0x0000000087d97930
+sstack push: 0x0000000087d97940
+sstack push: 0x0000000087d97950
+sstack push: 0x0000000087d97960
+sstack push: 0x0000000087d97970
+sstack push: 0x0000000087d97980
+sstack push: 0x0000000087d97990
+sstack push: 0x0000000087d979a0
+sstack push: 0x0000000087d979b0
+sstack push: 0x0000000087d979c0
+sstack push: 0x0000000087d979d0
+sstack push: 0x0000000087d979e0
+sstack push: 0x0000000087d979f0
+sstack push: 0x0000000087d97a00
+sstack push: 0x0000000087d97a10
+sstack push: 0x0000000087d97a20
+sstack push: 0x0000000087d97a30
+sstack push: 0x0000000087d97a40
+sstack push: 0x0000000087d97a50
+sstack push: 0x0000000087d97a60
+sstack push: 0x0000000087d97a70
+sstack push: 0x0000000087d97a80
+sstack push: 0x0000000087d97a90
+sstack push: 0x0000000087d97aa0
+sstack push: 0x0000000087d97ab0
+sstack push: 0x0000000087d97ac0
+sstack push: 0x0000000087d97ad0
+sstack push: 0x0000000087d97ae0
+sstack push: 0x0000000087d97af0
+sstack push: 0x0000000087d97b00
+sstack push: 0x0000000087d97b10
+sstack push: 0x0000000087d97b20
+sstack push: 0x0000000087d97b30
+sstack push: 0x0000000087d97b40
+sstack push: 0x0000000087d97b50
+sstack push: 0x0000000087d97b60
+sstack push: 0x0000000087d97b70
+sstack push: 0x0000000087d97b80
+sstack push: 0x0000000087d97b90
+sstack push: 0x0000000087d97ba0
+sstack push: 0x0000000087d97bb0
+sstack push: 0x0000000087d97bc0
+sstack push: 0x0000000087d97bd0
+sstack push: 0x0000000087d97be0
+sstack push: 0x0000000087d97bf0
+sstack push: 0x0000000087d97c00
+sstack push: 0x0000000087d97c10
+sstack push: 0x0000000087d97c20
+sstack push: 0x0000000087d97c30
+sstack push: 0x0000000087d97c40
+sstack push: 0x0000000087d97c50
+sstack push: 0x0000000087d97c60
+sstack push: 0x0000000087d97c70
+sstack push: 0x0000000087d97c80
+sstack push: 0x0000000087d97c90
+sstack push: 0x0000000087d97ca0
+sstack push: 0x0000000087d97cb0
+sstack push: 0x0000000087d97cc0
+sstack push: 0x0000000087d97cd0
+sstack push: 0x0000000087d97ce0
+sstack push: 0x0000000087d97cf0
+sstack push: 0x0000000087d97d00
+sstack push: 0x0000000087d97d10
+sstack push: 0x0000000087d97d20
+sstack push: 0x0000000087d97d30
+sstack push: 0x0000000087d97d40
+sstack push: 0x0000000087d97d50
+sstack push: 0x0000000087d97d60
+sstack push: 0x0000000087d97d70
+sstack push: 0x0000000087d97d80
+sstack push: 0x0000000087d97d90
+sstack push: 0x0000000087d97da0
+sstack push: 0x0000000087d97db0
+sstack push: 0x0000000087d97dc0
+sstack push: 0x0000000087d97dd0
+sstack push: 0x0000000087d97de0
+sstack push: 0x0000000087d97df0
+sstack push: 0x0000000087d97e00
+sstack push: 0x0000000087d97e10
+sstack push: 0x0000000087d97e20
+sstack push: 0x0000000087d97e30
+sstack push: 0x0000000087d97e40
+sstack push: 0x0000000087d97e50
+sstack push: 0x0000000087d97e60
+sstack push: 0x0000000087d97e70
+sstack push: 0x0000000087d97e80
+sstack push: 0x0000000087d97e90
+sstack push: 0x0000000087d97ea0
+sstack push: 0x0000000087d97eb0
+sstack push: 0x0000000087d97ec0
+sstack push: 0x0000000087d97ed0
+sstack push: 0x0000000087d97ee0
+sstack push: 0x0000000087d97ef0
+sstack push: 0x0000000087d97f00
+sstack push: 0x0000000087d97f10
+sstack push: 0x0000000087d97f20
+sstack push: 0x0000000087d97f30
+sstack push: 0x0000000087d97f40
+sstack push: 0x0000000087d97f50
+sstack push: 0x0000000087d97f60
+sstack push: 0x0000000087d97f70
+sstack push: 0x0000000087d97f80
+sstack push: 0x0000000087d97f90
+sstack push: 0x0000000087d97fa0
+sstack push: 0x0000000087d97fb0
+sstack push: 0x0000000087d97fc0
+sstack push: 0x0000000087d97fd0
+sstack push: 0x0000000087d97fe0
+sstack push: 0x0000000087d97ff0
+slab objs: 0x0000000087d95000
+sstack push: 0x0000000087d95000
+sstack push: 0x0000000087d95010
+sstack push: 0x0000000087d95020
+sstack push: 0x0000000087d95030
+sstack push: 0x0000000087d95040
+sstack push: 0x0000000087d95050
+sstack push: 0x0000000087d95060
+sstack push: 0x0000000087d95070
+sstack push: 0x0000000087d95080
+sstack push: 0x0000000087d95090
+sstack push: 0x0000000087d950a0
+sstack push: 0x0000000087d950b0
+sstack push: 0x0000000087d950c0
+sstack push: 0x0000000087d950d0
+sstack push: 0x0000000087d950e0
+sstack push: 0x0000000087d950f0
+sstack push: 0x0000000087d95100
+sstack push: 0x0000000087d95110
+sstack push: 0x0000000087d95120
+sstack push: 0x0000000087d95130
+sstack push: 0x0000000087d95140
+sstack push: 0x0000000087d95150
+sstack push: 0x0000000087d95160
+sstack push: 0x0000000087d95170
+sstack push: 0x0000000087d95180
+sstack push: 0x0000000087d95190
+sstack push: 0x0000000087d951a0
+sstack push: 0x0000000087d951b0
+sstack push: 0x0000000087d951c0
+sstack push: 0x0000000087d951d0
+sstack push: 0x0000000087d951e0
+sstack push: 0x0000000087d951f0
+sstack push: 0x0000000087d95200
+sstack push: 0x0000000087d95210
+sstack push: 0x0000000087d95220
+sstack push: 0x0000000087d95230
+sstack push: 0x0000000087d95240
+sstack push: 0x0000000087d95250
+sstack push: 0x0000000087d95260
+sstack push: 0x0000000087d95270
+sstack push: 0x0000000087d95280
+sstack push: 0x0000000087d95290
+sstack push: 0x0000000087d952a0
+sstack push: 0x0000000087d952b0
+sstack push: 0x0000000087d952c0
+sstack push: 0x0000000087d952d0
+sstack push: 0x0000000087d952e0
+sstack push: 0x0000000087d952f0
+sstack push: 0x0000000087d95300
+sstack push: 0x0000000087d95310
+sstack push: 0x0000000087d95320
+sstack push: 0x0000000087d95330
+sstack push: 0x0000000087d95340
+sstack push: 0x0000000087d95350
+sstack push: 0x0000000087d95360
+sstack push: 0x0000000087d95370
+sstack push: 0x0000000087d95380
+sstack push: 0x0000000087d95390
+sstack push: 0x0000000087d953a0
+sstack push: 0x0000000087d953b0
+sstack push: 0x0000000087d953c0
+sstack push: 0x0000000087d953d0
+sstack push: 0x0000000087d953e0
+sstack push: 0x0000000087d953f0
+sstack push: 0x0000000087d95400
+sstack push: 0x0000000087d95410
+sstack push: 0x0000000087d95420
+sstack push: 0x0000000087d95430
+sstack push: 0x0000000087d95440
+sstack push: 0x0000000087d95450
+sstack push: 0x0000000087d95460
+sstack push: 0x0000000087d95470
+sstack push: 0x0000000087d95480
+sstack push: 0x0000000087d95490
+sstack push: 0x0000000087d954a0
+sstack push: 0x0000000087d954b0
+sstack push: 0x0000000087d954c0
+sstack push: 0x0000000087d954d0
+sstack push: 0x0000000087d954e0
+sstack push: 0x0000000087d954f0
+sstack push: 0x0000000087d95500
+sstack push: 0x0000000087d95510
+sstack push: 0x0000000087d95520
+sstack push: 0x0000000087d95530
+sstack push: 0x0000000087d95540
+sstack push: 0x0000000087d95550
+sstack push: 0x0000000087d95560
+sstack push: 0x0000000087d95570
+sstack push: 0x0000000087d95580
+sstack push: 0x0000000087d95590
+sstack push: 0x0000000087d955a0
+sstack push: 0x0000000087d955b0
+sstack push: 0x0000000087d955c0
+sstack push: 0x0000000087d955d0
+sstack push: 0x0000000087d955e0
+sstack push: 0x0000000087d955f0
+sstack push: 0x0000000087d95600
+sstack push: 0x0000000087d95610
+sstack push: 0x0000000087d95620
+sstack push: 0x0000000087d95630
+sstack push: 0x0000000087d95640
+sstack push: 0x0000000087d95650
+sstack push: 0x0000000087d95660
+sstack push: 0x0000000087d95670
+sstack push: 0x0000000087d95680
+sstack push: 0x0000000087d95690
+sstack push: 0x0000000087d956a0
+sstack push: 0x0000000087d956b0
+sstack push: 0x0000000087d956c0
+sstack push: 0x0000000087d956d0
+sstack push: 0x0000000087d956e0
+sstack push: 0x0000000087d956f0
+sstack push: 0x0000000087d95700
+sstack push: 0x0000000087d95710
+sstack push: 0x0000000087d95720
+sstack push: 0x0000000087d95730
+sstack push: 0x0000000087d95740
+sstack push: 0x0000000087d95750
+sstack push: 0x0000000087d95760
+sstack push: 0x0000000087d95770
+sstack push: 0x0000000087d95780
+sstack push: 0x0000000087d95790
+sstack push: 0x0000000087d957a0
+sstack push: 0x0000000087d957b0
+sstack push: 0x0000000087d957c0
+sstack push: 0x0000000087d957d0
+sstack push: 0x0000000087d957e0
+sstack push: 0x0000000087d957f0
+sstack push: 0x0000000087d95800
+sstack push: 0x0000000087d95810
+sstack push: 0x0000000087d95820
+sstack push: 0x0000000087d95830
+sstack push: 0x0000000087d95840
+sstack push: 0x0000000087d95850
+sstack push: 0x0000000087d95860
+sstack push: 0x0000000087d95870
+sstack push: 0x0000000087d95880
+sstack push: 0x0000000087d95890
+sstack push: 0x0000000087d958a0
+sstack push: 0x0000000087d958b0
+sstack push: 0x0000000087d958c0
+sstack push: 0x0000000087d958d0
+sstack push: 0x0000000087d958e0
+sstack push: 0x0000000087d958f0
+sstack push: 0x0000000087d95900
+sstack push: 0x0000000087d95910
+sstack push: 0x0000000087d95920
+sstack push: 0x0000000087d95930
+sstack push: 0x0000000087d95940
+sstack push: 0x0000000087d95950
+sstack push: 0x0000000087d95960
+sstack push: 0x0000000087d95970
+sstack push: 0x0000000087d95980
+sstack push: 0x0000000087d95990
+sstack push: 0x0000000087d959a0
+sstack push: 0x0000000087d959b0
+sstack push: 0x0000000087d959c0
+sstack push: 0x0000000087d959d0
+sstack push: 0x0000000087d959e0
+sstack push: 0x0000000087d959f0
+sstack push: 0x0000000087d95a00
+sstack push: 0x0000000087d95a10
+sstack push: 0x0000000087d95a20
+sstack push: 0x0000000087d95a30
+sstack push: 0x0000000087d95a40
+sstack push: 0x0000000087d95a50
+sstack push: 0x0000000087d95a60
+sstack push: 0x0000000087d95a70
+sstack push: 0x0000000087d95a80
+sstack push: 0x0000000087d95a90
+sstack push: 0x0000000087d95aa0
+sstack push: 0x0000000087d95ab0
+sstack push: 0x0000000087d95ac0
+sstack push: 0x0000000087d95ad0
+sstack push: 0x0000000087d95ae0
+sstack push: 0x0000000087d95af0
+sstack push: 0x0000000087d95b00
+sstack push: 0x0000000087d95b10
+sstack push: 0x0000000087d95b20
+sstack push: 0x0000000087d95b30
+sstack push: 0x0000000087d95b40
+sstack push: 0x0000000087d95b50
+sstack push: 0x0000000087d95b60
+sstack push: 0x0000000087d95b70
+sstack push: 0x0000000087d95b80
+sstack push: 0x0000000087d95b90
+sstack push: 0x0000000087d95ba0
+sstack push: 0x0000000087d95bb0
+sstack push: 0x0000000087d95bc0
+sstack push: 0x0000000087d95bd0
+sstack push: 0x0000000087d95be0
+sstack push: 0x0000000087d95bf0
+sstack push: 0x0000000087d95c00
+sstack push: 0x0000000087d95c10
+sstack push: 0x0000000087d95c20
+sstack push: 0x0000000087d95c30
+sstack push: 0x0000000087d95c40
+sstack push: 0x0000000087d95c50
+sstack push: 0x0000000087d95c60
+sstack push: 0x0000000087d95c70
+sstack push: 0x0000000087d95c80
+sstack push: 0x0000000087d95c90
+sstack push: 0x0000000087d95ca0
+sstack push: 0x0000000087d95cb0
+sstack push: 0x0000000087d95cc0
+sstack push: 0x0000000087d95cd0
+sstack push: 0x0000000087d95ce0
+sstack push: 0x0000000087d95cf0
+sstack push: 0x0000000087d95d00
+sstack push: 0x0000000087d95d10
+sstack push: 0x0000000087d95d20
+sstack push: 0x0000000087d95d30
+sstack push: 0x0000000087d95d40
+sstack push: 0x0000000087d95d50
+sstack push: 0x0000000087d95d60
+sstack push: 0x0000000087d95d70
+sstack push: 0x0000000087d95d80
+sstack push: 0x0000000087d95d90
+sstack push: 0x0000000087d95da0
+sstack push: 0x0000000087d95db0
+sstack push: 0x0000000087d95dc0
+sstack push: 0x0000000087d95dd0
+sstack push: 0x0000000087d95de0
+sstack push: 0x0000000087d95df0
+sstack push: 0x0000000087d95e00
+sstack push: 0x0000000087d95e10
+sstack push: 0x0000000087d95e20
+sstack push: 0x0000000087d95e30
+sstack push: 0x0000000087d95e40
+sstack push: 0x0000000087d95e50
+sstack push: 0x0000000087d95e60
+sstack push: 0x0000000087d95e70
+sstack push: 0x0000000087d95e80
+sstack push: 0x0000000087d95e90
+sstack push: 0x0000000087d95ea0
+sstack push: 0x0000000087d95eb0
+sstack push: 0x0000000087d95ec0
+sstack push: 0x0000000087d95ed0
+sstack push: 0x0000000087d95ee0
+sstack push: 0x0000000087d95ef0
+sstack push: 0x0000000087d95f00
+sstack push: 0x0000000087d95f10
+sstack push: 0x0000000087d95f20
+sstack push: 0x0000000087d95f30
+sstack push: 0x0000000087d95f40
+sstack push: 0x0000000087d95f50
+sstack push: 0x0000000087d95f60
+sstack push: 0x0000000087d95f70
+sstack push: 0x0000000087d95f80
+sstack push: 0x0000000087d95f90
+sstack push: 0x0000000087d95fa0
+sstack push: 0x0000000087d95fb0
+sstack push: 0x0000000087d95fc0
+sstack push: 0x0000000087d95fd0
+sstack push: 0x0000000087d95fe0
+sstack push: 0x0000000087d95ff0
+slab objs: 0x0000000087d9b000
+sstack push: 0x0000000087d9b000
+sstack push: 0x0000000087d9b020
+sstack push: 0x0000000087d9b040
+sstack push: 0x0000000087d9b060
+sstack push: 0x0000000087d9b080
+sstack push: 0x0000000087d9b0a0
+sstack push: 0x0000000087d9b0c0
+sstack push: 0x0000000087d9b0e0
+sstack push: 0x0000000087d9b100
+sstack push: 0x0000000087d9b120
+sstack push: 0x0000000087d9b140
+sstack push: 0x0000000087d9b160
+sstack push: 0x0000000087d9b180
+sstack push: 0x0000000087d9b1a0
+sstack push: 0x0000000087d9b1c0
+sstack push: 0x0000000087d9b1e0
+sstack push: 0x0000000087d9b200
+sstack push: 0x0000000087d9b220
+sstack push: 0x0000000087d9b240
+sstack push: 0x0000000087d9b260
+sstack push: 0x0000000087d9b280
+sstack push: 0x0000000087d9b2a0
+sstack push: 0x0000000087d9b2c0
+sstack push: 0x0000000087d9b2e0
+sstack push: 0x0000000087d9b300
+sstack push: 0x0000000087d9b320
+sstack push: 0x0000000087d9b340
+sstack push: 0x0000000087d9b360
+sstack push: 0x0000000087d9b380
+sstack push: 0x0000000087d9b3a0
+sstack push: 0x0000000087d9b3c0
+sstack push: 0x0000000087d9b3e0
+sstack push: 0x0000000087d9b400
+sstack push: 0x0000000087d9b420
+sstack push: 0x0000000087d9b440
+sstack push: 0x0000000087d9b460
+sstack push: 0x0000000087d9b480
+sstack push: 0x0000000087d9b4a0
+sstack push: 0x0000000087d9b4c0
+sstack push: 0x0000000087d9b4e0
+sstack push: 0x0000000087d9b500
+sstack push: 0x0000000087d9b520
+sstack push: 0x0000000087d9b540
+sstack push: 0x0000000087d9b560
+sstack push: 0x0000000087d9b580
+sstack push: 0x0000000087d9b5a0
+sstack push: 0x0000000087d9b5c0
+sstack push: 0x0000000087d9b5e0
+sstack push: 0x0000000087d9b600
+sstack push: 0x0000000087d9b620
+sstack push: 0x0000000087d9b640
+sstack push: 0x0000000087d9b660
+sstack push: 0x0000000087d9b680
+sstack push: 0x0000000087d9b6a0
+sstack push: 0x0000000087d9b6c0
+sstack push: 0x0000000087d9b6e0
+sstack push: 0x0000000087d9b700
+sstack push: 0x0000000087d9b720
+sstack push: 0x0000000087d9b740
+sstack push: 0x0000000087d9b760
+sstack push: 0x0000000087d9b780
+sstack push: 0x0000000087d9b7a0
+sstack push: 0x0000000087d9b7c0
+sstack push: 0x0000000087d9b7e0
+sstack push: 0x0000000087d9b800
+sstack push: 0x0000000087d9b820
+sstack push: 0x0000000087d9b840
+sstack push: 0x0000000087d9b860
+sstack push: 0x0000000087d9b880
+sstack push: 0x0000000087d9b8a0
+sstack push: 0x0000000087d9b8c0
+sstack push: 0x0000000087d9b8e0
+sstack push: 0x0000000087d9b900
+sstack push: 0x0000000087d9b920
+sstack push: 0x0000000087d9b940
+sstack push: 0x0000000087d9b960
+sstack push: 0x0000000087d9b980
+sstack push: 0x0000000087d9b9a0
+sstack push: 0x0000000087d9b9c0
+sstack push: 0x0000000087d9b9e0
+sstack push: 0x0000000087d9ba00
+sstack push: 0x0000000087d9ba20
+sstack push: 0x0000000087d9ba40
+sstack push: 0x0000000087d9ba60
+sstack push: 0x0000000087d9ba80
+sstack push: 0x0000000087d9baa0
+sstack push: 0x0000000087d9bac0
+sstack push: 0x0000000087d9bae0
+sstack push: 0x0000000087d9bb00
+sstack push: 0x0000000087d9bb20
+sstack push: 0x0000000087d9bb40
+sstack push: 0x0000000087d9bb60
+sstack push: 0x0000000087d9bb80
+sstack push: 0x0000000087d9bba0
+sstack push: 0x0000000087d9bbc0
+sstack push: 0x0000000087d9bbe0
+sstack push: 0x0000000087d9bc00
+sstack push: 0x0000000087d9bc20
+sstack push: 0x0000000087d9bc40
+sstack push: 0x0000000087d9bc60
+sstack push: 0x0000000087d9bc80
+sstack push: 0x0000000087d9bca0
+sstack push: 0x0000000087d9bcc0
+sstack push: 0x0000000087d9bce0
+sstack push: 0x0000000087d9bd00
+sstack push: 0x0000000087d9bd20
+sstack push: 0x0000000087d9bd40
+sstack push: 0x0000000087d9bd60
+sstack push: 0x0000000087d9bd80
+sstack push: 0x0000000087d9bda0
+sstack push: 0x0000000087d9bdc0
+sstack push: 0x0000000087d9bde0
+sstack push: 0x0000000087d9be00
+sstack push: 0x0000000087d9be20
+sstack push: 0x0000000087d9be40
+sstack push: 0x0000000087d9be60
+sstack push: 0x0000000087d9be80
+sstack push: 0x0000000087d9bea0
+sstack push: 0x0000000087d9bec0
+sstack push: 0x0000000087d9bee0
+sstack push: 0x0000000087d9bf00
+sstack push: 0x0000000087d9bf20
+sstack push: 0x0000000087d9bf40
+sstack push: 0x0000000087d9bf60
+sstack push: 0x0000000087d9bf80
+sstack push: 0x0000000087d9bfa0
+sstack push: 0x0000000087d9bfc0
+sstack push: 0x0000000087d9bfe0
+slab objs: 0x0000000087d99000
+sstack push: 0x0000000087d99000
+sstack push: 0x0000000087d99020
+sstack push: 0x0000000087d99040
+sstack push: 0x0000000087d99060
+sstack push: 0x0000000087d99080
+sstack push: 0x0000000087d990a0
+sstack push: 0x0000000087d990c0
+sstack push: 0x0000000087d990e0
+sstack push: 0x0000000087d99100
+sstack push: 0x0000000087d99120
+sstack push: 0x0000000087d99140
+sstack push: 0x0000000087d99160
+sstack push: 0x0000000087d99180
+sstack push: 0x0000000087d991a0
+sstack push: 0x0000000087d991c0
+sstack push: 0x0000000087d991e0
+sstack push: 0x0000000087d99200
+sstack push: 0x0000000087d99220
+sstack push: 0x0000000087d99240
+sstack push: 0x0000000087d99260
+sstack push: 0x0000000087d99280
+sstack push: 0x0000000087d992a0
+sstack push: 0x0000000087d992c0
+sstack push: 0x0000000087d992e0
+sstack push: 0x0000000087d99300
+sstack push: 0x0000000087d99320
+sstack push: 0x0000000087d99340
+sstack push: 0x0000000087d99360
+sstack push: 0x0000000087d99380
+sstack push: 0x0000000087d993a0
+sstack push: 0x0000000087d993c0
+sstack push: 0x0000000087d993e0
+sstack push: 0x0000000087d99400
+sstack push: 0x0000000087d99420
+sstack push: 0x0000000087d99440
+sstack push: 0x0000000087d99460
+sstack push: 0x0000000087d99480
+sstack push: 0x0000000087d994a0
+sstack push: 0x0000000087d994c0
+sstack push: 0x0000000087d994e0
+sstack push: 0x0000000087d99500
+sstack push: 0x0000000087d99520
+sstack push: 0x0000000087d99540
+sstack push: 0x0000000087d99560
+sstack push: 0x0000000087d99580
+sstack push: 0x0000000087d995a0
+sstack push: 0x0000000087d995c0
+sstack push: 0x0000000087d995e0
+sstack push: 0x0000000087d99600
+sstack push: 0x0000000087d99620
+sstack push: 0x0000000087d99640
+sstack push: 0x0000000087d99660
+sstack push: 0x0000000087d99680
+sstack push: 0x0000000087d996a0
+sstack push: 0x0000000087d996c0
+sstack push: 0x0000000087d996e0
+sstack push: 0x0000000087d99700
+sstack push: 0x0000000087d99720
+sstack push: 0x0000000087d99740
+sstack push: 0x0000000087d99760
+sstack push: 0x0000000087d99780
+sstack push: 0x0000000087d997a0
+sstack push: 0x0000000087d997c0
+sstack push: 0x0000000087d997e0
+sstack push: 0x0000000087d99800
+sstack push: 0x0000000087d99820
+sstack push: 0x0000000087d99840
+sstack push: 0x0000000087d99860
+sstack push: 0x0000000087d99880
+sstack push: 0x0000000087d998a0
+sstack push: 0x0000000087d998c0
+sstack push: 0x0000000087d998e0
+sstack push: 0x0000000087d99900
+sstack push: 0x0000000087d99920
+sstack push: 0x0000000087d99940
+sstack push: 0x0000000087d99960
+sstack push: 0x0000000087d99980
+sstack push: 0x0000000087d999a0
+sstack push: 0x0000000087d999c0
+sstack push: 0x0000000087d999e0
+sstack push: 0x0000000087d99a00
+sstack push: 0x0000000087d99a20
+sstack push: 0x0000000087d99a40
+sstack push: 0x0000000087d99a60
+sstack push: 0x0000000087d99a80
+sstack push: 0x0000000087d99aa0
+sstack push: 0x0000000087d99ac0
+sstack push: 0x0000000087d99ae0
+sstack push: 0x0000000087d99b00
+sstack push: 0x0000000087d99b20
+sstack push: 0x0000000087d99b40
+sstack push: 0x0000000087d99b60
+sstack push: 0x0000000087d99b80
+sstack push: 0x0000000087d99ba0
+sstack push: 0x0000000087d99bc0
+sstack push: 0x0000000087d99be0
+sstack push: 0x0000000087d99c00
+sstack push: 0x0000000087d99c20
+sstack push: 0x0000000087d99c40
+sstack push: 0x0000000087d99c60
+sstack push: 0x0000000087d99c80
+sstack push: 0x0000000087d99ca0
+sstack push: 0x0000000087d99cc0
+sstack push: 0x0000000087d99ce0
+sstack push: 0x0000000087d99d00
+sstack push: 0x0000000087d99d20
+sstack push: 0x0000000087d99d40
+sstack push: 0x0000000087d99d60
+sstack push: 0x0000000087d99d80
+sstack push: 0x0000000087d99da0
+sstack push: 0x0000000087d99dc0
+sstack push: 0x0000000087d99de0
+sstack push: 0x0000000087d99e00
+sstack push: 0x0000000087d99e20
+sstack push: 0x0000000087d99e40
+sstack push: 0x0000000087d99e60
+sstack push: 0x0000000087d99e80
+sstack push: 0x0000000087d99ea0
+sstack push: 0x0000000087d99ec0
+sstack push: 0x0000000087d99ee0
+sstack push: 0x0000000087d99f00
+sstack push: 0x0000000087d99f20
+sstack push: 0x0000000087d99f40
+sstack push: 0x0000000087d99f60
+sstack push: 0x0000000087d99f80
+sstack push: 0x0000000087d99fa0
+sstack push: 0x0000000087d99fc0
+sstack push: 0x0000000087d99fe0
+slab objs: 0x0000000087d9f000
+sstack push: 0x0000000087d9f000
+sstack push: 0x0000000087d9f020
+sstack push: 0x0000000087d9f040
+sstack push: 0x0000000087d9f060
+sstack push: 0x0000000087d9f080
+sstack push: 0x0000000087d9f0a0
+sstack push: 0x0000000087d9f0c0
+sstack push: 0x0000000087d9f0e0
+sstack push: 0x0000000087d9f100
+sstack push: 0x0000000087d9f120
+sstack push: 0x0000000087d9f140
+sstack push: 0x0000000087d9f160
+sstack push: 0x0000000087d9f180
+sstack push: 0x0000000087d9f1a0
+sstack push: 0x0000000087d9f1c0
+sstack push: 0x0000000087d9f1e0
+sstack push: 0x0000000087d9f200
+sstack push: 0x0000000087d9f220
+sstack push: 0x0000000087d9f240
+sstack push: 0x0000000087d9f260
+sstack push: 0x0000000087d9f280
+sstack push: 0x0000000087d9f2a0
+sstack push: 0x0000000087d9f2c0
+sstack push: 0x0000000087d9f2e0
+sstack push: 0x0000000087d9f300
+sstack push: 0x0000000087d9f320
+sstack push: 0x0000000087d9f340
+sstack push: 0x0000000087d9f360
+sstack push: 0x0000000087d9f380
+sstack push: 0x0000000087d9f3a0
+sstack push: 0x0000000087d9f3c0
+sstack push: 0x0000000087d9f3e0
+sstack push: 0x0000000087d9f400
+sstack push: 0x0000000087d9f420
+sstack push: 0x0000000087d9f440
+sstack push: 0x0000000087d9f460
+sstack push: 0x0000000087d9f480
+sstack push: 0x0000000087d9f4a0
+sstack push: 0x0000000087d9f4c0
+sstack push: 0x0000000087d9f4e0
+sstack push: 0x0000000087d9f500
+sstack push: 0x0000000087d9f520
+sstack push: 0x0000000087d9f540
+sstack push: 0x0000000087d9f560
+sstack push: 0x0000000087d9f580
+sstack push: 0x0000000087d9f5a0
+sstack push: 0x0000000087d9f5c0
+sstack push: 0x0000000087d9f5e0
+sstack push: 0x0000000087d9f600
+sstack push: 0x0000000087d9f620
+sstack push: 0x0000000087d9f640
+sstack push: 0x0000000087d9f660
+sstack push: 0x0000000087d9f680
+sstack push: 0x0000000087d9f6a0
+sstack push: 0x0000000087d9f6c0
+sstack push: 0x0000000087d9f6e0
+sstack push: 0x0000000087d9f700
+sstack push: 0x0000000087d9f720
+sstack push: 0x0000000087d9f740
+sstack push: 0x0000000087d9f760
+sstack push: 0x0000000087d9f780
+sstack push: 0x0000000087d9f7a0
+sstack push: 0x0000000087d9f7c0
+sstack push: 0x0000000087d9f7e0
+sstack push: 0x0000000087d9f800
+sstack push: 0x0000000087d9f820
+sstack push: 0x0000000087d9f840
+sstack push: 0x0000000087d9f860
+sstack push: 0x0000000087d9f880
+sstack push: 0x0000000087d9f8a0
+sstack push: 0x0000000087d9f8c0
+sstack push: 0x0000000087d9f8e0
+sstack push: 0x0000000087d9f900
+sstack push: 0x0000000087d9f920
+sstack push: 0x0000000087d9f940
+sstack push: 0x0000000087d9f960
+sstack push: 0x0000000087d9f980
+sstack push: 0x0000000087d9f9a0
+sstack push: 0x0000000087d9f9c0
+sstack push: 0x0000000087d9f9e0
+sstack push: 0x0000000087d9fa00
+sstack push: 0x0000000087d9fa20
+sstack push: 0x0000000087d9fa40
+sstack push: 0x0000000087d9fa60
+sstack push: 0x0000000087d9fa80
+sstack push: 0x0000000087d9faa0
+sstack push: 0x0000000087d9fac0
+sstack push: 0x0000000087d9fae0
+sstack push: 0x0000000087d9fb00
+sstack push: 0x0000000087d9fb20
+sstack push: 0x0000000087d9fb40
+sstack push: 0x0000000087d9fb60
+sstack push: 0x0000000087d9fb80
+sstack push: 0x0000000087d9fba0
+sstack push: 0x0000000087d9fbc0
+sstack push: 0x0000000087d9fbe0
+sstack push: 0x0000000087d9fc00
+sstack push: 0x0000000087d9fc20
+sstack push: 0x0000000087d9fc40
+sstack push: 0x0000000087d9fc60
+sstack push: 0x0000000087d9fc80
+sstack push: 0x0000000087d9fca0
+sstack push: 0x0000000087d9fcc0
+sstack push: 0x0000000087d9fce0
+sstack push: 0x0000000087d9fd00
+sstack push: 0x0000000087d9fd20
+sstack push: 0x0000000087d9fd40
+sstack push: 0x0000000087d9fd60
+sstack push: 0x0000000087d9fd80
+sstack push: 0x0000000087d9fda0
+sstack push: 0x0000000087d9fdc0
+sstack push: 0x0000000087d9fde0
+sstack push: 0x0000000087d9fe00
+sstack push: 0x0000000087d9fe20
+sstack push: 0x0000000087d9fe40
+sstack push: 0x0000000087d9fe60
+sstack push: 0x0000000087d9fe80
+sstack push: 0x0000000087d9fea0
+sstack push: 0x0000000087d9fec0
+sstack push: 0x0000000087d9fee0
+sstack push: 0x0000000087d9ff00
+sstack push: 0x0000000087d9ff20
+sstack push: 0x0000000087d9ff40
+sstack push: 0x0000000087d9ff60
+sstack push: 0x0000000087d9ff80
+sstack push: 0x0000000087d9ffa0
+sstack push: 0x0000000087d9ffc0
+sstack push: 0x0000000087d9ffe0
+slab objs: 0x0000000087d9d000
+sstack push: 0x0000000087d9d000
+sstack push: 0x0000000087d9d020
+sstack push: 0x0000000087d9d040
+sstack push: 0x0000000087d9d060
+sstack push: 0x0000000087d9d080
+sstack push: 0x0000000087d9d0a0
+sstack push: 0x0000000087d9d0c0
+sstack push: 0x0000000087d9d0e0
+sstack push: 0x0000000087d9d100
+sstack push: 0x0000000087d9d120
+sstack push: 0x0000000087d9d140
+sstack push: 0x0000000087d9d160
+sstack push: 0x0000000087d9d180
+sstack push: 0x0000000087d9d1a0
+sstack push: 0x0000000087d9d1c0
+sstack push: 0x0000000087d9d1e0
+sstack push: 0x0000000087d9d200
+sstack push: 0x0000000087d9d220
+sstack push: 0x0000000087d9d240
+sstack push: 0x0000000087d9d260
+sstack push: 0x0000000087d9d280
+sstack push: 0x0000000087d9d2a0
+sstack push: 0x0000000087d9d2c0
+sstack push: 0x0000000087d9d2e0
+sstack push: 0x0000000087d9d300
+sstack push: 0x0000000087d9d320
+sstack push: 0x0000000087d9d340
+sstack push: 0x0000000087d9d360
+sstack push: 0x0000000087d9d380
+sstack push: 0x0000000087d9d3a0
+sstack push: 0x0000000087d9d3c0
+sstack push: 0x0000000087d9d3e0
+sstack push: 0x0000000087d9d400
+sstack push: 0x0000000087d9d420
+sstack push: 0x0000000087d9d440
+sstack push: 0x0000000087d9d460
+sstack push: 0x0000000087d9d480
+sstack push: 0x0000000087d9d4a0
+sstack push: 0x0000000087d9d4c0
+sstack push: 0x0000000087d9d4e0
+sstack push: 0x0000000087d9d500
+sstack push: 0x0000000087d9d520
+sstack push: 0x0000000087d9d540
+sstack push: 0x0000000087d9d560
+sstack push: 0x0000000087d9d580
+sstack push: 0x0000000087d9d5a0
+sstack push: 0x0000000087d9d5c0
+sstack push: 0x0000000087d9d5e0
+sstack push: 0x0000000087d9d600
+sstack push: 0x0000000087d9d620
+sstack push: 0x0000000087d9d640
+sstack push: 0x0000000087d9d660
+sstack push: 0x0000000087d9d680
+sstack push: 0x0000000087d9d6a0
+sstack push: 0x0000000087d9d6c0
+sstack push: 0x0000000087d9d6e0
+sstack push: 0x0000000087d9d700
+sstack push: 0x0000000087d9d720
+sstack push: 0x0000000087d9d740
+sstack push: 0x0000000087d9d760
+sstack push: 0x0000000087d9d780
+sstack push: 0x0000000087d9d7a0
+sstack push: 0x0000000087d9d7c0
+sstack push: 0x0000000087d9d7e0
+sstack push: 0x0000000087d9d800
+sstack push: 0x0000000087d9d820
+sstack push: 0x0000000087d9d840
+sstack push: 0x0000000087d9d860
+sstack push: 0x0000000087d9d880
+sstack push: 0x0000000087d9d8a0
+sstack push: 0x0000000087d9d8c0
+sstack push: 0x0000000087d9d8e0
+sstack push: 0x0000000087d9d900
+sstack push: 0x0000000087d9d920
+sstack push: 0x0000000087d9d940
+sstack push: 0x0000000087d9d960
+sstack push: 0x0000000087d9d980
+sstack push: 0x0000000087d9d9a0
+sstack push: 0x0000000087d9d9c0
+sstack push: 0x0000000087d9d9e0
+sstack push: 0x0000000087d9da00
+sstack push: 0x0000000087d9da20
+sstack push: 0x0000000087d9da40
+sstack push: 0x0000000087d9da60
+sstack push: 0x0000000087d9da80
+sstack push: 0x0000000087d9daa0
+sstack push: 0x0000000087d9dac0
+sstack push: 0x0000000087d9dae0
+sstack push: 0x0000000087d9db00
+sstack push: 0x0000000087d9db20
+sstack push: 0x0000000087d9db40
+sstack push: 0x0000000087d9db60
+sstack push: 0x0000000087d9db80
+sstack push: 0x0000000087d9dba0
+sstack push: 0x0000000087d9dbc0
+sstack push: 0x0000000087d9dbe0
+sstack push: 0x0000000087d9dc00
+sstack push: 0x0000000087d9dc20
+sstack push: 0x0000000087d9dc40
+sstack push: 0x0000000087d9dc60
+sstack push: 0x0000000087d9dc80
+sstack push: 0x0000000087d9dca0
+sstack push: 0x0000000087d9dcc0
+sstack push: 0x0000000087d9dce0
+sstack push: 0x0000000087d9dd00
+sstack push: 0x0000000087d9dd20
+sstack push: 0x0000000087d9dd40
+sstack push: 0x0000000087d9dd60
+sstack push: 0x0000000087d9dd80
+sstack push: 0x0000000087d9dda0
+sstack push: 0x0000000087d9ddc0
+sstack push: 0x0000000087d9dde0
+sstack push: 0x0000000087d9de00
+sstack push: 0x0000000087d9de20
+sstack push: 0x0000000087d9de40
+sstack push: 0x0000000087d9de60
+sstack push: 0x0000000087d9de80
+sstack push: 0x0000000087d9dea0
+sstack push: 0x0000000087d9dec0
+sstack push: 0x0000000087d9dee0
+sstack push: 0x0000000087d9df00
+sstack push: 0x0000000087d9df20
+sstack push: 0x0000000087d9df40
+sstack push: 0x0000000087d9df60
+sstack push: 0x0000000087d9df80
+sstack push: 0x0000000087d9dfa0
+sstack push: 0x0000000087d9dfc0
+sstack push: 0x0000000087d9dfe0
+slab objs: 0x0000000087d83000
+sstack push: 0x0000000087d83000
+sstack push: 0x0000000087d83040
+sstack push: 0x0000000087d83080
+sstack push: 0x0000000087d830c0
+sstack push: 0x0000000087d83100
+sstack push: 0x0000000087d83140
+sstack push: 0x0000000087d83180
+sstack push: 0x0000000087d831c0
+sstack push: 0x0000000087d83200
+sstack push: 0x0000000087d83240
+sstack push: 0x0000000087d83280
+sstack push: 0x0000000087d832c0
+sstack push: 0x0000000087d83300
+sstack push: 0x0000000087d83340
+sstack push: 0x0000000087d83380
+sstack push: 0x0000000087d833c0
+sstack push: 0x0000000087d83400
+sstack push: 0x0000000087d83440
+sstack push: 0x0000000087d83480
+sstack push: 0x0000000087d834c0
+sstack push: 0x0000000087d83500
+sstack push: 0x0000000087d83540
+sstack push: 0x0000000087d83580
+sstack push: 0x0000000087d835c0
+sstack push: 0x0000000087d83600
+sstack push: 0x0000000087d83640
+sstack push: 0x0000000087d83680
+sstack push: 0x0000000087d836c0
+sstack push: 0x0000000087d83700
+sstack push: 0x0000000087d83740
+sstack push: 0x0000000087d83780
+sstack push: 0x0000000087d837c0
+sstack push: 0x0000000087d83800
+sstack push: 0x0000000087d83840
+sstack push: 0x0000000087d83880
+sstack push: 0x0000000087d838c0
+sstack push: 0x0000000087d83900
+sstack push: 0x0000000087d83940
+sstack push: 0x0000000087d83980
+sstack push: 0x0000000087d839c0
+sstack push: 0x0000000087d83a00
+sstack push: 0x0000000087d83a40
+sstack push: 0x0000000087d83a80
+sstack push: 0x0000000087d83ac0
+sstack push: 0x0000000087d83b00
+sstack push: 0x0000000087d83b40
+sstack push: 0x0000000087d83b80
+sstack push: 0x0000000087d83bc0
+sstack push: 0x0000000087d83c00
+sstack push: 0x0000000087d83c40
+sstack push: 0x0000000087d83c80
+sstack push: 0x0000000087d83cc0
+sstack push: 0x0000000087d83d00
+sstack push: 0x0000000087d83d40
+sstack push: 0x0000000087d83d80
+sstack push: 0x0000000087d83dc0
+sstack push: 0x0000000087d83e00
+sstack push: 0x0000000087d83e40
+sstack push: 0x0000000087d83e80
+sstack push: 0x0000000087d83ec0
+sstack push: 0x0000000087d83f00
+sstack push: 0x0000000087d83f40
+sstack push: 0x0000000087d83f80
+sstack push: 0x0000000087d83fc0
+slab objs: 0x0000000087d81000
+sstack push: 0x0000000087d81000
+sstack push: 0x0000000087d81040
+sstack push: 0x0000000087d81080
+sstack push: 0x0000000087d810c0
+sstack push: 0x0000000087d81100
+sstack push: 0x0000000087d81140
+sstack push: 0x0000000087d81180
+sstack push: 0x0000000087d811c0
+sstack push: 0x0000000087d81200
+sstack push: 0x0000000087d81240
+sstack push: 0x0000000087d81280
+sstack push: 0x0000000087d812c0
+sstack push: 0x0000000087d81300
+sstack push: 0x0000000087d81340
+sstack push: 0x0000000087d81380
+sstack push: 0x0000000087d813c0
+sstack push: 0x0000000087d81400
+sstack push: 0x0000000087d81440
+sstack push: 0x0000000087d81480
+sstack push: 0x0000000087d814c0
+sstack push: 0x0000000087d81500
+sstack push: 0x0000000087d81540
+sstack push: 0x0000000087d81580
+sstack push: 0x0000000087d815c0
+sstack push: 0x0000000087d81600
+sstack push: 0x0000000087d81640
+sstack push: 0x0000000087d81680
+sstack push: 0x0000000087d816c0
+sstack push: 0x0000000087d81700
+sstack push: 0x0000000087d81740
+sstack push: 0x0000000087d81780
+sstack push: 0x0000000087d817c0
+sstack push: 0x0000000087d81800
+sstack push: 0x0000000087d81840
+sstack push: 0x0000000087d81880
+sstack push: 0x0000000087d818c0
+sstack push: 0x0000000087d81900
+sstack push: 0x0000000087d81940
+sstack push: 0x0000000087d81980
+sstack push: 0x0000000087d819c0
+sstack push: 0x0000000087d81a00
+sstack push: 0x0000000087d81a40
+sstack push: 0x0000000087d81a80
+sstack push: 0x0000000087d81ac0
+sstack push: 0x0000000087d81b00
+sstack push: 0x0000000087d81b40
+sstack push: 0x0000000087d81b80
+sstack push: 0x0000000087d81bc0
+sstack push: 0x0000000087d81c00
+sstack push: 0x0000000087d81c40
+sstack push: 0x0000000087d81c80
+sstack push: 0x0000000087d81cc0
+sstack push: 0x0000000087d81d00
+sstack push: 0x0000000087d81d40
+sstack push: 0x0000000087d81d80
+sstack push: 0x0000000087d81dc0
+sstack push: 0x0000000087d81e00
+sstack push: 0x0000000087d81e40
+sstack push: 0x0000000087d81e80
+sstack push: 0x0000000087d81ec0
+sstack push: 0x0000000087d81f00
+sstack push: 0x0000000087d81f40
+sstack push: 0x0000000087d81f80
+sstack push: 0x0000000087d81fc0
+slab objs: 0x0000000087d87000
+sstack push: 0x0000000087d87000
+sstack push: 0x0000000087d87040
+sstack push: 0x0000000087d87080
+sstack push: 0x0000000087d870c0
+sstack push: 0x0000000087d87100
+sstack push: 0x0000000087d87140
+sstack push: 0x0000000087d87180
+sstack push: 0x0000000087d871c0
+sstack push: 0x0000000087d87200
+sstack push: 0x0000000087d87240
+sstack push: 0x0000000087d87280
+sstack push: 0x0000000087d872c0
+sstack push: 0x0000000087d87300
+sstack push: 0x0000000087d87340
+sstack push: 0x0000000087d87380
+sstack push: 0x0000000087d873c0
+sstack push: 0x0000000087d87400
+sstack push: 0x0000000087d87440
+sstack push: 0x0000000087d87480
+sstack push: 0x0000000087d874c0
+sstack push: 0x0000000087d87500
+sstack push: 0x0000000087d87540
+sstack push: 0x0000000087d87580
+sstack push: 0x0000000087d875c0
+sstack push: 0x0000000087d87600
+sstack push: 0x0000000087d87640
+sstack push: 0x0000000087d87680
+sstack push: 0x0000000087d876c0
+sstack push: 0x0000000087d87700
+sstack push: 0x0000000087d87740
+sstack push: 0x0000000087d87780
+sstack push: 0x0000000087d877c0
+sstack push: 0x0000000087d87800
+sstack push: 0x0000000087d87840
+sstack push: 0x0000000087d87880
+sstack push: 0x0000000087d878c0
+sstack push: 0x0000000087d87900
+sstack push: 0x0000000087d87940
+sstack push: 0x0000000087d87980
+sstack push: 0x0000000087d879c0
+sstack push: 0x0000000087d87a00
+sstack push: 0x0000000087d87a40
+sstack push: 0x0000000087d87a80
+sstack push: 0x0000000087d87ac0
+sstack push: 0x0000000087d87b00
+sstack push: 0x0000000087d87b40
+sstack push: 0x0000000087d87b80
+sstack push: 0x0000000087d87bc0
+sstack push: 0x0000000087d87c00
+sstack push: 0x0000000087d87c40
+sstack push: 0x0000000087d87c80
+sstack push: 0x0000000087d87cc0
+sstack push: 0x0000000087d87d00
+sstack push: 0x0000000087d87d40
+sstack push: 0x0000000087d87d80
+sstack push: 0x0000000087d87dc0
+sstack push: 0x0000000087d87e00
+sstack push: 0x0000000087d87e40
+sstack push: 0x0000000087d87e80
+sstack push: 0x0000000087d87ec0
+sstack push: 0x0000000087d87f00
+sstack push: 0x0000000087d87f40
+sstack push: 0x0000000087d87f80
+sstack push: 0x0000000087d87fc0
+slab objs: 0x0000000087d85000
+sstack push: 0x0000000087d85000
+sstack push: 0x0000000087d85040
+sstack push: 0x0000000087d85080
+sstack push: 0x0000000087d850c0
+sstack push: 0x0000000087d85100
+sstack push: 0x0000000087d85140
+sstack push: 0x0000000087d85180
+sstack push: 0x0000000087d851c0
+sstack push: 0x0000000087d85200
+sstack push: 0x0000000087d85240
+sstack push: 0x0000000087d85280
+sstack push: 0x0000000087d852c0
+sstack push: 0x0000000087d85300
+sstack push: 0x0000000087d85340
+sstack push: 0x0000000087d85380
+sstack push: 0x0000000087d853c0
+sstack push: 0x0000000087d85400
+sstack push: 0x0000000087d85440
+sstack push: 0x0000000087d85480
+sstack push: 0x0000000087d854c0
+sstack push: 0x0000000087d85500
+sstack push: 0x0000000087d85540
+sstack push: 0x0000000087d85580
+sstack push: 0x0000000087d855c0
+sstack push: 0x0000000087d85600
+sstack push: 0x0000000087d85640
+sstack push: 0x0000000087d85680
+sstack push: 0x0000000087d856c0
+sstack push: 0x0000000087d85700
+sstack push: 0x0000000087d85740
+sstack push: 0x0000000087d85780
+sstack push: 0x0000000087d857c0
+sstack push: 0x0000000087d85800
+sstack push: 0x0000000087d85840
+sstack push: 0x0000000087d85880
+sstack push: 0x0000000087d858c0
+sstack push: 0x0000000087d85900
+sstack push: 0x0000000087d85940
+sstack push: 0x0000000087d85980
+sstack push: 0x0000000087d859c0
+sstack push: 0x0000000087d85a00
+sstack push: 0x0000000087d85a40
+sstack push: 0x0000000087d85a80
+sstack push: 0x0000000087d85ac0
+sstack push: 0x0000000087d85b00
+sstack push: 0x0000000087d85b40
+sstack push: 0x0000000087d85b80
+sstack push: 0x0000000087d85bc0
+sstack push: 0x0000000087d85c00
+sstack push: 0x0000000087d85c40
+sstack push: 0x0000000087d85c80
+sstack push: 0x0000000087d85cc0
+sstack push: 0x0000000087d85d00
+sstack push: 0x0000000087d85d40
+sstack push: 0x0000000087d85d80
+sstack push: 0x0000000087d85dc0
+sstack push: 0x0000000087d85e00
+sstack push: 0x0000000087d85e40
+sstack push: 0x0000000087d85e80
+sstack push: 0x0000000087d85ec0
+sstack push: 0x0000000087d85f00
+sstack push: 0x0000000087d85f40
+sstack push: 0x0000000087d85f80
+sstack push: 0x0000000087d85fc0
+slab objs: 0x0000000087d8b000
+sstack push: 0x0000000087d8b000
+sstack push: 0x0000000087d8b080
+sstack push: 0x0000000087d8b100
+sstack push: 0x0000000087d8b180
+sstack push: 0x0000000087d8b200
+sstack push: 0x0000000087d8b280
+sstack push: 0x0000000087d8b300
+sstack push: 0x0000000087d8b380
+sstack push: 0x0000000087d8b400
+sstack push: 0x0000000087d8b480
+sstack push: 0x0000000087d8b500
+sstack push: 0x0000000087d8b580
+sstack push: 0x0000000087d8b600
+sstack push: 0x0000000087d8b680
+sstack push: 0x0000000087d8b700
+sstack push: 0x0000000087d8b780
+sstack push: 0x0000000087d8b800
+sstack push: 0x0000000087d8b880
+sstack push: 0x0000000087d8b900
+sstack push: 0x0000000087d8b980
+sstack push: 0x0000000087d8ba00
+sstack push: 0x0000000087d8ba80
+sstack push: 0x0000000087d8bb00
+sstack push: 0x0000000087d8bb80
+sstack push: 0x0000000087d8bc00
+sstack push: 0x0000000087d8bc80
+sstack push: 0x0000000087d8bd00
+sstack push: 0x0000000087d8bd80
+sstack push: 0x0000000087d8be00
+sstack push: 0x0000000087d8be80
+sstack push: 0x0000000087d8bf00
+sstack push: 0x0000000087d8bf80
+slab objs: 0x0000000087d89000
+sstack push: 0x0000000087d89000
+sstack push: 0x0000000087d89080
+sstack push: 0x0000000087d89100
+sstack push: 0x0000000087d89180
+sstack push: 0x0000000087d89200
+sstack push: 0x0000000087d89280
+sstack push: 0x0000000087d89300
+sstack push: 0x0000000087d89380
+sstack push: 0x0000000087d89400
+sstack push: 0x0000000087d89480
+sstack push: 0x0000000087d89500
+sstack push: 0x0000000087d89580
+sstack push: 0x0000000087d89600
+sstack push: 0x0000000087d89680
+sstack push: 0x0000000087d89700
+sstack push: 0x0000000087d89780
+sstack push: 0x0000000087d89800
+sstack push: 0x0000000087d89880
+sstack push: 0x0000000087d89900
+sstack push: 0x0000000087d89980
+sstack push: 0x0000000087d89a00
+sstack push: 0x0000000087d89a80
+sstack push: 0x0000000087d89b00
+sstack push: 0x0000000087d89b80
+sstack push: 0x0000000087d89c00
+sstack push: 0x0000000087d89c80
+sstack push: 0x0000000087d89d00
+sstack push: 0x0000000087d89d80
+sstack push: 0x0000000087d89e00
+sstack push: 0x0000000087d89e80
+sstack push: 0x0000000087d89f00
+sstack push: 0x0000000087d89f80
+slab objs: 0x0000000087d8f000
+sstack push: 0x0000000087d8f000
+sstack push: 0x0000000087d8f080
+sstack push: 0x0000000087d8f100
+sstack push: 0x0000000087d8f180
+sstack push: 0x0000000087d8f200
+sstack push: 0x0000000087d8f280
+sstack push: 0x0000000087d8f300
+sstack push: 0x0000000087d8f380
+sstack push: 0x0000000087d8f400
+sstack push: 0x0000000087d8f480
+sstack push: 0x0000000087d8f500
+sstack push: 0x0000000087d8f580
+sstack push: 0x0000000087d8f600
+sstack push: 0x0000000087d8f680
+sstack push: 0x0000000087d8f700
+sstack push: 0x0000000087d8f780
+sstack push: 0x0000000087d8f800
+sstack push: 0x0000000087d8f880
+sstack push: 0x0000000087d8f900
+sstack push: 0x0000000087d8f980
+sstack push: 0x0000000087d8fa00
+sstack push: 0x0000000087d8fa80
+sstack push: 0x0000000087d8fb00
+sstack push: 0x0000000087d8fb80
+sstack push: 0x0000000087d8fc00
+sstack push: 0x0000000087d8fc80
+sstack push: 0x0000000087d8fd00
+sstack push: 0x0000000087d8fd80
+sstack push: 0x0000000087d8fe00
+sstack push: 0x0000000087d8fe80
+sstack push: 0x0000000087d8ff00
+sstack push: 0x0000000087d8ff80
+slab objs: 0x0000000087d8d000
+sstack push: 0x0000000087d8d000
+sstack push: 0x0000000087d8d080
+sstack push: 0x0000000087d8d100
+sstack push: 0x0000000087d8d180
+sstack push: 0x0000000087d8d200
+sstack push: 0x0000000087d8d280
+sstack push: 0x0000000087d8d300
+sstack push: 0x0000000087d8d380
+sstack push: 0x0000000087d8d400
+sstack push: 0x0000000087d8d480
+sstack push: 0x0000000087d8d500
+sstack push: 0x0000000087d8d580
+sstack push: 0x0000000087d8d600
+sstack push: 0x0000000087d8d680
+sstack push: 0x0000000087d8d700
+sstack push: 0x0000000087d8d780
+sstack push: 0x0000000087d8d800
+sstack push: 0x0000000087d8d880
+sstack push: 0x0000000087d8d900
+sstack push: 0x0000000087d8d980
+sstack push: 0x0000000087d8da00
+sstack push: 0x0000000087d8da80
+sstack push: 0x0000000087d8db00
+sstack push: 0x0000000087d8db80
+sstack push: 0x0000000087d8dc00
+sstack push: 0x0000000087d8dc80
+sstack push: 0x0000000087d8dd00
+sstack push: 0x0000000087d8dd80
+sstack push: 0x0000000087d8de00
+sstack push: 0x0000000087d8de80
+sstack push: 0x0000000087d8df00
+sstack push: 0x0000000087d8df80
+slab objs: 0x0000000087d73000
+sstack push: 0x0000000087d73000
+sstack push: 0x0000000087d73100
+sstack push: 0x0000000087d73200
+sstack push: 0x0000000087d73300
+sstack push: 0x0000000087d73400
+sstack push: 0x0000000087d73500
+sstack push: 0x0000000087d73600
+sstack push: 0x0000000087d73700
+sstack push: 0x0000000087d73800
+sstack push: 0x0000000087d73900
+sstack push: 0x0000000087d73a00
+sstack push: 0x0000000087d73b00
+sstack push: 0x0000000087d73c00
+sstack push: 0x0000000087d73d00
+sstack push: 0x0000000087d73e00
+sstack push: 0x0000000087d73f00
+slab objs: 0x0000000087d71000
+sstack push: 0x0000000087d71000
+sstack push: 0x0000000087d71100
+sstack push: 0x0000000087d71200
+sstack push: 0x0000000087d71300
+sstack push: 0x0000000087d71400
+sstack push: 0x0000000087d71500
+sstack push: 0x0000000087d71600
+sstack push: 0x0000000087d71700
+sstack push: 0x0000000087d71800
+sstack push: 0x0000000087d71900
+sstack push: 0x0000000087d71a00
+sstack push: 0x0000000087d71b00
+sstack push: 0x0000000087d71c00
+sstack push: 0x0000000087d71d00
+sstack push: 0x0000000087d71e00
+sstack push: 0x0000000087d71f00
+slab objs: 0x0000000087d77000
+sstack push: 0x0000000087d77000
+sstack push: 0x0000000087d77100
+sstack push: 0x0000000087d77200
+sstack push: 0x0000000087d77300
+sstack push: 0x0000000087d77400
+sstack push: 0x0000000087d77500
+sstack push: 0x0000000087d77600
+sstack push: 0x0000000087d77700
+sstack push: 0x0000000087d77800
+sstack push: 0x0000000087d77900
+sstack push: 0x0000000087d77a00
+sstack push: 0x0000000087d77b00
+sstack push: 0x0000000087d77c00
+sstack push: 0x0000000087d77d00
+sstack push: 0x0000000087d77e00
+sstack push: 0x0000000087d77f00
+slab objs: 0x0000000087d75000
+sstack push: 0x0000000087d75000
+sstack push: 0x0000000087d75100
+sstack push: 0x0000000087d75200
+sstack push: 0x0000000087d75300
+sstack push: 0x0000000087d75400
+sstack push: 0x0000000087d75500
+sstack push: 0x0000000087d75600
+sstack push: 0x0000000087d75700
+sstack push: 0x0000000087d75800
+sstack push: 0x0000000087d75900
+sstack push: 0x0000000087d75a00
+sstack push: 0x0000000087d75b00
+sstack push: 0x0000000087d75c00
+sstack push: 0x0000000087d75d00
+sstack push: 0x0000000087d75e00
+sstack push: 0x0000000087d75f00
+slab objs: 0x0000000087d7b000
+sstack push: 0x0000000087d7b000
+sstack push: 0x0000000087d7b200
+sstack push: 0x0000000087d7b400
+sstack push: 0x0000000087d7b600
+sstack push: 0x0000000087d7b800
+sstack push: 0x0000000087d7ba00
+sstack push: 0x0000000087d7bc00
+sstack push: 0x0000000087d7be00
+slab objs: 0x0000000087d79000
+sstack push: 0x0000000087d79000
+sstack push: 0x0000000087d79200
+sstack push: 0x0000000087d79400
+sstack push: 0x0000000087d79600
+sstack push: 0x0000000087d79800
+sstack push: 0x0000000087d79a00
+sstack push: 0x0000000087d79c00
+sstack push: 0x0000000087d79e00
+slab objs: 0x0000000087d7f000
+sstack push: 0x0000000087d7f000
+sstack push: 0x0000000087d7f200
+sstack push: 0x0000000087d7f400
+sstack push: 0x0000000087d7f600
+sstack push: 0x0000000087d7f800
+sstack push: 0x0000000087d7fa00
+sstack push: 0x0000000087d7fc00
+sstack push: 0x0000000087d7fe00
+slab objs: 0x0000000087d7d000
+sstack push: 0x0000000087d7d000
+sstack push: 0x0000000087d7d200
+sstack push: 0x0000000087d7d400
+sstack push: 0x0000000087d7d600
+sstack push: 0x0000000087d7d800
+sstack push: 0x0000000087d7da00
+sstack push: 0x0000000087d7dc00
+sstack push: 0x0000000087d7de00
+slab objs: 0x0000000087d63000
+sstack push: 0x0000000087d63000
+sstack push: 0x0000000087d63400
+sstack push: 0x0000000087d63800
+sstack push: 0x0000000087d63c00
+slab objs: 0x0000000087d61000
+sstack push: 0x0000000087d61000
+sstack push: 0x0000000087d61400
+sstack push: 0x0000000087d61800
+sstack push: 0x0000000087d61c00
+slab objs: 0x0000000087d67000
+sstack push: 0x0000000087d67000
+sstack push: 0x0000000087d67400
+sstack push: 0x0000000087d67800
+sstack push: 0x0000000087d67c00
+slab objs: 0x0000000087d65000
+sstack push: 0x0000000087d65000
+sstack push: 0x0000000087d65400
+sstack push: 0x0000000087d65800
+sstack push: 0x0000000087d65c00
+slab objs: 0x0000000087d6b000
+sstack push: 0x0000000087d6b000
+sstack push: 0x0000000087d6b800
+sstack push: 0x0000000087d6c000
+sstack push: 0x0000000087d6c800
+slab objs: 0x0000000087d6f000
+sstack push: 0x0000000087d6f000
+sstack push: 0x0000000087d6f800
+sstack push: 0x0000000087d70000
+sstack push: 0x0000000087d70800
+slab objs: 0x0000000087d6d000
+sstack push: 0x0000000087d6d000
+sstack push: 0x0000000087d6d800
+sstack push: 0x0000000087d6e000
+sstack push: 0x0000000087d6e800
+slab objs: 0x0000000087d51000
+sstack push: 0x0000000087d51000
+sstack push: 0x0000000087d51800
+sstack push: 0x0000000087d52000
+sstack push: 0x0000000087d52800
+slab objs: 0x0000000087d57000
+sstack push: 0x0000000087d57000
+sstack push: 0x0000000087d58000
+sstack push: 0x0000000087d59000
+sstack push: 0x0000000087d5a000
+slab objs: 0x0000000087d5f000
+sstack push: 0x0000000087d5f000
+sstack push: 0x0000000087d60000
+sstack push: 0x0000000087d61000
+sstack push: 0x0000000087d62000
+slab objs: 0x0000000087d43000
+sstack push: 0x0000000087d43000
+sstack push: 0x0000000087d44000
+sstack push: 0x0000000087d45000
+sstack push: 0x0000000087d46000
+slab objs: 0x0000000087d47000
+sstack push: 0x0000000087d47000
+sstack push: 0x0000000087d48000
+sstack push: 0x0000000087d49000
+sstack push: 0x0000000087d4a000
+slab objs: 0x0000000087d4b000
+sstack push: 0x0000000087d4b000
+sstack push: 0x0000000087d4d000
+sstack push: 0x0000000087d4f000
+sstack push: 0x0000000087d51000
+slab objs: 0x0000000087d3b000
+sstack push: 0x0000000087d3b000
+sstack push: 0x0000000087d3d000
+sstack push: 0x0000000087d3f000
+sstack push: 0x0000000087d41000
+slab objs: 0x0000000087d23000
+sstack push: 0x0000000087d23000
+sstack push: 0x0000000087d25000
+sstack push: 0x0000000087d27000
+sstack push: 0x0000000087d29000
+slab objs: 0x0000000087d2b000
+sstack push: 0x0000000087d2b000
+sstack push: 0x0000000087d2d000
+sstack push: 0x0000000087d2f000
+sstack push: 0x0000000087d31000
 mm_init ok
-{ L: 0, N: 0 }	{ L: 1, N: 1 }	{ L: 2, N: 1 }	{ L: 3, N: 0 }	{ L: 4, N: 0 }	{ L: 5, N: 1 }	{ L: 6, N: 0 }	{ L: 7, N: 0 }	{ L: 8, N: 1 }	{ L: 9, N: 0 }	[panic]: !!!
-
--------maybe len max-------
+{ L: 0, N: 1 }	{ L: 1, N: 0 }	{ L: 2, N: 1 }	{ L: 3, N: 0 }	{ L: 4, N: 0 }	{ L: 5, N: 1 }	{ L: 6, N: 0 }	{ L: 7, N: 0 }	{ L: 8, N: 1 }	{ L: 9, N: 0 }	{ L: 10, N: 31 }	
+i: 0, ptr: 0x0000000087d13000
+100- page: 0
+i: 1, ptr: 0x0000000087d37000
+i: 2, ptr: 0x0000000087d30000
+i: 3, ptr: 0x0000000087d1b000
+i: 4, ptr: 0x0000000087d35000
+i: 5, ptr: 0x0000000087d03000
+i: 6, ptr: 0x0000000087d0b000
+i: 7, ptr: 0x0000000087d01000
+i: 8, ptr: 0x0000000087d02000
+i: 9, ptr: 0x0000000087cf3000
+i: 10, ptr: 0x0000000087d07000
+i: 11, ptr: 0x0000000087d05000
+i: 12, ptr: 0x0000000087cfb000
+i: 13, ptr: 0x0000000087ce3000
+i: 14, ptr: 0x0000000087d04000
+i: 15, ptr: 0x0000000087ceb000
+i: 16, ptr: 0x0000000087ce1000
+i: 17, ptr: 0x0000000087ce7000
+i: 18, ptr: 0x0000000087cd3000
+i: 19, ptr: 0x0000000087ce5000
+i: 20, ptr: 0x0000000087ce6000
+i: 21, ptr: 0x0000000087cdb000
+i: 22, ptr: 0x0000000087cc3000
+i: 23, ptr: 0x0000000087cc1000
+i: 24, ptr: 0x0000000087ccb000
+i: 25, ptr: 0x0000000087cc7000
+i: 26, ptr: 0x0000000087cc0000
+i: 27, ptr: 0x0000000087cb3000
+i: 28, ptr: 0x0000000087cc5000
+i: 29, ptr: 0x0000000087cbb000
+i: 30, ptr: 0x0000000087ca3000
+i: 31, ptr: 0x0000000087cb9000
+i: 32, ptr: 0x0000000087cba000
+i: 33, ptr: 0x0000000087cab000
+i: 34, ptr: 0x0000000087cbf000
+i: 35, ptr: 0x0000000087cbd000
+i: 36, ptr: 0x0000000087c93000
+i: 37, ptr: 0x0000000087c9b000
+i: 38, ptr: 0x0000000087cbc000
+i: 39, ptr: 0x0000000087c83000
+i: 40, ptr: 0x0000000087c99000
+i: 41, ptr: 0x0000000087c9f000
+i: 42, ptr: 0x0000000087c8b000
+i: 43, ptr: 0x0000000087c9d000
+i: 44, ptr: 0x0000000087c9e000
+i: 45, ptr: 0x0000000087c73000
+i: 46, ptr: 0x0000000087c7b000
+i: 47, ptr: 0x0000000087c79000
+i: 48, ptr: 0x0000000087c63000
+i: 49, ptr: 0x0000000087c7f000
+i: 50, ptr: 0x0000000087c78000
+i: 51, ptr: 0x0000000087c6b000
+i: 52, ptr: 0x0000000087c7d000
+i: 53, ptr: 0x0000000087c53000
+i: 54, ptr: 0x0000000087c5b000
+i: 55, ptr: 0x0000000087c51000
+i: 56, ptr: 0x0000000087c52000
+i: 57, ptr: 0x0000000087c43000
+i: 58, ptr: 0x0000000087c57000
+i: 59, ptr: 0x0000000087c55000
+i: 60, ptr: 0x0000000087c4b000
+i: 61, ptr: 0x0000000087c33000
+i: 62, ptr: 0x0000000087c54000
+i: 63, ptr: 0x0000000087c3b000
+i: 64, ptr: 0x0000000087c31000
+i: 65, ptr: 0x0000000087c37000
+i: 66, ptr: 0x0000000087c23000
+i: 67, ptr: 0x0000000087c35000
+i: 68, ptr: 0x0000000087c36000
+i: 69, ptr: 0x0000000087c2b000
+i: 70, ptr: 0x0000000087c13000
+i: 71, ptr: 0x0000000087c11000
+i: 72, ptr: 0x0000000087c1b000
+i: 73, ptr: 0x0000000087c17000
+i: 74, ptr: 0x0000000087c10000
+i: 75, ptr: 0x0000000087c03000
+i: 76, ptr: 0x0000000087c15000
+i: 77, ptr: 0x0000000087c0b000
+i: 78, ptr: 0x00000000879f3000
+i: 79, ptr: 0x0000000087c09000
+i: 80, ptr: 0x0000000087c0a000
+i: 81, ptr: 0x00000000879fb000
+i: 82, ptr: 0x0000000087c0f000
+i: 83, ptr: 0x0000000087c0d000
+i: 84, ptr: 0x00000000879e3000
+i: 85, ptr: 0x00000000879eb000
+i: 86, ptr: 0x0000000087c0c000
+i: 87, ptr: 0x00000000879d3000
+i: 88, ptr: 0x00000000879e9000
+i: 89, ptr: 0x00000000879ef000
+i: 90, ptr: 0x00000000879db000
+i: 91, ptr: 0x00000000879ed000
+i: 92, ptr: 0x00000000879ee000
+i: 93, ptr: 0x00000000879c3000
+i: 94, ptr: 0x00000000879cb000
+i: 95, ptr: 0x00000000879c9000
+i: 96, ptr: 0x00000000879b3000
+i: 97, ptr: 0x00000000879cf000
+i: 98, ptr: 0x00000000879c8000
+i: 99, ptr: 0x00000000879bb000
+i: 100, ptr: 0x00000000879cd000
+100- page: 1
+i: 101, ptr: 0x00000000879a3000
+i: 102, ptr: 0x00000000879ab000
+i: 103, ptr: 0x00000000879a1000
+i: 104, ptr: 0x00000000879a2000
+i: 105, ptr: 0x0000000087993000
+i: 106, ptr: 0x00000000879a7000
+i: 107, ptr: 0x00000000879a5000
+i: 108, ptr: 0x000000008799b000
+i: 109, ptr: 0x0000000087983000
+i: 110, ptr: 0x00000000879a4000
+i: 111, ptr: 0x000000008798b000
+i: 112, ptr: 0x0000000087981000
+i: 113, ptr: 0x0000000087987000
+i: 114, ptr: 0x0000000087973000
+i: 115, ptr: 0x0000000087985000
+i: 116, ptr: 0x0000000087986000
+i: 117, ptr: 0x000000008797b000
+i: 118, ptr: 0x0000000087963000
+i: 119, ptr: 0x0000000087961000
+i: 120, ptr: 0x000000008796b000
+i: 121, ptr: 0x0000000087967000
+i: 122, ptr: 0x0000000087960000
+i: 123, ptr: 0x0000000087953000
+i: 124, ptr: 0x0000000087965000
+i: 125, ptr: 0x000000008795b000
+i: 126, ptr: 0x0000000087943000
+i: 127, ptr: 0x0000000087959000
+i: 128, ptr: 0x000000008795a000
+i: 129, ptr: 0x000000008794b000
+i: 130, ptr: 0x000000008795f000
+i: 131, ptr: 0x000000008795d000
+i: 132, ptr: 0x0000000087933000
+i: 133, ptr: 0x000000008793b000
+i: 134, ptr: 0x000000008795c000
+i: 135, ptr: 0x0000000087923000
+i: 136, ptr: 0x0000000087939000
+i: 137, ptr: 0x000000008793f000
+i: 138, ptr: 0x000000008792b000
+i: 139, ptr: 0x000000008793d000
+i: 140, ptr: 0x000000008793e000
+i: 141, ptr: 0x0000000087913000
+i: 142, ptr: 0x000000008791b000
+i: 143, ptr: 0x0000000087919000
+i: 144, ptr: 0x0000000087903000
+i: 145, ptr: 0x000000008791f000
+i: 146, ptr: 0x0000000087918000
+i: 147, ptr: 0x000000008790b000
+i: 148, ptr: 0x000000008791d000
+i: 149, ptr: 0x00000000878f3000
+i: 150, ptr: 0x00000000878fb000
+i: 151, ptr: 0x00000000878f1000
+i: 152, ptr: 0x00000000878f2000
+i: 153, ptr: 0x00000000878e3000
+i: 154, ptr: 0x00000000878f7000
+i: 155, ptr: 0x00000000878f5000
+i: 156, ptr: 0x00000000878eb000
+i: 157, ptr: 0x00000000878d3000
+i: 158, ptr: 0x00000000878f4000
+i: 159, ptr: 0x00000000878db000
+i: 160, ptr: 0x00000000878d1000
+i: 161, ptr: 0x00000000878d7000
+i: 162, ptr: 0x00000000878c3000
+i: 163, ptr: 0x00000000878d5000
+i: 164, ptr: 0x00000000878d6000
+i: 165, ptr: 0x00000000878cb000
+i: 166, ptr: 0x00000000878b3000
+i: 167, ptr: 0x00000000878b1000
+i: 168, ptr: 0x00000000878bb000
+i: 169, ptr: 0x00000000878b7000
+i: 170, ptr: 0x00000000878b0000
+i: 171, ptr: 0x00000000878a3000
+i: 172, ptr: 0x00000000878b5000
+i: 173, ptr: 0x00000000878ab000
+i: 174, ptr: 0x0000000087893000
+i: 175, ptr: 0x00000000878a9000
+i: 176, ptr: 0x00000000878aa000
+i: 177, ptr: 0x000000008789b000
+i: 178, ptr: 0x00000000878af000
+i: 179, ptr: 0x00000000878ad000
+i: 180, ptr: 0x0000000087883000
+i: 181, ptr: 0x000000008788b000
+i: 182, ptr: 0x00000000878ac000
+i: 183, ptr: 0x0000000087873000
+i: 184, ptr: 0x0000000087889000
+i: 185, ptr: 0x000000008788f000
+i: 186, ptr: 0x000000008787b000
+i: 187, ptr: 0x000000008788d000
+i: 188, ptr: 0x000000008788e000
+i: 189, ptr: 0x0000000087863000
+i: 190, ptr: 0x000000008786b000
+i: 191, ptr: 0x0000000087869000
+i: 192, ptr: 0x0000000087853000
+i: 193, ptr: 0x000000008786f000
+i: 194, ptr: 0x0000000087868000
+i: 195, ptr: 0x000000008785b000
+i: 196, ptr: 0x000000008786d000
+i: 197, ptr: 0x0000000087843000
+i: 198, ptr: 0x000000008784b000
+i: 199, ptr: 0x0000000087841000
+Page allocation successful
+ptr: 0x0000000087ffbe00
+ptr: 0x0000000087ffbc00
+ptr: 0x0000000087ffba00
+ptr: 0x0000000087ffb800
+1ptr: 0x0000000087ffb600
+ptr: 0x0000000087ffb400
+ptr: 0x0000000087ffb200
+ptr: 0x0000000087ffb000
+add slab
+slab objs: 0x0000000087847000
+sstack push: 0x0000000087847000
+sstack push: 0x0000000087847200
+sstack push: 0x0000000087847400
+sstack push: 0x0000000087847600
+sstack push: 0x0000000087847800
+sstack push: 0x0000000087847a00
+sstack push: 0x0000000087847c00
+sstack push: 0x0000000087847e00
+ptr: 0x0000000087847e00
+ptr: 0x0000000087847c00
+ptr: 0x0000000087847a00
+ptr: 0x0000000087847800
+ptr: 0x0000000087847600
+ptr: 0x0000000087847400
+ptr: 0x0000000087847200
+ptr: 0x0000000087847000
+add slab
+slab objs: 0x0000000087845000
+sstack push: 0x0000000087845000
+sstack push: 0x0000000087845200
+sstack push: 0x0000000087845400
+sstack push: 0x0000000087845600
+sstack push: 0x0000000087845800
+sstack push: 0x0000000087845a00
+sstack push: 0x0000000087845c00
+sstack push: 0x0000000087845e00
+ptr: 0x0000000087845e00
+ptr: 0x0000000087845c00
+ptr: 0x0000000087845a00
+ptr: 0x0000000087845800
+ptr: 0x0000000087845600
+ptr: 0x0000000087845400
+ptr: 0x0000000087845200
+ptr: 0x0000000087845000
+add slab
+slab objs: 0x0000000087833000
+sstack push: 0x0000000087833000
+sstack push: 0x0000000087833200
+sstack push: 0x0000000087833400
+sstack push: 0x0000000087833600
+sstack push: 0x0000000087833800
+sstack push: 0x0000000087833a00
+sstack push: 0x0000000087833c00
+sstack push: 0x0000000087833e00
+ptr: 0x0000000087833e00
+ptr: 0x0000000087833c00
+ptr: 0x0000000087833a00
+ptr: 0x0000000087833800
+ptr: 0x0000000087833600
+ptr: 0x0000000087833400
+ptr: 0x0000000087833200
+ptr: 0x0000000087833000
+add slab
+slab objs: 0x0000000087831000
+sstack push: 0x0000000087831000
+sstack push: 0x0000000087831200
+sstack push: 0x0000000087831400
+sstack push: 0x0000000087831600
+sstack push: 0x0000000087831800
+sstack push: 0x0000000087831a00
+sstack push: 0x0000000087831c00
+sstack push: 0x0000000087831e00
+ptr: 0x0000000087831e00
+ptr: 0x0000000087831c00
+ptr: 0x0000000087831a00
+ptr: 0x0000000087831800
+ptr: 0x0000000087831600
+ptr: 0x0000000087831400
+ptr: 0x0000000087831200
+ptr: 0x0000000087831000
+add slab
+slab objs: 0x0000000087837000
+sstack push: 0x0000000087837000
+sstack push: 0x0000000087837200
+sstack push: 0x0000000087837400
+sstack push: 0x0000000087837600
+sstack push: 0x0000000087837800
+sstack push: 0x0000000087837a00
+sstack push: 0x0000000087837c00
+sstack push: 0x0000000087837e00
+ptr: 0x0000000087837e00
+ptr: 0x0000000087837c00
+ptr: 0x0000000087837a00
+ptr: 0x0000000087837800
+ptr: 0x0000000087837600
+ptr: 0x0000000087837400
+ptr: 0x0000000087837200
+ptr: 0x0000000087837000
+add slab
+slab objs: 0x0000000087835000
+sstack push: 0x0000000087835000
+sstack push: 0x0000000087835200
+sstack push: 0x0000000087835400
+sstack push: 0x0000000087835600
+sstack push: 0x0000000087835800
+sstack push: 0x0000000087835a00
+sstack push: 0x0000000087835c00
+sstack push: 0x0000000087835e00
+ptr: 0x0000000087835e00
+ptr: 0x0000000087835c00
+ptr: 0x0000000087835a00
+ptr: 0x0000000087835800
+ptr: 0x0000000087835600
+ptr: 0x0000000087835400
+ptr: 0x0000000087835200
+ptr: 0x0000000087835000
+add slab
+slab objs: 0x000000008783b000
+sstack push: 0x000000008783b000
+sstack push: 0x000000008783b200
+sstack push: 0x000000008783b400
+sstack push: 0x000000008783b600
+sstack push: 0x000000008783b800
+sstack push: 0x000000008783ba00
+sstack push: 0x000000008783bc00
+sstack push: 0x000000008783be00
+ptr: 0x000000008783be00
+ptr: 0x000000008783bc00
+ptr: 0x000000008783ba00
+ptr: 0x000000008783b800
+ptr: 0x000000008783b600
+ptr: 0x000000008783b400
+ptr: 0x000000008783b200
+ptr: 0x000000008783b000
+add slab
+slab objs: 0x0000000087839000
+sstack push: 0x0000000087839000
+sstack push: 0x0000000087839200
+sstack push: 0x0000000087839400
+sstack push: 0x0000000087839600
+sstack push: 0x0000000087839800
+sstack push: 0x0000000087839a00
+sstack push: 0x0000000087839c00
+sstack push: 0x0000000087839e00
+ptr: 0x0000000087839e00
+ptr: 0x0000000087839c00
+ptr: 0x0000000087839a00
+ptr: 0x0000000087839800
+ptr: 0x0000000087839600
+ptr: 0x0000000087839400
+ptr: 0x0000000087839200
+ptr: 0x0000000087839000
+add slab
+slab objs: 0x000000008783f000
+sstack push: 0x000000008783f000
+sstack push: 0x000000008783f200
+sstack push: 0x000000008783f400
+sstack push: 0x000000008783f600
+sstack push: 0x000000008783f800
+sstack push: 0x000000008783fa00
+sstack push: 0x000000008783fc00
+sstack push: 0x000000008783fe00
+ptr: 0x000000008783fe00
+ptr: 0x000000008783fc00
+ptr: 0x000000008783fa00
+ptr: 0x000000008783f800
+ptr: 0x000000008783f600
+ptr: 0x000000008783f400
+ptr: 0x000000008783f200
+ptr: 0x000000008783f000
+add slab
+slab objs: 0x000000008783d000
+sstack push: 0x000000008783d000
+sstack push: 0x000000008783d200
+sstack push: 0x000000008783d400
+sstack push: 0x000000008783d600
+sstack push: 0x000000008783d800
+sstack push: 0x000000008783da00
+sstack push: 0x000000008783dc00
+sstack push: 0x000000008783de00
+ptr: 0x000000008783de00
+ptr: 0x000000008783dc00
+ptr: 0x000000008783da00
+ptr: 0x000000008783d800
+ptr: 0x000000008783d600
+ptr: 0x000000008783d400
+ptr: 0x000000008783d200
+ptr: 0x000000008783d000
+add slab
+slab objs: 0x0000000087823000
+sstack push: 0x0000000087823000
+sstack push: 0x0000000087823200
+sstack push: 0x0000000087823400
+sstack push: 0x0000000087823600
+sstack push: 0x0000000087823800
+sstack push: 0x0000000087823a00
+sstack push: 0x0000000087823c00
+sstack push: 0x0000000087823e00
+ptr: 0x0000000087823e00
+ptr: 0x0000000087823c00
+ptr: 0x0000000087823a00
+ptr: 0x0000000087823800
+ptr: 0x0000000087823600
+ptr: 0x0000000087823400
+ptr: 0x0000000087823200
+ptr: 0x0000000087823000
+add slab
+slab objs: 0x0000000087821000
+sstack push: 0x0000000087821000
+sstack push: 0x0000000087821200
+sstack push: 0x0000000087821400
+sstack push: 0x0000000087821600
+sstack push: 0x0000000087821800
+sstack push: 0x0000000087821a00
+sstack push: 0x0000000087821c00
+sstack push: 0x0000000087821e00
+ptr: 0x0000000087821e00
+ptr: 0x0000000087821c00
+ptr: 0x0000000087821a00
+ptr: 0x0000000087821800
+ptr: 0x0000000087821600
+ptr: 0x0000000087821400
+ptr: 0x0000000087821200
+ptr: 0x0000000087821000
+add slab
+slab objs: 0x0000000087827000
+sstack push: 0x0000000087827000
+sstack push: 0x0000000087827200
+sstack push: 0x0000000087827400
+sstack push: 0x0000000087827600
+sstack push: 0x0000000087827800
+sstack push: 0x0000000087827a00
+sstack push: 0x0000000087827c00
+sstack push: 0x0000000087827e00
+ptr: 0x0000000087827e00
+ptr: 0x0000000087827c00
+ptr: 0x0000000087827a00
+ptr: 0x0000000087827800
+ptr: 0x0000000087827600
+ptr: 0x0000000087827400
+ptr: 0x0000000087827200
+ptr: 0x0000000087827000
+add slab
+slab objs: 0x0000000087825000
+sstack push: 0x0000000087825000
+sstack push: 0x0000000087825200
+sstack push: 0x0000000087825400
+sstack push: 0x0000000087825600
+sstack push: 0x0000000087825800
+sstack push: 0x0000000087825a00
+sstack push: 0x0000000087825c00
+sstack push: 0x0000000087825e00
+ptr: 0x0000000087825e00
+ptr: 0x0000000087825c00
+ptr: 0x0000000087825a00
+ptr: 0x0000000087825800
+ptr: 0x0000000087825600
+ptr: 0x0000000087825400
+ptr: 0x0000000087825200
+ptr: 0x0000000087825000
+add slab
+slab objs: 0x000000008782b000
+sstack push: 0x000000008782b000
+sstack push: 0x000000008782b200
+sstack push: 0x000000008782b400
+sstack push: 0x000000008782b600
+sstack push: 0x000000008782b800
+sstack push: 0x000000008782ba00
+sstack push: 0x000000008782bc00
+sstack push: 0x000000008782be00
+ptr: 0x000000008782be00
+ptr: 0x000000008782bc00
+ptr: 0x000000008782ba00
+ptr: 0x000000008782b800
+ptr: 0x000000008782b600
+ptr: 0x000000008782b400
+ptr: 0x000000008782b200
+ptr: 0x000000008782b000
+add slab
+slab objs: 0x0000000087829000
+sstack push: 0x0000000087829000
+sstack push: 0x0000000087829200
+sstack push: 0x0000000087829400
+sstack push: 0x0000000087829600
+sstack push: 0x0000000087829800
+sstack push: 0x0000000087829a00
+sstack push: 0x0000000087829c00
+sstack push: 0x0000000087829e00
+ptr: 0x0000000087829e00
+ptr: 0x0000000087829c00
+ptr: 0x0000000087829a00
+ptr: 0x0000000087829800
+ptr: 0x0000000087829600
+ptr: 0x0000000087829400
+ptr: 0x0000000087829200
+ptr: 0x0000000087829000
+add slab
+slab objs: 0x000000008782f000
+sstack push: 0x000000008782f000
+sstack push: 0x000000008782f200
+sstack push: 0x000000008782f400
+sstack push: 0x000000008782f600
+sstack push: 0x000000008782f800
+sstack push: 0x000000008782fa00
+sstack push: 0x000000008782fc00
+sstack push: 0x000000008782fe00
+ptr: 0x000000008782fe00
+ptr: 0x000000008782fc00
+ptr: 0x000000008782fa00
+ptr: 0x000000008782f800
+ptr: 0x000000008782f600
+ptr: 0x000000008782f400
+ptr: 0x000000008782f200
+ptr: 0x000000008782f000
+add slab
+slab objs: 0x000000008782d000
+sstack push: 0x000000008782d000
+sstack push: 0x000000008782d200
+sstack push: 0x000000008782d400
+sstack push: 0x000000008782d600
+sstack push: 0x000000008782d800
+sstack push: 0x000000008782da00
+sstack push: 0x000000008782dc00
+sstack push: 0x000000008782de00
+ptr: 0x000000008782de00
+ptr: 0x000000008782dc00
+ptr: 0x000000008782da00
+ptr: 0x000000008782d800
+ptr: 0x000000008782d600
+ptr: 0x000000008782d400
+ptr: 0x000000008782d200
+ptr: 0x000000008782d000
+add slab
+slab objs: 0x0000000087813000
+sstack push: 0x0000000087813000
+sstack push: 0x0000000087813200
+sstack push: 0x0000000087813400
+sstack push: 0x0000000087813600
+sstack push: 0x0000000087813800
+sstack push: 0x0000000087813a00
+sstack push: 0x0000000087813c00
+sstack push: 0x0000000087813e00
+ptr: 0x0000000087813e00
+ptr: 0x0000000087813c00
+ptr: 0x0000000087813a00
+ptr: 0x0000000087813800
+ptr: 0x0000000087813600
+ptr: 0x0000000087813400
+ptr: 0x0000000087813200
+ptr: 0x0000000087813000
+add slab
+slab objs: 0x0000000087811000
+sstack push: 0x0000000087811000
+sstack push: 0x0000000087811200
+sstack push: 0x0000000087811400
+sstack push: 0x0000000087811600
+sstack push: 0x0000000087811800
+sstack push: 0x0000000087811a00
+sstack push: 0x0000000087811c00
+sstack push: 0x0000000087811e00
+ptr: 0x0000000087811e00
+ptr: 0x0000000087811c00
+ptr: 0x0000000087811a00
+ptr: 0x0000000087811800
+ptr: 0x0000000087811600
+ptr: 0x0000000087811400
+ptr: 0x0000000087811200
+ptr: 0x0000000087811000
+add slab
+slab objs: 0x0000000087817000
+sstack push: 0x0000000087817000
+sstack push: 0x0000000087817200
+sstack push: 0x0000000087817400
+sstack push: 0x0000000087817600
+sstack push: 0x0000000087817800
+sstack push: 0x0000000087817a00
+sstack push: 0x0000000087817c00
+sstack push: 0x0000000087817e00
+ptr: 0x0000000087817e00
+ptr: 0x0000000087817c00
+ptr: 0x0000000087817a00
+ptr: 0x0000000087817800
+ptr: 0x0000000087817600
+ptr: 0x0000000087817400
+ptr: 0x0000000087817200
+ptr: 0x0000000087817000
+add slab
+slab objs: 0x0000000087815000
+sstack push: 0x0000000087815000
+sstack push: 0x0000000087815200
+sstack push: 0x0000000087815400
+sstack push: 0x0000000087815600
+sstack push: 0x0000000087815800
+sstack push: 0x0000000087815a00
+sstack push: 0x0000000087815c00
+sstack push: 0x0000000087815e00
+ptr: 0x0000000087815e00
+ptr: 0x0000000087815c00
+ptr: 0x0000000087815a00
+ptr: 0x0000000087815800
+ptr: 0x0000000087815600
+ptr: 0x0000000087815400
+ptr: 0x0000000087815200
+ptr: 0x0000000087815000
+add slab
+slab objs: 0x000000008781b000
+sstack push: 0x000000008781b000
+sstack push: 0x000000008781b200
+sstack push: 0x000000008781b400
+sstack push: 0x000000008781b600
+sstack push: 0x000000008781b800
+sstack push: 0x000000008781ba00
+sstack push: 0x000000008781bc00
+sstack push: 0x000000008781be00
+ptr: 0x000000008781be00
+ptr: 0x000000008781bc00
+ptr: 0x000000008781ba00
+ptr: 0x000000008781b800
+ptr: 0x000000008781b600
+ptr: 0x000000008781b400
+ptr: 0x000000008781b200
+ptr: 0x000000008781b000
+add slab
+slab objs: 0x0000000087819000
+sstack push: 0x0000000087819000
+sstack push: 0x0000000087819200
+sstack push: 0x0000000087819400
+sstack push: 0x0000000087819600
+sstack push: 0x0000000087819800
+sstack push: 0x0000000087819a00
+sstack push: 0x0000000087819c00
+sstack push: 0x0000000087819e00
+ptr: 0x0000000087819e00
+ptr: 0x0000000087819c00
+ptr: 0x0000000087819a00
+ptr: 0x0000000087819800
+ptr: 0x0000000087819600
+ptr: 0x0000000087819400
+ptr: 0x0000000087819200
+ptr: 0x0000000087819000
+add slab
+slab objs: 0x000000008781f000
+sstack push: 0x000000008781f000
+sstack push: 0x000000008781f200
+sstack push: 0x000000008781f400
+sstack push: 0x000000008781f600
+sstack push: 0x000000008781f800
+sstack push: 0x000000008781fa00
+sstack push: 0x000000008781fc00
+sstack push: 0x000000008781fe00
+ptr: 0x000000008781fe00
+ptr: 0x000000008781fc00
+ptr: 0x000000008781fa00
+ptr: 0x000000008781f800
+ptr: 0x000000008781f600
+ptr: 0x000000008781f400
+ptr: 0x000000008781f200
+ptr: 0x000000008781f000
+add slab
+slab objs: 0x000000008781d000
+sstack push: 0x000000008781d000
+sstack push: 0x000000008781d200
+sstack push: 0x000000008781d400
+sstack push: 0x000000008781d600
+sstack push: 0x000000008781d800
+sstack push: 0x000000008781da00
+sstack push: 0x000000008781dc00
+sstack push: 0x000000008781de00
+ptr: 0x000000008781de00
+ptr: 0x000000008781dc00
+ptr: 0x000000008781da00
+ptr: 0x000000008781d800
+ptr: 0x000000008781d600
+ptr: 0x000000008781d400
+ptr: 0x000000008781d200
+ptr: 0x000000008781d000
+add slab
+slab objs: 0x0000000087803000
+sstack push: 0x0000000087803000
+sstack push: 0x0000000087803200
+sstack push: 0x0000000087803400
+sstack push: 0x0000000087803600
+sstack push: 0x0000000087803800
+sstack push: 0x0000000087803a00
+sstack push: 0x0000000087803c00
+sstack push: 0x0000000087803e00
+ptr: 0x0000000087803e00
+ptr: 0x0000000087803c00
+ptr: 0x0000000087803a00
+ptr: 0x0000000087803800
+ptr: 0x0000000087803600
+ptr: 0x0000000087803400
+ptr: 0x0000000087803200
+ptr: 0x0000000087803000
+add slab
+slab objs: 0x0000000087801000
+sstack push: 0x0000000087801000
+sstack push: 0x0000000087801200
+sstack push: 0x0000000087801400
+sstack push: 0x0000000087801600
+sstack push: 0x0000000087801800
+sstack push: 0x0000000087801a00
+sstack push: 0x0000000087801c00
+sstack push: 0x0000000087801e00
+ptr: 0x0000000087801e00
+ptr: 0x0000000087801c00
+ptr: 0x0000000087801a00
+ptr: 0x0000000087801800
+ptr: 0x0000000087801600
+ptr: 0x0000000087801400
+ptr: 0x0000000087801200
+ptr: 0x0000000087801000
+add slab
+slab objs: 0x0000000087807000
+sstack push: 0x0000000087807000
+sstack push: 0x0000000087807200
+sstack push: 0x0000000087807400
+sstack push: 0x0000000087807600
+sstack push: 0x0000000087807800
+sstack push: 0x0000000087807a00
+sstack push: 0x0000000087807c00
+sstack push: 0x0000000087807e00
+ptr: 0x0000000087807e00
+ptr: 0x0000000087807c00
+ptr: 0x0000000087807a00
+ptr: 0x0000000087807800
+ptr: 0x0000000087807600
+ptr: 0x0000000087807400
+ptr: 0x0000000087807200
+ptr: 0x0000000087807000
+add slab
+slab objs: 0x0000000087805000
+sstack push: 0x0000000087805000
+sstack push: 0x0000000087805200
+sstack push: 0x0000000087805400
+sstack push: 0x0000000087805600
+sstack push: 0x0000000087805800
+sstack push: 0x0000000087805a00
+sstack push: 0x0000000087805c00
+sstack push: 0x0000000087805e00
+ptr: 0x0000000087805e00
+ptr: 0x0000000087805c00
+ptr: 0x0000000087805a00
+ptr: 0x0000000087805800
+ptr: 0x0000000087805600
+ptr: 0x0000000087805400
+ptr: 0x0000000087805200
+ptr: 0x0000000087805000
+add slab
+slab objs: 0x000000008780b000
+sstack push: 0x000000008780b000
+sstack push: 0x000000008780b200
+sstack push: 0x000000008780b400
+sstack push: 0x000000008780b600
+sstack push: 0x000000008780b800
+sstack push: 0x000000008780ba00
+sstack push: 0x000000008780bc00
+sstack push: 0x000000008780be00
+ptr: 0x000000008780be00
+ptr: 0x000000008780bc00
+ptr: 0x000000008780ba00
+ptr: 0x000000008780b800
+ptr: 0x000000008780b600
+ptr: 0x000000008780b400
+ptr: 0x000000008780b200
+ptr: 0x000000008780b000
+add slab
+slab objs: 0x0000000087809000
+sstack push: 0x0000000087809000
+sstack push: 0x0000000087809200
+sstack push: 0x0000000087809400
+sstack push: 0x0000000087809600
+sstack push: 0x0000000087809800
+sstack push: 0x0000000087809a00
+sstack push: 0x0000000087809c00
+sstack push: 0x0000000087809e00
+ptr: 0x0000000087809e00
+ptr: 0x0000000087809c00
+ptr: 0x0000000087809a00
+ptr: 0x0000000087809800
+ptr: 0x0000000087809600
+ptr: 0x0000000087809400
+ptr: 0x0000000087809200
+ptr: 0x0000000087809000
+add slab
+slab objs: 0x000000008780f000
+sstack push: 0x000000008780f000
+sstack push: 0x000000008780f200
+sstack push: 0x000000008780f400
+sstack push: 0x000000008780f600
+sstack push: 0x000000008780f800
+sstack push: 0x000000008780fa00
+sstack push: 0x000000008780fc00
+sstack push: 0x000000008780fe00
+ptr: 0x000000008780fe00
+ptr: 0x000000008780fc00
+ptr: 0x000000008780fa00
+ptr: 0x000000008780f800
+ptr: 0x000000008780f600
+ptr: 0x000000008780f400
+ptr: 0x000000008780f200
+ptr: 0x000000008780f000
+add slab
+slab objs: 0x000000008780d000
+sstack push: 0x000000008780d000
+sstack push: 0x000000008780d200
+sstack push: 0x000000008780d400
+sstack push: 0x000000008780d600
+sstack push: 0x000000008780d800
+sstack push: 0x000000008780da00
+sstack push: 0x000000008780dc00
+sstack push: 0x000000008780de00
+ptr: 0x000000008780de00
+ptr: 0x000000008780dc00
+ptr: 0x000000008780da00
+ptr: 0x000000008780d800
+ptr: 0x000000008780d600
+ptr: 0x000000008780d400
+ptr: 0x000000008780d200
+ptr: 0x000000008780d000
+add slab
+slab objs: 0x0000000087bf3000
+sstack push: 0x0000000087bf3000
+sstack push: 0x0000000087bf3200
+sstack push: 0x0000000087bf3400
+sstack push: 0x0000000087bf3600
+sstack push: 0x0000000087bf3800
+sstack push: 0x0000000087bf3a00
+sstack push: 0x0000000087bf3c00
+sstack push: 0x0000000087bf3e00
+ptr: 0x0000000087bf3e00
+ptr: 0x0000000087bf3c00
+ptr: 0x0000000087bf3a00
+ptr: 0x0000000087bf3800
+ptr: 0x0000000087bf3600
+ptr: 0x0000000087bf3400
+ptr: 0x0000000087bf3200
+ptr: 0x0000000087bf3000
+add slab
+slab objs: 0x0000000087bf1000
+sstack push: 0x0000000087bf1000
+sstack push: 0x0000000087bf1200
+sstack push: 0x0000000087bf1400
+sstack push: 0x0000000087bf1600
+sstack push: 0x0000000087bf1800
+sstack push: 0x0000000087bf1a00
+sstack push: 0x0000000087bf1c00
+sstack push: 0x0000000087bf1e00
+ptr: 0x0000000087bf1e00
+ptr: 0x0000000087bf1c00
+ptr: 0x0000000087bf1a00
+ptr: 0x0000000087bf1800
+ptr: 0x0000000087bf1600
+ptr: 0x0000000087bf1400
+ptr: 0x0000000087bf1200
+ptr: 0x0000000087bf1000
+add slab
+slab objs: 0x0000000087bf7000
+sstack push: 0x0000000087bf7000
+sstack push: 0x0000000087bf7200
+sstack push: 0x0000000087bf7400
+sstack push: 0x0000000087bf7600
+sstack push: 0x0000000087bf7800
+sstack push: 0x0000000087bf7a00
+sstack push: 0x0000000087bf7c00
+sstack push: 0x0000000087bf7e00
+ptr: 0x0000000087bf7e00
+ptr: 0x0000000087bf7c00
+ptr: 0x0000000087bf7a00
+ptr: 0x0000000087bf7800
+ptr: 0x0000000087bf7600
+ptr: 0x0000000087bf7400
+ptr: 0x0000000087bf7200
+ptr: 0x0000000087bf7000
+add slab
+slab objs: 0x0000000087bf5000
+sstack push: 0x0000000087bf5000
+sstack push: 0x0000000087bf5200
+sstack push: 0x0000000087bf5400
+sstack push: 0x0000000087bf5600
+sstack push: 0x0000000087bf5800
+sstack push: 0x0000000087bf5a00
+sstack push: 0x0000000087bf5c00
+sstack push: 0x0000000087bf5e00
+ptr: 0x0000000087bf5e00
+ptr: 0x0000000087bf5c00
+ptr: 0x0000000087bf5a00
+ptr: 0x0000000087bf5800
+ptr: 0x0000000087bf5600
+ptr: 0x0000000087bf5400
+ptr: 0x0000000087bf5200
+ptr: 0x0000000087bf5000
+add slab
+slab objs: 0x0000000087bfb000
+sstack push: 0x0000000087bfb000
+sstack push: 0x0000000087bfb200
+sstack push: 0x0000000087bfb400
+sstack push: 0x0000000087bfb600
+sstack push: 0x0000000087bfb800
+sstack push: 0x0000000087bfba00
+sstack push: 0x0000000087bfbc00
+sstack push: 0x0000000087bfbe00
+ptr: 0x0000000087bfbe00
+ptr: 0x0000000087bfbc00
+ptr: 0x0000000087bfba00
+ptr: 0x0000000087bfb800
+ptr: 0x0000000087bfb600
+ptr: 0x0000000087bfb400
+ptr: 0x0000000087bfb200
+ptr: 0x0000000087bfb000
+add slab
+slab objs: 0x0000000087bf9000
+sstack push: 0x0000000087bf9000
+sstack push: 0x0000000087bf9200
+sstack push: 0x0000000087bf9400
+sstack push: 0x0000000087bf9600
+sstack push: 0x0000000087bf9800
+sstack push: 0x0000000087bf9a00
+sstack push: 0x0000000087bf9c00
+sstack push: 0x0000000087bf9e00
+ptr: 0x0000000087bf9e00
+ptr: 0x0000000087bf9c00
+ptr: 0x0000000087bf9a00
+ptr: 0x0000000087bf9800
+ptr: 0x0000000087bf9600
+ptr: 0x0000000087bf9400
+ptr: 0x0000000087bf9200
+ptr: 0x0000000087bf9000
+add slab
+slab objs: 0x0000000087bff000
+sstack push: 0x0000000087bff000
+sstack push: 0x0000000087bff200
+sstack push: 0x0000000087bff400
+sstack push: 0x0000000087bff600
+sstack push: 0x0000000087bff800
+sstack push: 0x0000000087bffa00
+sstack push: 0x0000000087bffc00
+sstack push: 0x0000000087bffe00
+ptr: 0x0000000087bffe00
+ptr: 0x0000000087bffc00
+ptr: 0x0000000087bffa00
+ptr: 0x0000000087bff800
+ptr: 0x0000000087bff600
+ptr: 0x0000000087bff400
+ptr: 0x0000000087bff200
+ptr: 0x0000000087bff000
+add slab
+slab objs: 0x0000000087bfd000
+sstack push: 0x0000000087bfd000
+sstack push: 0x0000000087bfd200
+sstack push: 0x0000000087bfd400
+sstack push: 0x0000000087bfd600
+sstack push: 0x0000000087bfd800
+sstack push: 0x0000000087bfda00
+sstack push: 0x0000000087bfdc00
+sstack push: 0x0000000087bfde00
+ptr: 0x0000000087bfde00
+ptr: 0x0000000087bfdc00
+ptr: 0x0000000087bfda00
+ptr: 0x0000000087bfd800
+ptr: 0x0000000087bfd600
+ptr: 0x0000000087bfd400
+ptr: 0x0000000087bfd200
+ptr: 0x0000000087bfd000
+add slab
+slab objs: 0x0000000087be3000
+sstack push: 0x0000000087be3000
+sstack push: 0x0000000087be3200
+sstack push: 0x0000000087be3400
+sstack push: 0x0000000087be3600
+sstack push: 0x0000000087be3800
+sstack push: 0x0000000087be3a00
+sstack push: 0x0000000087be3c00
+sstack push: 0x0000000087be3e00
+ptr: 0x0000000087be3e00
+ptr: 0x0000000087be3c00
+ptr: 0x0000000087be3a00
+ptr: 0x0000000087be3800
+ptr: 0x0000000087be3600
+ptr: 0x0000000087be3400
+ptr: 0x0000000087be3200
+ptr: 0x0000000087be3000
+add slab
+slab objs: 0x0000000087be1000
+sstack push: 0x0000000087be1000
+sstack push: 0x0000000087be1200
+sstack push: 0x0000000087be1400
+sstack push: 0x0000000087be1600
+sstack push: 0x0000000087be1800
+sstack push: 0x0000000087be1a00
+sstack push: 0x0000000087be1c00
+sstack push: 0x0000000087be1e00
+ptr: 0x0000000087be1e00
+ptr: 0x0000000087be1c00
+ptr: 0x0000000087be1a00
+ptr: 0x0000000087be1800
+ptr: 0x0000000087be1600
+ptr: 0x0000000087be1400
+ptr: 0x0000000087be1200
+ptr: 0x0000000087be1000
+add slab
+slab objs: 0x0000000087be7000
+sstack push: 0x0000000087be7000
+sstack push: 0x0000000087be7200
+sstack push: 0x0000000087be7400
+sstack push: 0x0000000087be7600
+sstack push: 0x0000000087be7800
+sstack push: 0x0000000087be7a00
+sstack push: 0x0000000087be7c00
+sstack push: 0x0000000087be7e00
+ptr: 0x0000000087be7e00
+ptr: 0x0000000087be7c00
+ptr: 0x0000000087be7a00
+ptr: 0x0000000087be7800
+ptr: 0x0000000087be7600
+ptr: 0x0000000087be7400
+ptr: 0x0000000087be7200
+ptr: 0x0000000087be7000
+add slab
+slab objs: 0x0000000087be5000
+sstack push: 0x0000000087be5000
+sstack push: 0x0000000087be5200
+sstack push: 0x0000000087be5400
+sstack push: 0x0000000087be5600
+sstack push: 0x0000000087be5800
+sstack push: 0x0000000087be5a00
+sstack push: 0x0000000087be5c00
+sstack push: 0x0000000087be5e00
+ptr: 0x0000000087be5e00
+ptr: 0x0000000087be5c00
+ptr: 0x0000000087be5a00
+ptr: 0x0000000087be5800
+ptr: 0x0000000087be5600
+ptr: 0x0000000087be5400
+ptr: 0x0000000087be5200
+ptr: 0x0000000087be5000
+add slab
+slab objs: 0x0000000087beb000
+sstack push: 0x0000000087beb000
+sstack push: 0x0000000087beb200
+sstack push: 0x0000000087beb400
+sstack push: 0x0000000087beb600
+sstack push: 0x0000000087beb800
+sstack push: 0x0000000087beba00
+sstack push: 0x0000000087bebc00
+sstack push: 0x0000000087bebe00
+ptr: 0x0000000087bebe00
+ptr: 0x0000000087bebc00
+ptr: 0x0000000087beba00
+ptr: 0x0000000087beb800
+ptr: 0x0000000087beb600
+ptr: 0x0000000087beb400
+ptr: 0x0000000087beb200
+ptr: 0x0000000087beb000
+add slab
+slab objs: 0x0000000087be9000
+sstack push: 0x0000000087be9000
+sstack push: 0x0000000087be9200
+sstack push: 0x0000000087be9400
+sstack push: 0x0000000087be9600
+sstack push: 0x0000000087be9800
+sstack push: 0x0000000087be9a00
+sstack push: 0x0000000087be9c00
+sstack push: 0x0000000087be9e00
+ptr: 0x0000000087be9e00
+ptr: 0x0000000087be9c00
+ptr: 0x0000000087be9a00
+ptr: 0x0000000087be9800
+ptr: 0x0000000087be9600
+ptr: 0x0000000087be9400
+ptr: 0x0000000087be9200
+ptr: 0x0000000087be9000
+add slab
+slab objs: 0x0000000087bef000
+sstack push: 0x0000000087bef000
+sstack push: 0x0000000087bef200
+sstack push: 0x0000000087bef400
+sstack push: 0x0000000087bef600
+sstack push: 0x0000000087bef800
+sstack push: 0x0000000087befa00
+sstack push: 0x0000000087befc00
+sstack push: 0x0000000087befe00
+ptr: 0x0000000087befe00
+ptr: 0x0000000087befc00
+ptr: 0x0000000087befa00
+ptr: 0x0000000087bef800
+ptr: 0x0000000087bef600
+ptr: 0x0000000087bef400
+ptr: 0x0000000087bef200
+ptr: 0x0000000087bef000
+add slab
+slab objs: 0x0000000087bed000
+sstack push: 0x0000000087bed000
+sstack push: 0x0000000087bed200
+sstack push: 0x0000000087bed400
+sstack push: 0x0000000087bed600
+sstack push: 0x0000000087bed800
+sstack push: 0x0000000087beda00
+sstack push: 0x0000000087bedc00
+sstack push: 0x0000000087bede00
+ptr: 0x0000000087bede00
+ptr: 0x0000000087bedc00
+ptr: 0x0000000087beda00
+ptr: 0x0000000087bed800
+ptr: 0x0000000087bed600
+ptr: 0x0000000087bed400
+ptr: 0x0000000087bed200
+ptr: 0x0000000087bed000
+add slab
+slab objs: 0x0000000087bd3000
+sstack push: 0x0000000087bd3000
+sstack push: 0x0000000087bd3200
+sstack push: 0x0000000087bd3400
+sstack push: 0x0000000087bd3600
+sstack push: 0x0000000087bd3800
+sstack push: 0x0000000087bd3a00
+sstack push: 0x0000000087bd3c00
+sstack push: 0x0000000087bd3e00
+ptr: 0x0000000087bd3e00
+ptr: 0x0000000087bd3c00
+ptr: 0x0000000087bd3a00
+ptr: 0x0000000087bd3800
+ptr: 0x0000000087bd3600
+ptr: 0x0000000087bd3400
+ptr: 0x0000000087bd3200
+ptr: 0x0000000087bd3000
+add slab
+slab objs: 0x0000000087bd1000
+sstack push: 0x0000000087bd1000
+sstack push: 0x0000000087bd1200
+sstack push: 0x0000000087bd1400
+sstack push: 0x0000000087bd1600
+sstack push: 0x0000000087bd1800
+sstack push: 0x0000000087bd1a00
+sstack push: 0x0000000087bd1c00
+sstack push: 0x0000000087bd1e00
+ptr: 0x0000000087bd1e00
+ptr: 0x0000000087bd1c00
+ptr: 0x0000000087bd1a00
+ptr: 0x0000000087bd1800
+ptr: 0x0000000087bd1600
+ptr: 0x0000000087bd1400
+ptr: 0x0000000087bd1200
+ptr: 0x0000000087bd1000
+add slab
+slab objs: 0x0000000087bd7000
+sstack push: 0x0000000087bd7000
+sstack push: 0x0000000087bd7200
+sstack push: 0x0000000087bd7400
+sstack push: 0x0000000087bd7600
+sstack push: 0x0000000087bd7800
+sstack push: 0x0000000087bd7a00
+sstack push: 0x0000000087bd7c00
+sstack push: 0x0000000087bd7e00
+ptr: 0x0000000087bd7e00
+ptr: 0x0000000087bd7c00
+ptr: 0x0000000087bd7a00
+ptr: 0x0000000087bd7800
+ptr: 0x0000000087bd7600
+ptr: 0x0000000087bd7400
+ptr: 0x0000000087bd7200
+ptr: 0x0000000087bd7000
+add slab
+slab objs: 0x0000000087bd5000
+sstack push: 0x0000000087bd5000
+sstack push: 0x0000000087bd5200
+sstack push: 0x0000000087bd5400
+sstack push: 0x0000000087bd5600
+sstack push: 0x0000000087bd5800
+sstack push: 0x0000000087bd5a00
+sstack push: 0x0000000087bd5c00
+sstack push: 0x0000000087bd5e00
+ptr: 0x0000000087bd5e00
+ptr: 0x0000000087bd5c00
+ptr: 0x0000000087bd5a00
+ptr: 0x0000000087bd5800
+ptr: 0x0000000087bd5600
+ptr: 0x0000000087bd5400
+ptr: 0x0000000087bd5200
+ptr: 0x0000000087bd5000
+add slab
+slab objs: 0x0000000087bdb000
+sstack push: 0x0000000087bdb000
+sstack push: 0x0000000087bdb200
+sstack push: 0x0000000087bdb400
+sstack push: 0x0000000087bdb600
+sstack push: 0x0000000087bdb800
+sstack push: 0x0000000087bdba00
+sstack push: 0x0000000087bdbc00
+sstack push: 0x0000000087bdbe00
+ptr: 0x0000000087bdbe00
+ptr: 0x0000000087bdbc00
+ptr: 0x0000000087bdba00
+ptr: 0x0000000087bdb800
+ptr: 0x0000000087bdb600
+ptr: 0x0000000087bdb400
+ptr: 0x0000000087bdb200
+ptr: 0x0000000087bdb000
+add slab
+slab objs: 0x0000000087bd9000
+sstack push: 0x0000000087bd9000
+sstack push: 0x0000000087bd9200
+sstack push: 0x0000000087bd9400
+sstack push: 0x0000000087bd9600
+sstack push: 0x0000000087bd9800
+sstack push: 0x0000000087bd9a00
+sstack push: 0x0000000087bd9c00
+sstack push: 0x0000000087bd9e00
+ptr: 0x0000000087bd9e00
+ptr: 0x0000000087bd9c00
+ptr: 0x0000000087bd9a00
+ptr: 0x0000000087bd9800
+ptr: 0x0000000087bd9600
+ptr: 0x0000000087bd9400
+ptr: 0x0000000087bd9200
+ptr: 0x0000000087bd9000
+add slab
+slab objs: 0x0000000087bdf000
+sstack push: 0x0000000087bdf000
+sstack push: 0x0000000087bdf200
+sstack push: 0x0000000087bdf400
+sstack push: 0x0000000087bdf600
+sstack push: 0x0000000087bdf800
+sstack push: 0x0000000087bdfa00
+sstack push: 0x0000000087bdfc00
+sstack push: 0x0000000087bdfe00
+ptr: 0x0000000087bdfe00
+ptr: 0x0000000087bdfc00
+ptr: 0x0000000087bdfa00
+ptr: 0x0000000087bdf800
+ptr: 0x0000000087bdf600
+ptr: 0x0000000087bdf400
+ptr: 0x0000000087bdf200
+ptr: 0x0000000087bdf000
+add slab
+slab objs: 0x0000000087bdd000
+sstack push: 0x0000000087bdd000
+sstack push: 0x0000000087bdd200
+sstack push: 0x0000000087bdd400
+sstack push: 0x0000000087bdd600
+sstack push: 0x0000000087bdd800
+sstack push: 0x0000000087bdda00
+sstack push: 0x0000000087bddc00
+sstack push: 0x0000000087bdde00
+ptr: 0x0000000087bdde00
+ptr: 0x0000000087bddc00
+ptr: 0x0000000087bdda00
+ptr: 0x0000000087bdd800
+ptr: 0x0000000087bdd600
+ptr: 0x0000000087bdd400
+ptr: 0x0000000087bdd200
+ptr: 0x0000000087bdd000
+add slab
+slab objs: 0x0000000087bc3000
+sstack push: 0x0000000087bc3000
+sstack push: 0x0000000087bc3200
+sstack push: 0x0000000087bc3400
+sstack push: 0x0000000087bc3600
+sstack push: 0x0000000087bc3800
+sstack push: 0x0000000087bc3a00
+sstack push: 0x0000000087bc3c00
+sstack push: 0x0000000087bc3e00
+ptr: 0x0000000087bc3e00
+ptr: 0x0000000087bc3c00
+ptr: 0x0000000087bc3a00
+ptr: 0x0000000087bc3800
+ptr: 0x0000000087bc3600
+ptr: 0x0000000087bc3400
+ptr: 0x0000000087bc3200
+ptr: 0x0000000087bc3000
+add slab
+slab objs: 0x0000000087bc1000
+sstack push: 0x0000000087bc1000
+sstack push: 0x0000000087bc1200
+sstack push: 0x0000000087bc1400
+sstack push: 0x0000000087bc1600
+sstack push: 0x0000000087bc1800
+sstack push: 0x0000000087bc1a00
+sstack push: 0x0000000087bc1c00
+sstack push: 0x0000000087bc1e00
+ptr: 0x0000000087bc1e00
+ptr: 0x0000000087bc1c00
+ptr: 0x0000000087bc1a00
+ptr: 0x0000000087bc1800
+ptr: 0x0000000087bc1600
+ptr: 0x0000000087bc1400
+ptr: 0x0000000087bc1200
+ptr: 0x0000000087bc1000
+add slab
+slab objs: 0x0000000087bc7000
+sstack push: 0x0000000087bc7000
+sstack push: 0x0000000087bc7200
+sstack push: 0x0000000087bc7400
+sstack push: 0x0000000087bc7600
+sstack push: 0x0000000087bc7800
+sstack push: 0x0000000087bc7a00
+sstack push: 0x0000000087bc7c00
+sstack push: 0x0000000087bc7e00
+ptr: 0x0000000087bc7e00
+ptr: 0x0000000087bc7c00
+ptr: 0x0000000087bc7a00
+ptr: 0x0000000087bc7800
+ptr: 0x0000000087bc7600
+ptr: 0x0000000087bc7400
+ptr: 0x0000000087bc7200
+ptr: 0x0000000087bc7000
+add slab
+slab objs: 0x0000000087bc5000
+sstack push: 0x0000000087bc5000
+sstack push: 0x0000000087bc5200
+sstack push: 0x0000000087bc5400
+sstack push: 0x0000000087bc5600
+sstack push: 0x0000000087bc5800
+sstack push: 0x0000000087bc5a00
+sstack push: 0x0000000087bc5c00
+sstack push: 0x0000000087bc5e00
+ptr: 0x0000000087bc5e00
+ptr: 0x0000000087bc5c00
+ptr: 0x0000000087bc5a00
+ptr: 0x0000000087bc5800
+ptr: 0x0000000087bc5600
+ptr: 0x0000000087bc5400
+ptr: 0x0000000087bc5200
+ptr: 0x0000000087bc5000
+add slab
+slab objs: 0x0000000087bcb000
+sstack push: 0x0000000087bcb000
+sstack push: 0x0000000087bcb200
+sstack push: 0x0000000087bcb400
+sstack push: 0x0000000087bcb600
+sstack push: 0x0000000087bcb800
+sstack push: 0x0000000087bcba00
+sstack push: 0x0000000087bcbc00
+sstack push: 0x0000000087bcbe00
+ptr: 0x0000000087bcbe00
+ptr: 0x0000000087bcbc00
+ptr: 0x0000000087bcba00
+ptr: 0x0000000087bcb800
+ptr: 0x0000000087bcb600
+ptr: 0x0000000087bcb400
+ptr: 0x0000000087bcb200
+ptr: 0x0000000087bcb000
+add slab
+slab objs: 0x0000000087bc9000
+sstack push: 0x0000000087bc9000
+sstack push: 0x0000000087bc9200
+sstack push: 0x0000000087bc9400
+sstack push: 0x0000000087bc9600
+sstack push: 0x0000000087bc9800
+sstack push: 0x0000000087bc9a00
+sstack push: 0x0000000087bc9c00
+sstack push: 0x0000000087bc9e00
+ptr: 0x0000000087bc9e00
+ptr: 0x0000000087bc9c00
+ptr: 0x0000000087bc9a00
+ptr: 0x0000000087bc9800
+ptr: 0x0000000087bc9600
+ptr: 0x0000000087bc9400
+ptr: 0x0000000087bc9200
+ptr: 0x0000000087bc9000
+add slab
+slab objs: 0x0000000087bcf000
+sstack push: 0x0000000087bcf000
+sstack push: 0x0000000087bcf200
+sstack push: 0x0000000087bcf400
+sstack push: 0x0000000087bcf600
+sstack push: 0x0000000087bcf800
+sstack push: 0x0000000087bcfa00
+sstack push: 0x0000000087bcfc00
+sstack push: 0x0000000087bcfe00
+ptr: 0x0000000087bcfe00
+ptr: 0x0000000087bcfc00
+ptr: 0x0000000087bcfa00
+ptr: 0x0000000087bcf800
+ptr: 0x0000000087bcf600
+ptr: 0x0000000087bcf400
+ptr: 0x0000000087bcf200
+ptr: 0x0000000087bcf000
+add slab
+slab objs: 0x0000000087bcd000
+sstack push: 0x0000000087bcd000
+sstack push: 0x0000000087bcd200
+sstack push: 0x0000000087bcd400
+sstack push: 0x0000000087bcd600
+sstack push: 0x0000000087bcd800
+sstack push: 0x0000000087bcda00
+sstack push: 0x0000000087bcdc00
+sstack push: 0x0000000087bcde00
+ptr: 0x0000000087bcde00
+ptr: 0x0000000087bcdc00
+ptr: 0x0000000087bcda00
+ptr: 0x0000000087bcd800
+ptr: 0x0000000087bcd600
+ptr: 0x0000000087bcd400
+ptr: 0x0000000087bcd200
+ptr: 0x0000000087bcd000
+add slab
+slab objs: 0x0000000087bb3000
+sstack push: 0x0000000087bb3000
+sstack push: 0x0000000087bb3200
+sstack push: 0x0000000087bb3400
+sstack push: 0x0000000087bb3600
+sstack push: 0x0000000087bb3800
+sstack push: 0x0000000087bb3a00
+sstack push: 0x0000000087bb3c00
+sstack push: 0x0000000087bb3e00
+ptr: 0x0000000087bb3e00
+ptr: 0x0000000087bb3c00
+ptr: 0x0000000087bb3a00
+ptr: 0x0000000087bb3800
+ptr: 0x0000000087bb3600
+ptr: 0x0000000087bb3400
+ptr: 0x0000000087bb3200
+ptr: 0x0000000087bb3000
+add slab
+slab objs: 0x0000000087bb1000
+sstack push: 0x0000000087bb1000
+sstack push: 0x0000000087bb1200
+sstack push: 0x0000000087bb1400
+sstack push: 0x0000000087bb1600
+sstack push: 0x0000000087bb1800
+sstack push: 0x0000000087bb1a00
+sstack push: 0x0000000087bb1c00
+sstack push: 0x0000000087bb1e00
+ptr: 0x0000000087bb1e00
+ptr: 0x0000000087bb1c00
+ptr: 0x0000000087bb1a00
+ptr: 0x0000000087bb1800
+ptr: 0x0000000087bb1600
+ptr: 0x0000000087bb1400
+ptr: 0x0000000087bb1200
+ptr: 0x0000000087bb1000
+add slab
+slab objs: 0x0000000087bb7000
+sstack push: 0x0000000087bb7000
+sstack push: 0x0000000087bb7200
+sstack push: 0x0000000087bb7400
+sstack push: 0x0000000087bb7600
+sstack push: 0x0000000087bb7800
+sstack push: 0x0000000087bb7a00
+sstack push: 0x0000000087bb7c00
+sstack push: 0x0000000087bb7e00
+ptr: 0x0000000087bb7e00
+ptr: 0x0000000087bb7c00
+ptr: 0x0000000087bb7a00
+ptr: 0x0000000087bb7800
+ptr: 0x0000000087bb7600
+ptr: 0x0000000087bb7400
+ptr: 0x0000000087bb7200
+ptr: 0x0000000087bb7000
+add slab
+slab objs: 0x0000000087bb5000
+sstack push: 0x0000000087bb5000
+sstack push: 0x0000000087bb5200
+sstack push: 0x0000000087bb5400
+sstack push: 0x0000000087bb5600
+sstack push: 0x0000000087bb5800
+sstack push: 0x0000000087bb5a00
+sstack push: 0x0000000087bb5c00
+sstack push: 0x0000000087bb5e00
+ptr: 0x0000000087bb5e00
+ptr: 0x0000000087bb5c00
+ptr: 0x0000000087bb5a00
+ptr: 0x0000000087bb5800
+ptr: 0x0000000087bb5600
+ptr: 0x0000000087bb5400
+ptr: 0x0000000087bb5200
+ptr: 0x0000000087bb5000
+add slab
+slab objs: 0x0000000087bbb000
+sstack push: 0x0000000087bbb000
+sstack push: 0x0000000087bbb200
+sstack push: 0x0000000087bbb400
+sstack push: 0x0000000087bbb600
+sstack push: 0x0000000087bbb800
+sstack push: 0x0000000087bbba00
+sstack push: 0x0000000087bbbc00
+sstack push: 0x0000000087bbbe00
+ptr: 0x0000000087bbbe00
+ptr: 0x0000000087bbbc00
+ptr: 0x0000000087bbba00
+ptr: 0x0000000087bbb800
+ptr: 0x0000000087bbb600
+ptr: 0x0000000087bbb400
+ptr: 0x0000000087bbb200
+ptr: 0x0000000087bbb000
+add slab
+slab objs: 0x0000000087bb9000
+sstack push: 0x0000000087bb9000
+sstack push: 0x0000000087bb9200
+sstack push: 0x0000000087bb9400
+sstack push: 0x0000000087bb9600
+sstack push: 0x0000000087bb9800
+sstack push: 0x0000000087bb9a00
+sstack push: 0x0000000087bb9c00
+sstack push: 0x0000000087bb9e00
+ptr: 0x0000000087bb9e00
+ptr: 0x0000000087bb9c00
+ptr: 0x0000000087bb9a00
+ptr: 0x0000000087bb9800
+ptr: 0x0000000087bb9600
+ptr: 0x0000000087bb9400
+ptr: 0x0000000087bb9200
+ptr: 0x0000000087bb9000
+add slab
+slab objs: 0x0000000087bbf000
+sstack push: 0x0000000087bbf000
+sstack push: 0x0000000087bbf200
+sstack push: 0x0000000087bbf400
+sstack push: 0x0000000087bbf600
+sstack push: 0x0000000087bbf800
+sstack push: 0x0000000087bbfa00
+sstack push: 0x0000000087bbfc00
+sstack push: 0x0000000087bbfe00
+ptr: 0x0000000087bbfe00
+ptr: 0x0000000087bbfc00
+ptr: 0x0000000087bbfa00
+ptr: 0x0000000087bbf800
+ptr: 0x0000000087bbf600
+ptr: 0x0000000087bbf400
+ptr: 0x0000000087bbf200
+ptr: 0x0000000087bbf000
+add slab
+slab objs: 0x0000000087bbd000
+sstack push: 0x0000000087bbd000
+sstack push: 0x0000000087bbd200
+sstack push: 0x0000000087bbd400
+sstack push: 0x0000000087bbd600
+sstack push: 0x0000000087bbd800
+sstack push: 0x0000000087bbda00
+sstack push: 0x0000000087bbdc00
+sstack push: 0x0000000087bbde00
+ptr: 0x0000000087bbde00
+ptr: 0x0000000087bbdc00
+ptr: 0x0000000087bbda00
+ptr: 0x0000000087bbd800
+ptr: 0x0000000087bbd600
+ptr: 0x0000000087bbd400
+ptr: 0x0000000087bbd200
+ptr: 0x0000000087bbd000
+add slab
+slab objs: 0x0000000087ba3000
+sstack push: 0x0000000087ba3000
+sstack push: 0x0000000087ba3200
+sstack push: 0x0000000087ba3400
+sstack push: 0x0000000087ba3600
+sstack push: 0x0000000087ba3800
+sstack push: 0x0000000087ba3a00
+sstack push: 0x0000000087ba3c00
+sstack push: 0x0000000087ba3e00
+ptr: 0x0000000087ba3e00
+ptr: 0x0000000087ba3c00
+ptr: 0x0000000087ba3a00
+ptr: 0x0000000087ba3800
+ptr: 0x0000000087ba3600
+ptr: 0x0000000087ba3400
+ptr: 0x0000000087ba3200
+ptr: 0x0000000087ba3000
+add slab
+slab objs: 0x0000000087ba1000
+sstack push: 0x0000000087ba1000
+sstack push: 0x0000000087ba1200
+sstack push: 0x0000000087ba1400
+sstack push: 0x0000000087ba1600
+sstack push: 0x0000000087ba1800
+sstack push: 0x0000000087ba1a00
+sstack push: 0x0000000087ba1c00
+sstack push: 0x0000000087ba1e00
+ptr: 0x0000000087ba1e00
+ptr: 0x0000000087ba1c00
+ptr: 0x0000000087ba1a00
+ptr: 0x0000000087ba1800
+ptr: 0x0000000087ba1600
+ptr: 0x0000000087ba1400
+ptr: 0x0000000087ba1200
+ptr: 0x0000000087ba1000
+add slab
+slab objs: 0x0000000087ba7000
+sstack push: 0x0000000087ba7000
+sstack push: 0x0000000087ba7200
+sstack push: 0x0000000087ba7400
+sstack push: 0x0000000087ba7600
+sstack push: 0x0000000087ba7800
+sstack push: 0x0000000087ba7a00
+sstack push: 0x0000000087ba7c00
+sstack push: 0x0000000087ba7e00
+ptr: 0x0000000087ba7e00
+ptr: 0x0000000087ba7c00
+ptr: 0x0000000087ba7a00
+ptr: 0x0000000087ba7800
+ptr: 0x0000000087ba7600
+ptr: 0x0000000087ba7400
+ptr: 0x0000000087ba7200
+ptr: 0x0000000087ba7000
+add slab
+slab objs: 0x0000000087ba5000
+sstack push: 0x0000000087ba5000
+sstack push: 0x0000000087ba5200
+sstack push: 0x0000000087ba5400
+sstack push: 0x0000000087ba5600
+sstack push: 0x0000000087ba5800
+sstack push: 0x0000000087ba5a00
+sstack push: 0x0000000087ba5c00
+sstack push: 0x0000000087ba5e00
+ptr: 0x0000000087ba5e00
+ptr: 0x0000000087ba5c00
+ptr: 0x0000000087ba5a00
+ptr: 0x0000000087ba5800
+ptr: 0x0000000087ba5600
+ptr: 0x0000000087ba5400
+ptr: 0x0000000087ba5200
+ptr: 0x0000000087ba5000
+add slab
+slab objs: 0x0000000087bab000
+sstack push: 0x0000000087bab000
+sstack push: 0x0000000087bab200
+sstack push: 0x0000000087bab400
+sstack push: 0x0000000087bab600
+sstack push: 0x0000000087bab800
+sstack push: 0x0000000087baba00
+sstack push: 0x0000000087babc00
+sstack push: 0x0000000087babe00
+ptr: 0x0000000087babe00
+ptr: 0x0000000087babc00
+ptr: 0x0000000087baba00
+ptr: 0x0000000087bab800
+ptr: 0x0000000087bab600
+ptr: 0x0000000087bab400
+ptr: 0x0000000087bab200
+ptr: 0x0000000087bab000
+add slab
+slab objs: 0x0000000087ba9000
+sstack push: 0x0000000087ba9000
+sstack push: 0x0000000087ba9200
+sstack push: 0x0000000087ba9400
+sstack push: 0x0000000087ba9600
+sstack push: 0x0000000087ba9800
+sstack push: 0x0000000087ba9a00
+sstack push: 0x0000000087ba9c00
+sstack push: 0x0000000087ba9e00
+ptr: 0x0000000087ba9e00
+ptr: 0x0000000087ba9c00
+ptr: 0x0000000087ba9a00
+ptr: 0x0000000087ba9800
+ptr: 0x0000000087ba9600
+ptr: 0x0000000087ba9400
+ptr: 0x0000000087ba9200
+ptr: 0x0000000087ba9000
+add slab
+slab objs: 0x0000000087baf000
+sstack push: 0x0000000087baf000
+sstack push: 0x0000000087baf200
+sstack push: 0x0000000087baf400
+sstack push: 0x0000000087baf600
+sstack push: 0x0000000087baf800
+sstack push: 0x0000000087bafa00
+sstack push: 0x0000000087bafc00
+sstack push: 0x0000000087bafe00
+ptr: 0x0000000087bafe00
+ptr: 0x0000000087bafc00
+ptr: 0x0000000087bafa00
+ptr: 0x0000000087baf800
+ptr: 0x0000000087baf600
+ptr: 0x0000000087baf400
+ptr: 0x0000000087baf200
+ptr: 0x0000000087baf000
+add slab
+slab objs: 0x0000000087bad000
+sstack push: 0x0000000087bad000
+sstack push: 0x0000000087bad200
+sstack push: 0x0000000087bad400
+sstack push: 0x0000000087bad600
+sstack push: 0x0000000087bad800
+sstack push: 0x0000000087bada00
+sstack push: 0x0000000087badc00
+sstack push: 0x0000000087bade00
+ptr: 0x0000000087bade00
+ptr: 0x0000000087badc00
+ptr: 0x0000000087bada00
+ptr: 0x0000000087bad800
+ptr: 0x0000000087bad600
+ptr: 0x0000000087bad400
+ptr: 0x0000000087bad200
+ptr: 0x0000000087bad000
+add slab
+slab objs: 0x0000000087b93000
+sstack push: 0x0000000087b93000
+sstack push: 0x0000000087b93200
+sstack push: 0x0000000087b93400
+sstack push: 0x0000000087b93600
+sstack push: 0x0000000087b93800
+sstack push: 0x0000000087b93a00
+sstack push: 0x0000000087b93c00
+sstack push: 0x0000000087b93e00
+ptr: 0x0000000087b93e00
+ptr: 0x0000000087b93c00
+ptr: 0x0000000087b93a00
+ptr: 0x0000000087b93800
+ptr: 0x0000000087b93600
+ptr: 0x0000000087b93400
+ptr: 0x0000000087b93200
+ptr: 0x0000000087b93000
+add slab
+slab objs: 0x0000000087b91000
+sstack push: 0x0000000087b91000
+sstack push: 0x0000000087b91200
+sstack push: 0x0000000087b91400
+sstack push: 0x0000000087b91600
+sstack push: 0x0000000087b91800
+sstack push: 0x0000000087b91a00
+sstack push: 0x0000000087b91c00
+sstack push: 0x0000000087b91e00
+ptr: 0x0000000087b91e00
+ptr: 0x0000000087b91c00
+ptr: 0x0000000087b91a00
+ptr: 0x0000000087b91800
+ptr: 0x0000000087b91600
+ptr: 0x0000000087b91400
+ptr: 0x0000000087b91200
+ptr: 0x0000000087b91000
+add slab
+slab objs: 0x0000000087b97000
+sstack push: 0x0000000087b97000
+sstack push: 0x0000000087b97200
+sstack push: 0x0000000087b97400
+sstack push: 0x0000000087b97600
+sstack push: 0x0000000087b97800
+sstack push: 0x0000000087b97a00
+sstack push: 0x0000000087b97c00
+sstack push: 0x0000000087b97e00
+ptr: 0x0000000087b97e00
+ptr: 0x0000000087b97c00
+ptr: 0x0000000087b97a00
+ptr: 0x0000000087b97800
+ptr: 0x0000000087b97600
+ptr: 0x0000000087b97400
+ptr: 0x0000000087b97200
+ptr: 0x0000000087b97000
+add slab
+slab objs: 0x0000000087b95000
+sstack push: 0x0000000087b95000
+sstack push: 0x0000000087b95200
+sstack push: 0x0000000087b95400
+sstack push: 0x0000000087b95600
+sstack push: 0x0000000087b95800
+sstack push: 0x0000000087b95a00
+sstack push: 0x0000000087b95c00
+sstack push: 0x0000000087b95e00
+ptr: 0x0000000087b95e00
+ptr: 0x0000000087b95c00
+ptr: 0x0000000087b95a00
+ptr: 0x0000000087b95800
+ptr: 0x0000000087b95600
+ptr: 0x0000000087b95400
+ptr: 0x0000000087b95200
+ptr: 0x0000000087b95000
+add slab
+slab objs: 0x0000000087b9b000
+sstack push: 0x0000000087b9b000
+sstack push: 0x0000000087b9b200
+sstack push: 0x0000000087b9b400
+sstack push: 0x0000000087b9b600
+sstack push: 0x0000000087b9b800
+sstack push: 0x0000000087b9ba00
+sstack push: 0x0000000087b9bc00
+sstack push: 0x0000000087b9be00
+ptr: 0x0000000087b9be00
+ptr: 0x0000000087b9bc00
+ptr: 0x0000000087b9ba00
+ptr: 0x0000000087b9b800
+ptr: 0x0000000087b9b600
+ptr: 0x0000000087b9b400
+ptr: 0x0000000087b9b200
+ptr: 0x0000000087b9b000
+add slab
+slab objs: 0x0000000087b99000
+sstack push: 0x0000000087b99000
+sstack push: 0x0000000087b99200
+sstack push: 0x0000000087b99400
+sstack push: 0x0000000087b99600
+sstack push: 0x0000000087b99800
+sstack push: 0x0000000087b99a00
+sstack push: 0x0000000087b99c00
+sstack push: 0x0000000087b99e00
+ptr: 0x0000000087b99e00
+ptr: 0x0000000087b99c00
+ptr: 0x0000000087b99a00
+ptr: 0x0000000087b99800
+ptr: 0x0000000087b99600
+ptr: 0x0000000087b99400
+ptr: 0x0000000087b99200
+ptr: 0x0000000087b99000
+add slab
+slab objs: 0x0000000087b9f000
+sstack push: 0x0000000087b9f000
+sstack push: 0x0000000087b9f200
+sstack push: 0x0000000087b9f400
+sstack push: 0x0000000087b9f600
+sstack push: 0x0000000087b9f800
+sstack push: 0x0000000087b9fa00
+sstack push: 0x0000000087b9fc00
+sstack push: 0x0000000087b9fe00
+ptr: 0x0000000087b9fe00
+ptr: 0x0000000087b9fc00
+ptr: 0x0000000087b9fa00
+ptr: 0x0000000087b9f800
+ptr: 0x0000000087b9f600
+ptr: 0x0000000087b9f400
+ptr: 0x0000000087b9f200
+ptr: 0x0000000087b9f000
+add slab
+slab objs: 0x0000000087b9d000
+sstack push: 0x0000000087b9d000
+sstack push: 0x0000000087b9d200
+sstack push: 0x0000000087b9d400
+sstack push: 0x0000000087b9d600
+sstack push: 0x0000000087b9d800
+sstack push: 0x0000000087b9da00
+sstack push: 0x0000000087b9dc00
+sstack push: 0x0000000087b9de00
+ptr: 0x0000000087b9de00
+ptr: 0x0000000087b9dc00
+ptr: 0x0000000087b9da00
+ptr: 0x0000000087b9d800
+ptr: 0x0000000087b9d600
+ptr: 0x0000000087b9d400
+ptr: 0x0000000087b9d200
+ptr: 0x0000000087b9d000
+add slab
+slab objs: 0x0000000087b83000
+sstack push: 0x0000000087b83000
+sstack push: 0x0000000087b83200
+sstack push: 0x0000000087b83400
+sstack push: 0x0000000087b83600
+sstack push: 0x0000000087b83800
+sstack push: 0x0000000087b83a00
+sstack push: 0x0000000087b83c00
+sstack push: 0x0000000087b83e00
+ptr: 0x0000000087b83e00
+ptr: 0x0000000087b83c00
+ptr: 0x0000000087b83a00
+ptr: 0x0000000087b83800
+ptr: 0x0000000087b83600
+ptr: 0x0000000087b83400
+ptr: 0x0000000087b83200
+ptr: 0x0000000087b83000
+add slab
+slab objs: 0x0000000087b81000
+sstack push: 0x0000000087b81000
+sstack push: 0x0000000087b81200
+sstack push: 0x0000000087b81400
+sstack push: 0x0000000087b81600
+sstack push: 0x0000000087b81800
+sstack push: 0x0000000087b81a00
+sstack push: 0x0000000087b81c00
+sstack push: 0x0000000087b81e00
+ptr: 0x0000000087b81e00
+ptr: 0x0000000087b81c00
+ptr: 0x0000000087b81a00
+ptr: 0x0000000087b81800
+ptr: 0x0000000087b81600
+ptr: 0x0000000087b81400
+ptr: 0x0000000087b81200
+ptr: 0x0000000087b81000
+add slab
+slab objs: 0x0000000087b87000
+sstack push: 0x0000000087b87000
+sstack push: 0x0000000087b87200
+sstack push: 0x0000000087b87400
+sstack push: 0x0000000087b87600
+sstack push: 0x0000000087b87800
+sstack push: 0x0000000087b87a00
+sstack push: 0x0000000087b87c00
+sstack push: 0x0000000087b87e00
+ptr: 0x0000000087b87e00
+ptr: 0x0000000087b87c00
+ptr: 0x0000000087b87a00
+ptr: 0x0000000087b87800
+ptr: 0x0000000087b87600
+ptr: 0x0000000087b87400
+ptr: 0x0000000087b87200
+ptr: 0x0000000087b87000
+add slab
+slab objs: 0x0000000087b85000
+sstack push: 0x0000000087b85000
+sstack push: 0x0000000087b85200
+sstack push: 0x0000000087b85400
+sstack push: 0x0000000087b85600
+sstack push: 0x0000000087b85800
+sstack push: 0x0000000087b85a00
+sstack push: 0x0000000087b85c00
+sstack push: 0x0000000087b85e00
+ptr: 0x0000000087b85e00
+ptr: 0x0000000087b85c00
+ptr: 0x0000000087b85a00
+ptr: 0x0000000087b85800
+ptr: 0x0000000087b85600
+ptr: 0x0000000087b85400
+ptr: 0x0000000087b85200
+ptr: 0x0000000087b85000
+add slab
+slab objs: 0x0000000087b8b000
+sstack push: 0x0000000087b8b000
+sstack push: 0x0000000087b8b200
+sstack push: 0x0000000087b8b400
+sstack push: 0x0000000087b8b600
+sstack push: 0x0000000087b8b800
+sstack push: 0x0000000087b8ba00
+sstack push: 0x0000000087b8bc00
+sstack push: 0x0000000087b8be00
+ptr: 0x0000000087b8be00
+ptr: 0x0000000087b8bc00
+ptr: 0x0000000087b8ba00
+ptr: 0x0000000087b8b800
+ptr: 0x0000000087b8b600
+ptr: 0x0000000087b8b400
+ptr: 0x0000000087b8b200
+ptr: 0x0000000087b8b000
+add slab
+slab objs: 0x0000000087b89000
+sstack push: 0x0000000087b89000
+sstack push: 0x0000000087b89200
+sstack push: 0x0000000087b89400
+sstack push: 0x0000000087b89600
+sstack push: 0x0000000087b89800
+sstack push: 0x0000000087b89a00
+sstack push: 0x0000000087b89c00
+sstack push: 0x0000000087b89e00
+ptr: 0x0000000087b89e00
+ptr: 0x0000000087b89c00
+ptr: 0x0000000087b89a00
+ptr: 0x0000000087b89800
+ptr: 0x0000000087b89600
+ptr: 0x0000000087b89400
+ptr: 0x0000000087b89200
+ptr: 0x0000000087b89000
+add slab
+slab objs: 0x0000000087b8f000
+sstack push: 0x0000000087b8f000
+sstack push: 0x0000000087b8f200
+sstack push: 0x0000000087b8f400
+sstack push: 0x0000000087b8f600
+sstack push: 0x0000000087b8f800
+sstack push: 0x0000000087b8fa00
+sstack push: 0x0000000087b8fc00
+sstack push: 0x0000000087b8fe00
+ptr: 0x0000000087b8fe00
+ptr: 0x0000000087b8fc00
+ptr: 0x0000000087b8fa00
+ptr: 0x0000000087b8f800
+ptr: 0x0000000087b8f600
+ptr: 0x0000000087b8f400
+ptr: 0x0000000087b8f200
+ptr: 0x0000000087b8f000
+add slab
+slab objs: 0x0000000087b8d000
+sstack push: 0x0000000087b8d000
+sstack push: 0x0000000087b8d200
+sstack push: 0x0000000087b8d400
+sstack push: 0x0000000087b8d600
+sstack push: 0x0000000087b8d800
+sstack push: 0x0000000087b8da00
+sstack push: 0x0000000087b8dc00
+sstack push: 0x0000000087b8de00
+ptr: 0x0000000087b8de00
+ptr: 0x0000000087b8dc00
+ptr: 0x0000000087b8da00
+ptr: 0x0000000087b8d800
+ptr: 0x0000000087b8d600
+ptr: 0x0000000087b8d400
+ptr: 0x0000000087b8d200
+ptr: 0x0000000087b8d000
+add slab
+slab objs: 0x0000000087b73000
+sstack push: 0x0000000087b73000
+sstack push: 0x0000000087b73200
+sstack push: 0x0000000087b73400
+sstack push: 0x0000000087b73600
+sstack push: 0x0000000087b73800
+sstack push: 0x0000000087b73a00
+sstack push: 0x0000000087b73c00
+sstack push: 0x0000000087b73e00
+ptr: 0x0000000087b73e00
+ptr: 0x0000000087b73c00
+ptr: 0x0000000087b73a00
+ptr: 0x0000000087b73800
+ptr: 0x0000000087b73600
+ptr: 0x0000000087b73400
+ptr: 0x0000000087b73200
+ptr: 0x0000000087b73000
+add slab
+slab objs: 0x0000000087b71000
+sstack push: 0x0000000087b71000
+sstack push: 0x0000000087b71200
+sstack push: 0x0000000087b71400
+sstack push: 0x0000000087b71600
+sstack push: 0x0000000087b71800
+sstack push: 0x0000000087b71a00
+sstack push: 0x0000000087b71c00
+sstack push: 0x0000000087b71e00
+ptr: 0x0000000087b71e00
+ptr: 0x0000000087b71c00
+ptr: 0x0000000087b71a00
+ptr: 0x0000000087b71800
+ptr: 0x0000000087b71600
+ptr: 0x0000000087b71400
+ptr: 0x0000000087b71200
+ptr: 0x0000000087b71000
+add slab
+slab objs: 0x0000000087b77000
+sstack push: 0x0000000087b77000
+sstack push: 0x0000000087b77200
+sstack push: 0x0000000087b77400
+sstack push: 0x0000000087b77600
+sstack push: 0x0000000087b77800
+sstack push: 0x0000000087b77a00
+sstack push: 0x0000000087b77c00
+sstack push: 0x0000000087b77e00
+ptr: 0x0000000087b77e00
+ptr: 0x0000000087b77c00
+ptr: 0x0000000087b77a00
+ptr: 0x0000000087b77800
+ptr: 0x0000000087b77600
+ptr: 0x0000000087b77400
+ptr: 0x0000000087b77200
+ptr: 0x0000000087b77000
+add slab
+slab objs: 0x0000000087b75000
+sstack push: 0x0000000087b75000
+sstack push: 0x0000000087b75200
+sstack push: 0x0000000087b75400
+sstack push: 0x0000000087b75600
+sstack push: 0x0000000087b75800
+sstack push: 0x0000000087b75a00
+sstack push: 0x0000000087b75c00
+sstack push: 0x0000000087b75e00
+ptr: 0x0000000087b75e00
+ptr: 0x0000000087b75c00
+ptr: 0x0000000087b75a00
+ptr: 0x0000000087b75800
+ptr: 0x0000000087b75600
+ptr: 0x0000000087b75400
+ptr: 0x0000000087b75200
+ptr: 0x0000000087b75000
+add slab
+slab objs: 0x0000000087b7b000
+sstack push: 0x0000000087b7b000
+sstack push: 0x0000000087b7b200
+sstack push: 0x0000000087b7b400
+sstack push: 0x0000000087b7b600
+sstack push: 0x0000000087b7b800
+sstack push: 0x0000000087b7ba00
+sstack push: 0x0000000087b7bc00
+sstack push: 0x0000000087b7be00
+ptr: 0x0000000087b7be00
+ptr: 0x0000000087b7bc00
+ptr: 0x0000000087b7ba00
+ptr: 0x0000000087b7b800
+ptr: 0x0000000087b7b600
+ptr: 0x0000000087b7b400
+ptr: 0x0000000087b7b200
+ptr: 0x0000000087b7b000
+add slab
+slab objs: 0x0000000087b79000
+sstack push: 0x0000000087b79000
+sstack push: 0x0000000087b79200
+sstack push: 0x0000000087b79400
+sstack push: 0x0000000087b79600
+sstack push: 0x0000000087b79800
+sstack push: 0x0000000087b79a00
+sstack push: 0x0000000087b79c00
+sstack push: 0x0000000087b79e00
+ptr: 0x0000000087b79e00
+ptr: 0x0000000087b79c00
+ptr: 0x0000000087b79a00
+ptr: 0x0000000087b79800
+ptr: 0x0000000087b79600
+ptr: 0x0000000087b79400
+ptr: 0x0000000087b79200
+ptr: 0x0000000087b79000
+add slab
+slab objs: 0x0000000087b7f000
+sstack push: 0x0000000087b7f000
+sstack push: 0x0000000087b7f200
+sstack push: 0x0000000087b7f400
+sstack push: 0x0000000087b7f600
+sstack push: 0x0000000087b7f800
+sstack push: 0x0000000087b7fa00
+sstack push: 0x0000000087b7fc00
+sstack push: 0x0000000087b7fe00
+ptr: 0x0000000087b7fe00
+ptr: 0x0000000087b7fc00
+ptr: 0x0000000087b7fa00
+ptr: 0x0000000087b7f800
+ptr: 0x0000000087b7f600
+ptr: 0x0000000087b7f400
+ptr: 0x0000000087b7f200
+ptr: 0x0000000087b7f000
+add slab
+slab objs: 0x0000000087b7d000
+sstack push: 0x0000000087b7d000
+sstack push: 0x0000000087b7d200
+sstack push: 0x0000000087b7d400
+sstack push: 0x0000000087b7d600
+sstack push: 0x0000000087b7d800
+sstack push: 0x0000000087b7da00
+sstack push: 0x0000000087b7dc00
+sstack push: 0x0000000087b7de00
+ptr: 0x0000000087b7de00
+ptr: 0x0000000087b7dc00
+ptr: 0x0000000087b7da00
+ptr: 0x0000000087b7d800
+ptr: 0x0000000087b7d600
+ptr: 0x0000000087b7d400
+ptr: 0x0000000087b7d200
+ptr: 0x0000000087b7d000
+add slab
+slab objs: 0x0000000087b63000
+sstack push: 0x0000000087b63000
+sstack push: 0x0000000087b63200
+sstack push: 0x0000000087b63400
+sstack push: 0x0000000087b63600
+sstack push: 0x0000000087b63800
+sstack push: 0x0000000087b63a00
+sstack push: 0x0000000087b63c00
+sstack push: 0x0000000087b63e00
+ptr: 0x0000000087b63e00
+ptr: 0x0000000087b63c00
+ptr: 0x0000000087b63a00
+ptr: 0x0000000087b63800
+ptr: 0x0000000087b63600
+ptr: 0x0000000087b63400
+ptr: 0x0000000087b63200
+ptr: 0x0000000087b63000
+add slab
+slab objs: 0x0000000087b61000
+sstack push: 0x0000000087b61000
+sstack push: 0x0000000087b61200
+sstack push: 0x0000000087b61400
+sstack push: 0x0000000087b61600
+sstack push: 0x0000000087b61800
+sstack push: 0x0000000087b61a00
+sstack push: 0x0000000087b61c00
+sstack push: 0x0000000087b61e00
+ptr: 0x0000000087b61e00
+ptr: 0x0000000087b61c00
+ptr: 0x0000000087b61a00
+ptr: 0x0000000087b61800
+ptr: 0x0000000087b61600
+ptr: 0x0000000087b61400
+ptr: 0x0000000087b61200
+ptr: 0x0000000087b61000
+add slab
+slab objs: 0x0000000087b67000
+sstack push: 0x0000000087b67000
+sstack push: 0x0000000087b67200
+sstack push: 0x0000000087b67400
+sstack push: 0x0000000087b67600
+sstack push: 0x0000000087b67800
+sstack push: 0x0000000087b67a00
+sstack push: 0x0000000087b67c00
+sstack push: 0x0000000087b67e00
+ptr: 0x0000000087b67e00
+ptr: 0x0000000087b67c00
+ptr: 0x0000000087b67a00
+ptr: 0x0000000087b67800
+ptr: 0x0000000087b67600
+ptr: 0x0000000087b67400
+ptr: 0x0000000087b67200
+ptr: 0x0000000087b67000
+add slab
+slab objs: 0x0000000087b65000
+sstack push: 0x0000000087b65000
+sstack push: 0x0000000087b65200
+sstack push: 0x0000000087b65400
+sstack push: 0x0000000087b65600
+sstack push: 0x0000000087b65800
+sstack push: 0x0000000087b65a00
+sstack push: 0x0000000087b65c00
+sstack push: 0x0000000087b65e00
+ptr: 0x0000000087b65e00
+ptr: 0x0000000087b65c00
+ptr: 0x0000000087b65a00
+ptr: 0x0000000087b65800
+ptr: 0x0000000087b65600
+ptr: 0x0000000087b65400
+ptr: 0x0000000087b65200
+ptr: 0x0000000087b65000
+add slab
+slab objs: 0x0000000087b6b000
+sstack push: 0x0000000087b6b000
+sstack push: 0x0000000087b6b200
+sstack push: 0x0000000087b6b400
+sstack push: 0x0000000087b6b600
+sstack push: 0x0000000087b6b800
+sstack push: 0x0000000087b6ba00
+sstack push: 0x0000000087b6bc00
+sstack push: 0x0000000087b6be00
+ptr: 0x0000000087b6be00
+ptr: 0x0000000087b6bc00
+ptr: 0x0000000087b6ba00
+ptr: 0x0000000087b6b800
+ptr: 0x0000000087b6b600
+ptr: 0x0000000087b6b400
+ptr: 0x0000000087b6b200
+ptr: 0x0000000087b6b000
+add slab
+slab objs: 0x0000000087b69000
+sstack push: 0x0000000087b69000
+sstack push: 0x0000000087b69200
+sstack push: 0x0000000087b69400
+sstack push: 0x0000000087b69600
+sstack push: 0x0000000087b69800
+sstack push: 0x0000000087b69a00
+sstack push: 0x0000000087b69c00
+sstack push: 0x0000000087b69e00
+ptr: 0x0000000087b69e00
+ptr: 0x0000000087b69c00
+ptr: 0x0000000087b69a00
+ptr: 0x0000000087b69800
+ptr: 0x0000000087b69600
+ptr: 0x0000000087b69400
+ptr: 0x0000000087b69200
+ptr: 0x0000000087b69000
+add slab
+slab objs: 0x0000000087b6f000
+sstack push: 0x0000000087b6f000
+sstack push: 0x0000000087b6f200
+sstack push: 0x0000000087b6f400
+sstack push: 0x0000000087b6f600
+sstack push: 0x0000000087b6f800
+sstack push: 0x0000000087b6fa00
+sstack push: 0x0000000087b6fc00
+sstack push: 0x0000000087b6fe00
+ptr: 0x0000000087b6fe00
+ptr: 0x0000000087b6fc00
+ptr: 0x0000000087b6fa00
+ptr: 0x0000000087b6f800
+ptr: 0x0000000087b6f600
+ptr: 0x0000000087b6f400
+ptr: 0x0000000087b6f200
+ptr: 0x0000000087b6f000
+add slab
+slab objs: 0x0000000087b6d000
+sstack push: 0x0000000087b6d000
+sstack push: 0x0000000087b6d200
+sstack push: 0x0000000087b6d400
+sstack push: 0x0000000087b6d600
+sstack push: 0x0000000087b6d800
+sstack push: 0x0000000087b6da00
+sstack push: 0x0000000087b6dc00
+sstack push: 0x0000000087b6de00
+ptr: 0x0000000087b6de00
+ptr: 0x0000000087b6dc00
+ptr: 0x0000000087b6da00
+ptr: 0x0000000087b6d800
+ptr: 0x0000000087b6d600
+ptr: 0x0000000087b6d400
+ptr: 0x0000000087b6d200
+ptr: 0x0000000087b6d000
+add slab
+slab objs: 0x0000000087b53000
+sstack push: 0x0000000087b53000
+sstack push: 0x0000000087b53200
+sstack push: 0x0000000087b53400
+sstack push: 0x0000000087b53600
+sstack push: 0x0000000087b53800
+sstack push: 0x0000000087b53a00
+sstack push: 0x0000000087b53c00
+sstack push: 0x0000000087b53e00
+ptr: 0x0000000087b53e00
+ptr: 0x0000000087b53c00
+ptr: 0x0000000087b53a00
+ptr: 0x0000000087b53800
+ptr: 0x0000000087b53600
+ptr: 0x0000000087b53400
+ptr: 0x0000000087b53200
+ptr: 0x0000000087b53000
+add slab
+slab objs: 0x0000000087b51000
+sstack push: 0x0000000087b51000
+sstack push: 0x0000000087b51200
+sstack push: 0x0000000087b51400
+sstack push: 0x0000000087b51600
+sstack push: 0x0000000087b51800
+sstack push: 0x0000000087b51a00
+sstack push: 0x0000000087b51c00
+sstack push: 0x0000000087b51e00
+ptr: 0x0000000087b51e00
+ptr: 0x0000000087b51c00
+ptr: 0x0000000087b51a00
+ptr: 0x0000000087b51800
+ptr: 0x0000000087b51600
+ptr: 0x0000000087b51400
+ptr: 0x0000000087b51200
+ptr: 0x0000000087b51000
+add slab
+slab objs: 0x0000000087b57000
+sstack push: 0x0000000087b57000
+sstack push: 0x0000000087b57200
+sstack push: 0x0000000087b57400
+sstack push: 0x0000000087b57600
+sstack push: 0x0000000087b57800
+sstack push: 0x0000000087b57a00
+sstack push: 0x0000000087b57c00
+sstack push: 0x0000000087b57e00
+ptr: 0x0000000087b57e00
+ptr: 0x0000000087b57c00
+ptr: 0x0000000087b57a00
+ptr: 0x0000000087b57800
+ptr: 0x0000000087b57600
+ptr: 0x0000000087b57400
+ptr: 0x0000000087b57200
+ptr: 0x0000000087b57000
+add slab
+slab objs: 0x0000000087b55000
+sstack push: 0x0000000087b55000
+sstack push: 0x0000000087b55200
+sstack push: 0x0000000087b55400
+sstack push: 0x0000000087b55600
+sstack push: 0x0000000087b55800
+sstack push: 0x0000000087b55a00
+sstack push: 0x0000000087b55c00
+sstack push: 0x0000000087b55e00
+ptr: 0x0000000087b55e00
+ptr: 0x0000000087b55c00
+ptr: 0x0000000087b55a00
+ptr: 0x0000000087b55800
+ptr: 0x0000000087b55600
+ptr: 0x0000000087b55400
+ptr: 0x0000000087b55200
+ptr: 0x0000000087b55000
+add slab
+slab objs: 0x0000000087b5b000
+sstack push: 0x0000000087b5b000
+sstack push: 0x0000000087b5b200
+sstack push: 0x0000000087b5b400
+sstack push: 0x0000000087b5b600
+sstack push: 0x0000000087b5b800
+sstack push: 0x0000000087b5ba00
+sstack push: 0x0000000087b5bc00
+sstack push: 0x0000000087b5be00
+ptr: 0x0000000087b5be00
+ptr: 0x0000000087b5bc00
+ptr: 0x0000000087b5ba00
+ptr: 0x0000000087b5b800
+ptr: 0x0000000087b5b600
+ptr: 0x0000000087b5b400
+ptr: 0x0000000087b5b200
+ptr: 0x0000000087b5b000
+add slab
+slab objs: 0x0000000087b59000
+sstack push: 0x0000000087b59000
+sstack push: 0x0000000087b59200
+sstack push: 0x0000000087b59400
+sstack push: 0x0000000087b59600
+sstack push: 0x0000000087b59800
+sstack push: 0x0000000087b59a00
+sstack push: 0x0000000087b59c00
+sstack push: 0x0000000087b59e00
+ptr: 0x0000000087b59e00
+ptr: 0x0000000087b59c00
+ptr: 0x0000000087b59a00
+ptr: 0x0000000087b59800
+ptr: 0x0000000087b59600
+ptr: 0x0000000087b59400
+ptr: 0x0000000087b59200
+ptr: 0x0000000087b59000
+add slab
+slab objs: 0x0000000087b5f000
+sstack push: 0x0000000087b5f000
+sstack push: 0x0000000087b5f200
+sstack push: 0x0000000087b5f400
+sstack push: 0x0000000087b5f600
+sstack push: 0x0000000087b5f800
+sstack push: 0x0000000087b5fa00
+sstack push: 0x0000000087b5fc00
+sstack push: 0x0000000087b5fe00
+ptr: 0x0000000087b5fe00
+ptr: 0x0000000087b5fc00
+ptr: 0x0000000087b5fa00
+ptr: 0x0000000087b5f800
+ptr: 0x0000000087b5f600
+ptr: 0x0000000087b5f400
+ptr: 0x0000000087b5f200
+ptr: 0x0000000087b5f000
+add slab
+slab objs: 0x0000000087b5d000
+sstack push: 0x0000000087b5d000
+sstack push: 0x0000000087b5d200
+sstack push: 0x0000000087b5d400
+sstack push: 0x0000000087b5d600
+sstack push: 0x0000000087b5d800
+sstack push: 0x0000000087b5da00
+sstack push: 0x0000000087b5dc00
+sstack push: 0x0000000087b5de00
+ptr: 0x0000000087b5de00
+ptr: 0x0000000087b5dc00
+ptr: 0x0000000087b5da00
+ptr: 0x0000000087b5d800
+ptr: 0x0000000087b5d600
+ptr: 0x0000000087b5d400
+ptr: 0x0000000087b5d200
+ptr: 0x0000000087b5d000
+add slab
+slab objs: 0x0000000087b43000
+sstack push: 0x0000000087b43000
+sstack push: 0x0000000087b43200
+sstack push: 0x0000000087b43400
+sstack push: 0x0000000087b43600
+sstack push: 0x0000000087b43800
+sstack push: 0x0000000087b43a00
+sstack push: 0x0000000087b43c00
+sstack push: 0x0000000087b43e00
+ptr: 0x0000000087b43e00
+ptr: 0x0000000087b43c00
+ptr: 0x0000000087b43a00
+ptr: 0x0000000087b43800
+ptr: 0x0000000087b43600
+ptr: 0x0000000087b43400
+ptr: 0x0000000087b43200
+ptr: 0x0000000087b43000
+add slab
+slab objs: 0x0000000087b41000
+sstack push: 0x0000000087b41000
+sstack push: 0x0000000087b41200
+sstack push: 0x0000000087b41400
+sstack push: 0x0000000087b41600
+sstack push: 0x0000000087b41800
+sstack push: 0x0000000087b41a00
+sstack push: 0x0000000087b41c00
+sstack push: 0x0000000087b41e00
+ptr: 0x0000000087b41e00
+ptr: 0x0000000087b41c00
+ptr: 0x0000000087b41a00
+ptr: 0x0000000087b41800
+ptr: 0x0000000087b41600
+ptr: 0x0000000087b41400
+ptr: 0x0000000087b41200
+ptr: 0x0000000087b41000
+SLAB allocation for index 0 successful
+ptr: 0x0000000087df9000
+ptr: 0x0000000087df7000
+ptr: 0x0000000087df5000
+ptr: 0x0000000087df3000
+1add slab
+slab objs: 0x0000000087b4b000
+sstack push: 0x0000000087b4b000
+sstack push: 0x0000000087b4d000
+sstack push: 0x0000000087b4f000
+sstack push: 0x0000000087b51000
+ptr: 0x0000000087b51000
+[panic]: !!!
+SLAB 1-4 allocation ele_exist
 [panic]: !!!
 QEMU: Terminated
 

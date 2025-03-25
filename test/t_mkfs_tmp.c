@@ -1239,5 +1239,5 @@ void __mkfs_tmp_test()
 
 void mkfs_tmp_test()
 {
-    kthread_create(__mkfs_tmp_test, NULL, "__mkfs_tmp", NO_CPU_AFF);
+    kthread_create(get_init(),__mkfs_tmp_test, NULL, "__mkfs_tmp", NO_CPU_AFF);
 }

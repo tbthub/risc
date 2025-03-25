@@ -76,7 +76,7 @@ int t_mem_test()
         if (!ptr) {
             panic("__alloc_page returned NULL\n");
         }
-        printk("i: %d, ptr: %p\n",i, ptr);
+        // printk("i: %d, ptr: %p\n",i, ptr);
         if (ele_exist(ptr)) {
             panic("PAGE_CNT ele_exist\n");
         }
@@ -103,7 +103,7 @@ int t_mem_test()
             if (!ptr) {
                 panic("kmem_cache_alloc returned NULL\n");
             }
-            printk("ptr: %p\n", ptr);
+            // printk("ptr: %p\n", ptr);
             if (ele_exist(ptr)) {
                 panic("SLAB %d-%d allocation ele_exist\n", j, i);
             }

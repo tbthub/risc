@@ -15,13 +15,13 @@ struct sched_struct
 
 #define NO_CPU_AFF -1
 
-extern void sched(int);
+extern void sched();
 extern void yield();
 extern void scheduler();
 
 extern void sched_init();
 extern void wakeup_process(struct thread_info *thread);
-extern struct thread_info * kthread_create(void (*func)(void *), void *args, const char *name, int cpu_affinity);
+extern struct thread_info * kthread_create(struct thread_info *pa, void (*func)(void *), void *args, const char *name, int cpu_affinity);
 extern void debug_cpu_shed_list() __attribute__((unused));
 
 #endif
