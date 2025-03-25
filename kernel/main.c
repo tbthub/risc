@@ -29,7 +29,7 @@ volatile static int started = 0;
 extern void init_s();
 
 extern void mm_init();
-
+extern int t_mem_test();
 void main()
 {
      if (cpuid() == 0)
@@ -37,20 +37,23 @@ void main()
 
           cons_init();
           mm_init();
-          kvm_init();
-          trap_init();
-          plic_init();
+          t_mem_test();
+          asm volatile("wfi");
+
+          // kvm_init();
+          // trap_init();
+          // plic_init();
           
-          proc_init();
-          sched_init();
+          // proc_init();
+          // sched_init();
           
-          kvm_init_hart();
-          trap_inithart();
-          plic_inithart();
+          // kvm_init_hart();
+          // trap_inithart();
+          // plic_inithart();
           
-          printk("111\n");
-          init_s();
-          printk("111\n");
+          // printk("111\n");
+          // init_s();
+          // printk("111\n");
           
 
           // printk("hart 0 init_s ok\n");

@@ -63,7 +63,8 @@
     "elf.h": "c",
     "conf.h": "c",
     "signal.h": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "stack.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

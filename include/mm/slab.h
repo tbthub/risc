@@ -3,6 +3,7 @@
 #include "lib/list.h"
 #include "lib/spinlock.h"
 #include "param.h"
+#include "lib/stack.h"
 
 #define CACHE_MAX_NAME_LEN 24
 #define FREE_LIST_MAX_LEN (PGSIZE / 16)
@@ -34,8 +35,8 @@ struct slab
     void *objs;
     uint16 inuse;
     struct list_head list;
-
-    void *free_list;
+    sstack_t free_list;
+    // void *free_list;
 };
 
 extern struct kmem_cache task_struct_kmem_cache;

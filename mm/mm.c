@@ -29,7 +29,7 @@ static struct
 static struct page *find_buddy(const struct page *page, const int order)
 {
     uint64 index = page - mem_map.pages;
-    uint64 buddy_index = index ^ (1 << order);
+    uint64 buddy_index = index ^ (1UL << order);
     if (buddy_index >= ALL_PFN) {
         // 如果伙伴超出了内存页的范围，返回 NULL
         printk("OOM ERROR!\n");
@@ -60,11 +60,15 @@ static struct page *buddy_alloc(const int order)
                 // 寻找下一级的伙伴(这里的伙伴存在的话一定是空闲的)
                 buddy_page = find_buddy(page, j - 1);
                 if (!buddy_page)
-                   goto bad;
+                    goto bad;
 
                 // 加到下一级的链表中
                 list_add_head(&buddy_page->buddy, &Buddy.free_lists[j - 1]);
             }
+
+            if (page_count(page) > 0)
+                panic("page_count\n");
+
             // 循环接受，该 page 也就是这个被拆分大块的起始地址（现在变成小块了）
             spin_unlock(&Buddy.lock);
             return page;
@@ -117,24 +121,33 @@ static void buddy_init()
     for (i = 0; i < MAX_LEVEL; i++)
         INIT_LIST_HEAD(&Buddy.free_lists[i]);
 
-    for (i = kernel_pfn_end + 1; i < ALL_PFN; i += MAX_LEVEL_COUNT)
-        list_add_head(&mem_map.pages[i].buddy, &Buddy.free_lists[MAX_LEVEL_INDEX]);
+    uint64 chunk_size = 1UL << MAX_LEVEL_INDEX;  // 块大小 = 2^MAX_LEVEL_INDEX 页
+    // 将可用内存初始化为最高阶块
+    for (uint64 i = kernel_pfn_end + 1; i + chunk_size <= ALL_PFN; i += chunk_size) {
+        struct page *page = &mem_map.pages[i];
+        list_add_head(&page->buddy, &Buddy.free_lists[MAX_LEVEL_INDEX]);
+    }
 
-    // 处理最后一点不足 max_level_count 的，也就是说，大概率是最后一个其实没有满
-    // 我们把这个假的弹出来
-    list_pop(&Buddy.free_lists[MAX_LEVEL_INDEX]);
+    // uint64 remaining_pages = ALL_PFN - kernel_pfn_end - 1;
+    // remaining_pages = remaining_pages % chunk_size;  // 剩余页面数
 
-    uint end_free_count = (ALL_PFN - kernel_pfn_end) % MAX_LEVEL_COUNT;
+    // // 处理剩余页面（无法组成完整最高阶块的部分）
+    uint64 remaining_start = kernel_pfn_end + 1 + (chunk_size * ((ALL_PFN - kernel_pfn_end - 1) / chunk_size));
+    uint64 remaining_pages = ALL_PFN - remaining_start;
 
-    // 假装分配
-    for (i = ALL_PFN - end_free_count; i < ALL_PFN; i++)
-        get_page(&mem_map.pages[i]);
+    // 按伙伴系统规则分割剩余页面到低阶
+    for (int order = MAX_LEVEL_INDEX - 1; order >= 0 && remaining_pages > 0; order--) {
+        uint64 block_size = 1UL << order;
+        while (remaining_pages >= block_size) {
+            printk("order: %d\n", order);
+            struct page *page = &mem_map.pages[remaining_start];
+            list_add_head(&page->buddy, &Buddy.free_lists[order]);
+            remaining_start += block_size;
+            remaining_pages -= block_size;
+        }
+    }
 
     __sync_synchronize();
-
-    // 一个一个回收
-    for (i = ALL_PFN - end_free_count; i < ALL_PFN; i++)
-        free_page(mem_map.pages + i);
 
     // printk("Buddy system: %d blocks\n", ALL_PFN - kernel_pfn_end);
 }
@@ -191,8 +204,7 @@ inline void __free_page(void *addr)
 
 void mm_debug()
 {
-    for (int i = 0; i < MAX_LEVEL; i++)
-    {
+    for (int i = 0; i < MAX_LEVEL; i++) {
         uint len = list_len(&Buddy.free_lists[i]);
         printk("{ L: %d, N: %d }\t", i, len);
     }
@@ -209,5 +221,3 @@ void mm_init()
     printk("mm_init ok\n");
     mm_debug();
 }
-
-
