@@ -56,8 +56,9 @@ static struct slab *slab_create(struct kmem_cache *cache)
     slab->kc = cache;
     slab->inuse = 0;
     sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
+    printk("slab objs: %p\n",slab->objs);
     for (uint i = 0; i < cache->count_per_slab; i++) {
-        // printk("sstack push: %p\n", (uint64)((char *)slab->objs + i * cache->size));
+        printk("sstack push: %p\n", (uint64)((char *)slab->objs + i * cache->size));
         sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
     }
 
