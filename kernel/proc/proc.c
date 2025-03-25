@@ -26,7 +26,6 @@ static struct
 
 struct cpu cpus[NCPU];
 struct thread_info *init_t;
-
 extern void usertrapret() __attribute__((noreturn));
 extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
@@ -147,11 +146,12 @@ static inline void task_struct_init(struct task_struct *task)
 
 static inline void thread_info_init(struct thread_info *thread)
 {
+    // thread->tid = 0;
     thread->task = NULL;
     spin_init(&thread->lock, "thread");
+
     thread->flags = 0;
     thread->state = USED;
-    thread->tid = 0;
 
     thread->parent = NULL;
     INIT_LIST_HEAD(&thread->child);
@@ -219,6 +219,7 @@ struct thread_info *kthread_struct_init()
         return NULL;
     }
     t->context.ra = (uint64)thread_entry;
+    alloc_kern_pgd(&t->task->mm);
     return t;
 }
 
@@ -407,11 +408,12 @@ void fd_close_all(struct files_struct *files)
  *      - 信号
  */
 
-static void copy_context(struct thread_info *ch, struct thread_info *pa)
+static void copy_tf(struct thread_info *ch, struct thread_info *pa)
 {
     *ch->tf = *pa->tf;
-    // 子进程返回的 pid 为 0
-    // ch->tf->a0 = 0;
+
+    ch->tf->kernel_sp = KERNEL_STACK_TOP(ch);
+    ch->tf->a0 = 0;
 }
 
 static void copy_vm(struct task_struct *ch, struct task_struct *pa)
@@ -456,7 +458,7 @@ static void copy_sigs(struct task_struct *ch, struct task_struct *pa)
     *ch_sigs->sig = *pa_sigs->sig;
 
     ch_sigs->sping.blocked = pa_sigs->sping.blocked;
-    ch_sigs->sping.signal = pa_sigs->sping.signal;
+    ch_sigs->sping.signal = 0;
     spin_unlock(&pa_sigs->lock);
 }
 
@@ -465,7 +467,7 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
     struct task_struct *ch_task = ch->task;
     struct task_struct *pa_task = pa->task;
 
-    copy_context(ch, pa);
+    copy_tf(ch, pa);
     copy_vm(ch_task, pa_task);
     copy_files(ch_task, pa_task);
     copy_sigs(ch_task, pa_task);
@@ -474,6 +476,7 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 int do_fork()
 {
+
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();
@@ -490,8 +493,6 @@ int do_fork()
     spin_unlock(&pa->lock);
 
     // vma_list_cat(ch->task->mm.mmap);
-    ch->tf->kernel_sp = KERNEL_STACK_TOP(ch);
-    ch->tf->a0 = 0;
     strdup(ch->name, pa->name);
     wakeup_process(ch);
     printk("[fork] end\n");
@@ -521,13 +522,13 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
             spin_lock(&t->lock);
             if (t->state == ZOMBIE) {
                 if (pid == -1) {  // 寻找任意子线程
-                    list_del(&t->sibling);
+                    list_del_init(&t->sibling);
                     spin_unlock(&t->lock);
                     spin_unlock(&cur->lock);
                     return t;
                 }
                 else if (pid > 0 && t->pid == pid) {  // 等待进程 ID 为 pid 的特定子进程。
-                    list_del(&t->sibling);
+                    list_del_init(&t->sibling);
                     spin_unlock(&t->lock);
                     spin_unlock(&cur->lock);
                     return t;
@@ -541,9 +542,7 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
         if (options == WNOHANG)  // 不阻塞
             return NULL;
         else  // 堵塞,继续while循环获取锁
-        {
             sem_wait(&cur->child_exit_sem);
-        }
     }
 }
 
@@ -602,8 +601,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
         if (t->tf)
             kmem_cache_free(&tf_kmem_cache, t->tf);
 
-        // send_sig(SIGCHLD, t->parent->pid);
-        // printk("pid: %d, send sig ->pa: %d\n", t->pid, t->parent->pid);
+        send_sig(SIGCHLD, t->parent->pid);
 
         spin_lock(&t->lock);
         t->state = ZOMBIE;
@@ -613,7 +611,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
 #ifdef DEBUG_EXIT
         printk("[exit] end pid: %d, thread: %s exit\n", t->pid, t->name);
 #endif
-        
+
         sched();
         // 不会在回来了
         panic("exit ret\n");
@@ -631,8 +629,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     struct thread_info *ch = __waitpid(pid, status, options);
     if (ch == NULL)
         return -1;
-    intr_off();
-    // assert(list_empty(&ch->sched), "do_waitpid sched\n");
+
     // (wait) 释放顶层页表
     free_user_pgd(&ch->task->mm);
 
@@ -647,7 +644,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     _pid = ch->pid;
 
 #ifdef DEBUG_WAIT
-    printk("[wait]: pid: %d, thread: %s code:%d ok. by %d\n", ch->pid, ch->name, ch->exit_code,ch->parent->pid);
+    printk("[wait]: pid: %d, thread: %s code: %d ok. by %d\n", ch->pid, ch->name, ch->exit_code, ch->parent->pid);
 #endif
     kmem_cache_free(&thread_info_kmem_cache, ch);
 

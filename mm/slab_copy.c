@@ -55,10 +55,9 @@ static struct slab *slab_create(struct kmem_cache *cache)
 
     slab->kc = cache;
     slab->inuse = 0;
+    spin_init(&slab->lock,"slab");
     sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
-    // printk("slab objs: %p\n",slab->objs);
     for (uint i = 0; i < cache->count_per_slab; i++) {
-        // printk("sstack push: %p\n", (uint64)((char *)slab->objs + i * cache->size));
         sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
     }
 
@@ -104,7 +103,7 @@ static void *obj_pop(struct slab *slab)
 {
     void *tmp = (void *)sstack_pop(&slab->free_list);
     if (tmp == NULL)
-        panic("obj_pop\n");
+        panic("obj_pop empty\n");
     else
         slab->inuse++;
     return tmp;
@@ -213,7 +212,10 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
 
     // 如果当前还有可用的，直接弹出即可
     if (is_slab_partial(cpu_slab, cache)) {
-        return obj_pop(cpu_slab);
+        spin_lock(&cpu_slab->lock);
+        void * tmp = obj_pop(cpu_slab);
+        spin_unlock(&cpu_slab->lock);
+        return tmp;
     }
 
     // 如果 cpu_cache 可用的已经分配完了
@@ -233,7 +235,7 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     slab = list_entry(list_first(&cache->part_slabs), struct slab, list);
     addr = obj_pop(slab);
     if (!is_slab_partial(slab, cache)) {
-        list_del(&slab->list);
+        list_del_init(&slab->list);
         list_add_head(&slab->list, &cache->full_slabs);
     }
 
@@ -241,6 +243,7 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     return addr;
 }
 
+// !
 // 释放对象
 void kmem_cache_free(struct kmem_cache *cache, void *obj)
 {
@@ -254,15 +257,18 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj)
 
     // 如果链表为空，说明是 cpu_cache,直接释放即可
     // 如果是 cpu_cache,则其他cpu无法访问这个slab的，是安全的，不必加锁
+    // ? 我们并不尽量都放在 cpu 中，这里加锁也是无奈，如果是其他CPU的（尽管效率更好）
     if (list_empty(&slab->list)) {
+        spin_lock(&slab->lock);
         obj_push(slab, obj);
+        spin_unlock(&slab->lock);
         return;
     }
 
     // 否则就是普通的
     spin_lock(&cache->lock);
 
-    // 如果原先全部都分配出去了，要 full 里提取出来放到 part 上
+    // 如果原先全部都分配出去了，要从 full 里提取出来放到 part 上
     if (!is_slab_partial(slab, cache)) {
         list_del(&slab->list);
         list_add_head(&slab->list, &cache->part_slabs);

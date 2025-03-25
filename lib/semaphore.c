@@ -29,7 +29,6 @@ void sem_wait(semaphore_t *sem)
         fifo_push(&sem->waiters, &thread->sched);
         
         spin_unlock(&sem->lock);
-        // printk("sem wait on, %d,intr:%d\n",thread->pid,intr_get());
         sched();
 	    // printk("sem wait up,%d, intr: %d\n",thread->pid,intr_get());
     }
@@ -53,7 +52,6 @@ void sem_signal(semaphore_t *sem)
         {
             struct thread_info *thread = list_entry(waiter, struct thread_info, sched);
             wakeup_process(thread);
-            // printk("sem pop queue, name: %s\n",thread->name);
         }
         else
         {

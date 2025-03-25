@@ -63,15 +63,15 @@ enum task_state
 
 struct thread_info;
 
-struct th_table_struct
-{
-    // 位为 0 即为主线程
-    struct thread_info **array;
-    spinlock_t lock;
-    semaphore_t main_thread_wait;
-    int num;
-    int alloc;
-};
+// struct th_table_struct
+// {
+//     // 位为 0 即为主线程
+//     struct thread_info **array;
+//     spinlock_t lock;
+//     semaphore_t main_thread_wait;
+//     int num;
+//     int alloc;
+// };
 
 // 主要管理资源，文件等。对个thread_info对应一个task_struct。操作task_struct时候需要加锁
 struct task_struct
@@ -82,7 +82,7 @@ struct task_struct
 
     struct files_struct files;
 
-    struct th_table_struct th_table;  // TODO fork copy
+    // struct th_table_struct th_table;  // TODO fork copy
 };
 
 struct trapframe

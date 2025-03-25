@@ -65,7 +65,7 @@ extern void hash_free(struct hash_table *htable);
 #define hash_del_node(htable, entry) \
     do                               \
     {                                \
-        list_del(entry);             \
+        list_del_init(entry);             \
         (htable)->count--;           \
     } while (0)
 
@@ -75,7 +75,7 @@ extern void hash_free(struct hash_table *htable);
         hash_find(pos, htable, key_member, key, hnode_member); \
         if (pos)                                               \
         {                                                      \
-            list_del(&pos->hnode_member);                      \
+            list_del_init(&pos->hnode_member);                      \
             (htable)->count--;                                 \
         }                                                      \
     } while (0)

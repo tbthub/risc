@@ -115,6 +115,7 @@ userret:
         ld       t4, 240(a0)
         ld       t5, 248(a0)
         ld       t6, 256(a0)
+        
         ld       a0, 88(a0)
 
 # return to user mode and user pc.

@@ -85,6 +85,7 @@ extern void kvm_init();
 extern void kvm_init_hart();
 
 extern int alloc_user_pgd(struct mm_struct *mm);
+extern int alloc_kern_pgd(struct mm_struct *mm);
 extern void free_user_pgd(struct mm_struct *mm);
 
 extern void free_user_memory(struct mm_struct *mm);

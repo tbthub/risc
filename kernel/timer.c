@@ -82,7 +82,7 @@ static void timer_try_wake()
             if (t->count != NO_RESTRICT) {
                 t->count--;
                 if (t->count <= 0) {
-                    list_del(&t->list);
+                    list_del_init(&t->list);
                     timer_wake(t);
                     timer_del(t);
                     continue;

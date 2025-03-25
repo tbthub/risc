@@ -1,35 +1,221 @@
-riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/test/t_test_mm.o test/t_test_mm.c
+riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/kernel/proc/proc.o kernel/proc/proc.c
 riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/mm/mm.o mm/mm.c
-riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/mm/slab_copy.o mm/slab_copy.c
-riscv64-unknown-elf-ld -z max-page-size=4096   -T ./boot/kernel.ld -o build/Kernel  ./build/boot/start.o  ./build/drive/virtio/virtio_disk.o  ./build/drive/uart.o  ./build/drive/mydev.o  ./build/drive/blk/mvir_blk.o  ./build/drive/plic.o  ./build/fs/easyfs/fs.o  ./build/fs/easyfs/super.o  ./build/fs/easyfs/inode.o  ./build/fs/easyfs/dentry.o  ./build/test/t_test_mm.o  ./build/test/t_kmem_cache.o  ./build/test/t_mkfs_tmp.o  ./build/test/t_timer.o  ./build/test/t_hash.o  ./build/test/t_thread.o  ./build/test/t_easy-fs.o  ./build/test/t_blk.o  ./build/test/t_semaphore_t.o  ./build/test/t_buf.o  ./build/test/t_sleeplock.o  ./build/test/t_mutex_t.o  ./build/test/t_workq.o  ./build/test/t_bitmap.o  ./build/test/t_mm.o  ./build/test/t_user_syswake.o  ./build/lib/bitmap.o  ./build/lib/print.o  ./build/lib/hash.o  ./build/lib/rbtree.o  ./build/lib/semaphore.o  ./build/lib/spinlock.o  ./build/lib/math.o  ./build/lib/string.o  ./build/lib/sleeplock.o  ./build/lib/lru.o  ./build/lib/mutex.o  ./build/kernel/trap/temp.o  ./build/kernel/trap/sysfile.o  ./build/kernel/trap/syscall.o  ./build/kernel/trap/trap.o  ./build/kernel/timer.o  ./build/kernel/work.o  ./build/kernel/dev/devs.o  ./build/kernel/dev/char/console.o  ./build/kernel/dev/blk/blk_dev.o  ./build/kernel/dev/blk/buf.o  ./build/kernel/dev/blk/bio.o  ./build/kernel/dev/blk/flush.o  ./build/kernel/dev/blk/gendisk.o  ./build/kernel/dev/blk/request.o  ./build/kernel/file.o  ./build/kernel/vm/vma.o  ./build/kernel/vm/kswapd.o  ./build/kernel/vm/vm.o  ./build/kernel/init.o  ./build/kernel/new_work.o  ./build/kernel/proc/signal.o  ./build/kernel/proc/sched.o  ./build/kernel/proc/proc.o  ./build/kernel/proc/elf.o  ./build/kernel/main.o  ./build/mm/kmalloc.o  ./build/mm/mm.o  ./build/mm/page.o  ./build/mm/slab.o  ./build/mm/slab_copy.o  ./build/boot/entry.o  ./build/kernel/trap/uservec.o  ./build/kernel/trap/kernelvec.o  ./build/kernel/swtch.o 
+riscv64-unknown-elf-ld -z max-page-size=4096   -T ./boot/kernel.ld -o build/Kernel  ./build/boot/start.o  ./build/drive/virtio/virtio_disk.o  ./build/drive/uart.o  ./build/drive/mydev.o  ./build/drive/blk/mvir_blk.o  ./build/drive/plic.o  ./build/fs/easyfs/fs.o  ./build/fs/easyfs/super.o  ./build/fs/easyfs/inode.o  ./build/fs/easyfs/dentry.o  ./build/test/t_test_mm.o  ./build/test/t_kmem_cache.o  ./build/test/t_mkfs_tmp.o  ./build/test/t_timer.o  ./build/test/t_hash.o  ./build/test/t_thread.o  ./build/test/t_easy-fs.o  ./build/test/t_blk.o  ./build/test/t_semaphore_t.o  ./build/test/t_buf.o  ./build/test/t_sleeplock.o  ./build/test/t_mutex_t.o  ./build/test/t_workq.o  ./build/test/t_bitmap.o  ./build/test/t_mm.o  ./build/test/t_user_syswake.o  ./build/lib/bitmap.o  ./build/lib/print.o  ./build/lib/hash.o  ./build/lib/rbtree.o  ./build/lib/semaphore.o  ./build/lib/spinlock.o  ./build/lib/math.o  ./build/lib/string.o  ./build/lib/sleeplock.o  ./build/lib/lru.o  ./build/lib/mutex.o  ./build/kernel/trap/temp.o  ./build/kernel/trap/sysfile.o  ./build/kernel/trap/syscall.o  ./build/kernel/trap/trap.o  ./build/kernel/timer.o  ./build/kernel/work.o  ./build/kernel/dev/devs.o  ./build/kernel/dev/char/console.o  ./build/kernel/dev/blk/blk_dev.o  ./build/kernel/dev/blk/buf.o  ./build/kernel/dev/blk/bio.o  ./build/kernel/dev/blk/flush.o  ./build/kernel/dev/blk/gendisk.o  ./build/kernel/dev/blk/request.o  ./build/kernel/file.o  ./build/kernel/vm/vma.o  ./build/kernel/vm/kswapd.o  ./build/kernel/vm/vm.o  ./build/kernel/init.o  ./build/kernel/proc/signal.o  ./build/kernel/proc/sched.o  ./build/kernel/proc/proc.o  ./build/kernel/proc/elf.o  ./build/kernel/main.o  ./build/mm/kmalloc.o  ./build/mm/mm.o  ./build/mm/page.o  ./build/mm/slab.o  ./build/mm/slab_copy.o  ./build/boot/entry.o  ./build/kernel/trap/uservec.o  ./build/kernel/trap/kernelvec.o  ./build/kernel/swtch.o 
 # riscv64-unknown-elf-objcopy -S -O binary build/Kernel ./build/Kernel_BIN
 riscv64-unknown-elf-objdump -j .text -S build/Kernel > ./build/kernel.asm
 riscv64-unknown-elf-objdump -t build/Kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > ./build/kernel.sym
 qemu-system-riscv64 -machine virt -bios none -kernel ./build/Kernel -m 128M -smp 4 -nographic -serial mon:stdio -global virtio-mmio.force-legacy=false -drive file=virtio_disk.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 mm_init ok
 { L: 0, N: 0 }	{ L: 1, N: 0 }	{ L: 2, N: 0 }	{ L: 3, N: 1 }	{ L: 4, N: 1 }	{ L: 5, N: 0 }	{ L: 6, N: 0 }	{ L: 7, N: 0 }	{ L: 8, N: 1 }	{ L: 9, N: 1 }	{ L: 10, N: 30 }	
-100- page: 0
-100- page: 1
-Page allocation successful
-1SLAB allocation for index 0 successful
-1SLAB allocation for index 1 successful
-1SLAB allocation for index 2 successful
-1SLAB allocation for index 3 successful
-1SLAB allocation for index 4 successful
-1SLAB allocation for index 5 successful
-1SLAB allocation for index 6 successful
-1SLAB allocation for index 7 successful
-1SLAB allocation for index 8 successful
-kmalloc allocation for size 16 successful
-kmalloc allocation for size 32 successful
-kmalloc allocation for size 64 successful
-kmalloc allocation for size 128 successful
-kmalloc allocation for size 256 successful
-kmalloc allocation for size 512 successful
-kmalloc allocation for size 1024 successful
-kmalloc allocation for size 2048 successful
-kmalloc allocation for size 4096 successful
-kmalloc allocation for size 8192 successful
+kvm init ok!
+hart 0 init_s ok
+xv6 kernel is booting
 hart 0 starting
+hart 1 starting
+hart 3 starting
+pid: 0, 	name: init_t, in running on hart 0
+hart 2 starting
+easy fs init start...
+pid: 1, 	name: work_handler, in running on hart 0
+pid: 4, 	name: work_handler, in running on hart 3
+pid: 2, 	name: work_handler, in running on hart 1
+pid: 3, 	name: work_handler, in running on hart 2
+pid: 6, 	name: gen_flush_bhash, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 0, 	name: init_t, in running on hart 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 0, 	name: init_t, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 0, 	name: init_t, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 7, 	name: efs_sync, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 0, 	name: init_t, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 0, 	name: init_t, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 0, 	name: init_t, in running on hart 3
+easy fs init done
+[exec] pid: 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 8, 	name: kswapd, in running on hart 0
+pid: 0, 	name: /init, in running on hart 2
+aa, pid: 0
+aa2, pid: 0
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 0, 	name: /init, in running on hart 1
+aa, pid: 0
+aa2, pid: 0
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 0, 	name: /init, in running on hart 3
+aa, pid: 0
+aa2, pid: 0
+[exec] end
+aa, pid: 0
+0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
+b, pid: 0
+pid: 0, 	name: /init, in running on hart 0
+aa, pid: 0
+aa2, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
+b, pid: 0
+pid: 8, 	name: kswapd, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 8, 	name: kswapd, in running on hart 0
+pid: 0, 	name: /init, in running on hart 1
+aa, pid: 0
+aa2, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
+b, pid: 0
+[fork] pa-pid: 0, child-pid: 9
+[fork] end
+aa, pid: 0
+0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
+b, pid: 0
+pid: 9, 	name: /init, in running on hart 2
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000042,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000042,0x0000000087c1dff0
+b, pid: 9
+pid: 8, 	name: kswapd, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 8, 	name: kswapd, in running on hart 2
+pid: 9, 	name: /init, in running on hart 3
+aa, pid: 9
+aa2, pid: 9
+[exec] pid: 9
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 9, 	name: /bin/sh, in running on hart 1
+aa, pid: 9
+aa2, pid: 9
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 9, 	name: /bin/sh, in running on hart 0
+aa, pid: 9
+aa2, pid: 9
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 9, 	name: /bin/sh, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 5, 	name: gen_start_io, in running on hart 0
+pid: 5, 	name: gen_start_io, in running on hart 1
+pid: 9, 	name: /bin/sh, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 9, 	name: /bin/sh, in running on hart 0
+aa, pid: 9
+aa2, pid: 9
+[exec] end
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+pid: 8, 	name: kswapd, in running on hart 1
+pid: 5, 	name: gen_start_io, in running on hart 2
+pid: 5, 	name: gen_start_io, in running on hart 3
+pid: 8, 	name: kswapd, in running on hart 0
+pid: 9, 	name: /bin/sh, in running on hart 1
+aa, pid: 9
+aa2, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
+b, pid: 9
+pid: 2, 	name: work_handler, in running on hart 1
+pid: 9, 	name: /bin/sh, in running on hart 2
+aa, pid: 9
+aa2, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
+b, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
+b, pid: 9
+pid: 9, 	name: /bin/sh, in running on hart 3
+aa, pid: 9
+aa2, pid: 9
+aa, pid: 9
+10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
+b, pid: 9
+[exit], pid: 9
+[exit] end pid: 9, thread: /bin/sh exit
+pid: 0, 	name: /init, in running on hart 0
+aa, pid: 0
+aa2, pid: 0
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
+b, pid: 0
+[fork] pa-pid: 0, child-pid: 10
+[fork] end
+aa, pid: 0
+0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
+b, pid: 0
+aa, pid: 0
+0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
+b, pid: 0
+pid: 10, 	name: /init, in running on hart 1
+aa, pid: 10
+10x0000000087d58000,0x0000000200000042,0x0000000087d59ff0
+b, pid: 10
+pid: 10, unknown scause
+pid: 10, unknown scause: 0x0000000000000002, sepc: 0x0000000200000042, stval: 0x0000000000000000
+[panic]: !!!
+[panic]: pid: 10, name:/init
+excep_handler unknown scause, sp:0x00000001ffffefd8
+[panic]: !!!
+pid: 3, 	name: work_handler, in running on hart 2
+pid: 7, 	name: efs_sync, in running on hart 2
+pid: 3, 	name: work_handler, in running on hart 2
+pid: 6, 	name: gen_flush_bhash, in running on hart 3
+pid: 3, 	name: work_handler, in running on hart 2
+pid: 7, 	name: efs_sync, in running on hart 0
 QEMU: Terminated
 

@@ -96,11 +96,6 @@ static inline void intr_handler(uint64 scause)
 
     case TIMER_SCAUSE:  // 时钟
         timer_intr();
-        // if (myproc() != NULL)
-        // {
-        // printk("sched7-%d (intr_handler, intr status: %d)\n", myproc()->pid,
-        // intr_get());
-        // }
         break;
 
     default:
@@ -114,7 +109,6 @@ static void excep_handler(uint64 scause)
 {
     switch (scause) {
     case E_SYSCALL:
-        // intr_on();
         syscall();
         break;
 
@@ -124,16 +118,13 @@ static void excep_handler(uint64 scause)
         page_fault_handler(r_stval(), scause);
         break;
     default:
-        if (r_scause() == 2) {
-            printk("13\n");
-        }
-        // struct thread_info *t = myproc();
-        // printk("pid: %d, unknown scause\n",t->pid);
-        // if (t)
-        //     printk("pid: %d, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
-        // else
-        //     printk("kerl, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
-        // panic("excep_handler unknown scause, sp:%p\n", t->tf->sp);
+        struct thread_info *t = myproc();
+        printk("pid: %d, unknown scause\n",t->pid);
+        if (t)
+            printk("pid: %d, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
+        else
+            printk("kerl, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
+        panic("excep_handler unknown scause, sp:%p\n", t->tf->sp);
         // vm2pa_show(&t->task->mm);
         break;
     }
@@ -143,10 +134,12 @@ __attribute__((noreturn)) void usertrapret()
 {
     intr_off();
     struct thread_info *p = myproc();
-
-    // intr_on();
-    // signal_handler(&p->task->sigs);
-
+    printk("aa, pid: %d\n",p->pid); 
+    if(p->pid != 0){
+        printk("1");
+    }
+    signal_handler(&p->task->sigs);
+    // printk("[u-ret]: sig ok.\n");
     // 我们即将把陷阱的目标从
     // kerneltrap() 切换到 usertrap()，因此请关闭中断，直到
     // 我们回到用户空间，此ma时 usertrap() 是正确的。(系统调用之前会开中断)
@@ -163,14 +156,15 @@ __attribute__((noreturn)) void usertrapret()
     w_stvec((uint64)uservec);
     w_sepc(p->tf->epc);
     w_sscratch((uint64)(p->tf));
+    printk("%p,%p,%p\n",p,p->tf->epc,p->tf->kernel_sp);
 
     // set S Previous Privilege mode to User.
     unsigned long x = r_sstatus();
     x &= ~SSTATUS_SPP;  // clear SPP to 0 for user mode
     x |= SSTATUS_SPIE;  // enable interrupts in user mode
     w_sstatus(x);
+    printk("b, pid: %d\n",p->pid); 
 
-    // printk("[u-ret] pid:%d\n", p->pid);
     userret();
 }
 
@@ -202,10 +196,6 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     // ! 解析参数的时候，前面已经 free_user_memory
 
-    // TODO
-    // 1. 复制参数
-    // 2. 销毁原空间
-    // 3. 挂上参数
     uint64 args_list;
     if (argv) {
         args_list = parse_argv(t, argv, args_page);
@@ -272,6 +262,7 @@ void usertrap()
     uint64 scause = r_scause();
     uint64 sstatus = r_sstatus();
     uint64 sepc = r_sepc();
+    // printk("[u-trap] pid: %d, scause: %p\n",myproc()->pid,scause);
     // 检查是否来自用户模式下的中断，也就是不是内核中断,确保中断来自用户态
     assert((sstatus & SSTATUS_SPP) == 0, "usertrap: not from user mode\n");
     assert(intr_get() == 0,

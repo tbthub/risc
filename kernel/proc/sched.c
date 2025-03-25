@@ -80,8 +80,10 @@ void sched()
         // 如果发生了进程切换
         if (r_satp() != MAKE_SATP(thread->task->mm.pgd)) {
             sfence_vma();
+            printk("aa, pid: %d\n",thread->pid);
             w_satp(MAKE_SATP(thread->task->mm.pgd));
             sfence_vma();
+            printk("aa2, pid: %d\n",thread->pid);
         }
         spin_unlock(&thread->task->mm.lock);
     }
@@ -123,9 +125,6 @@ void scheduler()
 #ifdef DEBUG_TASK_ON_CPU
             printk("pid: %d, \tname: %s, in running on hart %d\n", next->pid, next->name, cpuid());
 #endif
-            if(next->pid == 10){
-                printk("1\n");
-            }
             swtch(&cpu->context, &next->context);
 
             // 线程已经在运行了
@@ -137,7 +136,6 @@ void scheduler()
         // 如果没有一个可以运行的进程，则运行idle
         else {
             spin_unlock(&cpu->sched_list.lock);
-            // printk("C");
             intr_on();
             asm volatile("wfi");
         }
@@ -160,7 +158,7 @@ void wakeup_process(struct thread_info *thread)
     spin_lock(&thread->lock);
 
     // 确保不在任何队列中，我们要将其加入到就绪队列
-    assert(list_len(&thread->sched) == 0, "wakeup_process\n");
+    // assert(list_len(&thread->sched) == 0, "wakeup_process\n");
 
     thread->state = RUNNABLE;
     add_runnable_task(thread);

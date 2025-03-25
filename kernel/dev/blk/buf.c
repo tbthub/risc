@@ -1,12 +1,13 @@
 #include "dev/blk/buf.h"
-#include "lib/spinlock.h"
-#include "lib/hash.h"
-#include "lib/atomic.h"
-#include "std/stdio.h"
-#include "mm/kmalloc.h"
-#include "dev/blk/gendisk.h"
+
 #include "core/timer.h"
+#include "dev/blk/gendisk.h"
+#include "lib/atomic.h"
+#include "lib/hash.h"
+#include "lib/spinlock.h"
+#include "mm/kmalloc.h"
 #include "mm/mm.h"
+#include "std/stdio.h"
 
 inline void buf_pin(struct buf_head *b)
 {
@@ -64,22 +65,19 @@ static inline int bhash_empty(struct bhash_struct *bhash, uint32 blockno)
 static void bhash_lru(struct bhash_struct *bhash, struct buf_head *b)
 {
     // 如果已经在活跃链表中
-    if (TEST_FLAG(&b->flags, BH_Active) == BH_Active)
-    {
+    if (TEST_FLAG(&b->flags, BH_Active) == BH_Active) {
         // list_del(&b->lru);
         // list_add_head(&b->lru, &bhash->active_list);
     }
     // 如果是新的第二次访问，则要从当前 lru 移除，加入到 active_list 头
-    else if (TEST_FLAG(&b->flags, BH_Visited) == BH_Visited)
-    {
+    else if (TEST_FLAG(&b->flags, BH_Visited) == BH_Visited) {
         SET_FLAG(&b->flags, BH_Active);
-        list_del(&b->lru);
+        list_del_init(&b->lru);
         list_add_head(&b->lru, &bhash->active_list);
         bhash->active_count++;
     }
     // 新创建 BH_Visited 为0的，加入 inactive_list，并设为访问过一次
-    else
-    {
+    else {
         SET_FLAG(&b->flags, BH_Visited);
         list_add_head(&b->lru, &bhash->inactive_list);
         bhash->inactive_count++;
@@ -105,8 +103,7 @@ static struct buf_head *bhash_find(struct bhash_struct *bhash, uint _blockno)
     struct buf_head *b;
 
     hash_find(b, &bhash->buf_hash_table, blockno, _blockno, bh_node);
-    if (b)
-    {
+    if (b) {
         bhash_lru(bhash, b);
         // b->refcnt++;
     }
@@ -147,8 +144,7 @@ struct buf_head *buf_get(struct gendisk *gd, uint blockno)
     // int creating = 0;
     spin_lock(&gd->bhash.lock);
     buf = bhash_find(&gd->bhash, blockno);
-    if (!buf)
-    {
+    if (!buf) {
         buf = buf_alloc(gd, blockno);
         bhash_add(&gd->bhash, buf);
         bhash_lru(&gd->bhash, buf);
@@ -187,14 +183,13 @@ void buf_release(struct buf_head *b, int is_dirty)
     // printk("buf_release: %p\n",b->flags);
 
     // 正常使用过的缓存,加入脏链
-    if (is_dirty)
-    {
+    if (is_dirty) {
         // printk("buf_release dirty to list\n");
 
         SET_FLAG(&b->flags, BH_Dirty);
         spin_lock(&b->gd->bhash.lock);
         if (!list_empty(&b->gd->bhash.dirty_list))
-            list_del(&b->dirty);
+            list_del_init(&b->dirty);
         list_add_head(&b->dirty, &b->gd->bhash.dirty_list);
 
         spin_unlock(&b->gd->bhash.lock);

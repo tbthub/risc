@@ -33,6 +33,6 @@ void devs_add(struct list_head *node)
 void devs_del(struct list_head *node)
 {
     spin_lock(&dev_lists.lock);
-    list_del(node);
+    list_del_init(node);
     spin_unlock(&dev_lists.lock);
 }

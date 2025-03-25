@@ -289,7 +289,7 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
 
 void page_fault_handler(uint64 fault_addr, uint64 scause)
 {
-    if(fault_addr == 0x3b00000002){
+    if (fault_addr == 0x3b00000002) {
         printk("page");
         return;
     }
@@ -311,8 +311,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
 #endif
     v = find_vma(mm, fault_addr);
     if (!v) {
-        panic("page_fault_handler: illegal addr %p, scause: %p\n",
-              fault_addr,scause);  // TODO 杀死进程，不过我们暂时先报错
+        panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause);  // TODO 杀死进程，不过我们暂时先报错
     }
 
     switch (scause) {
@@ -411,14 +410,27 @@ int alloc_user_pgd(struct mm_struct *mm)
         return -1;
 
     // 把内核也映射到用户地址空间
-    memcpy(mm->pgd, kernel_pagetable, PGSIZE / 64);
+    memcpy(mm->pgd, kernel_pagetable, PGSIZE);
+    return 0;
+}
+
+int alloc_kern_pgd(struct mm_struct *mm)
+{
+    assert(mm != NULL, "alloc_user_pgd\n");
+    mm->pgd = __alloc_page(0);
+    if (!mm->pgd)
+        return -1;
+
+    // 把内核也映射到用户地址空间
+    memcpy(mm->pgd, kernel_pagetable, PGSIZE);
     return 0;
 }
 
 void free_user_pgd(struct mm_struct *mm)
 {
-    if (!mm)
-        return;
+    if (!mm) {
+        panic("mm\n");
+    }
     // 内核线程是没有页表的
     if (mm->pgd)
         __free_page(mm->pgd);

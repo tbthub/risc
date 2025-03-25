@@ -36,6 +36,7 @@ struct slab
     uint16 inuse;
     struct list_head list;
     sstack_t free_list;
+    spinlock_t lock;
     // void *free_list;
 };
 

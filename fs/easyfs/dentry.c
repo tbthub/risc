@@ -349,7 +349,7 @@ void efs_d_unlink(struct easy_dentry *d)
 
     if (efs_i_unlink(d->d_inode) == 0)
     {
-        list_del(&d->d_sibling);
+        list_del_init(&d->d_sibling);
 
         spin_lock(&m_esb.s_lock);
         spin_lock(&d->d_lock);

@@ -120,19 +120,18 @@ static void buddy_free(struct page *pg, const int order)
     // 向上合并伙伴
     for (level = order; level < MAX_LEVEL_INDEX; level++) {
         buddy_page = find_buddy(page, level);
-        if (list_empty(&Buddy.free_lists[level]))
-            break;
+
         // 伙伴不在，也就不用向上合并了
         // 如果页面不空闲，则已经被分配出去了，现在一定不在伙伴系统里面
         if (buddy_page == NULL || !page_is_free(buddy_page))
             break;
 
         // 如果有伙伴块的话
-        list_del_init(&buddy_page->buddy);
-        list_del_init(&page->buddy);
+        list_del(&buddy_page->buddy);
+        list_del(&page->buddy);
 
         // page 始终为位置更低的，这样最后的 page 就是最后大块的头儿
-        page = page < buddy_page ? page : buddy_page;
+        page = min(page, buddy_page);
     }
     list_add_head(&page->buddy, &Buddy.free_lists[level]);
     spin_unlock(&Buddy.lock);
