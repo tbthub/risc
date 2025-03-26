@@ -46,5 +46,5 @@ static void init_thread(void *a)
 
 void init_s()
 {
-    init_t = kthread_create(NULL,init_thread, NULL, "init_t", NO_CPU_AFF);
+    init_t = kthread_create(NULL, init_thread, NULL, "init_t", NO_CPU_AFF);
 }
