@@ -119,7 +119,7 @@ static void excep_handler(uint64 scause)
         break;
     default:
         struct thread_info *t = myproc();
-        printk("pid: %d, unknown scause\n",t->pid);
+        printk("pid: %d, unknown scause\n", t->pid);
         if (t)
             printk("pid: %d, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
         else
@@ -134,10 +134,10 @@ __attribute__((noreturn)) void usertrapret()
 {
     intr_off();
     struct thread_info *p = myproc();
-    printk("aa, pid: %d\n",p->pid); 
-    if(p->pid != 0){
-        printk("1");
-    }
+    // printk("aa, pid: %d\n",p->pid);
+    // if(p->pid != 0){
+    //     printk("1");
+    // }
     signal_handler(&p->task->sigs);
     // printk("[u-ret]: sig ok.\n");
     // 我们即将把陷阱的目标从
@@ -156,14 +156,14 @@ __attribute__((noreturn)) void usertrapret()
     w_stvec((uint64)uservec);
     w_sepc(p->tf->epc);
     w_sscratch((uint64)(p->tf));
-    printk("%p,%p,%p\n",p,p->tf->epc,p->tf->kernel_sp);
+    // printk("%p,%p,%p\n",p,p->tf->epc,p->tf->kernel_sp);
 
     // set S Previous Privilege mode to User.
     unsigned long x = r_sstatus();
     x &= ~SSTATUS_SPP;  // clear SPP to 0 for user mode
     x |= SSTATUS_SPIE;  // enable interrupts in user mode
     w_sstatus(x);
-    printk("b, pid: %d\n",p->pid); 
+    // printk("b, pid: %d\n",p->pid);
 
     userret();
 }
@@ -182,7 +182,9 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
         ;
 
     struct thread_info *t = myproc();
+#ifdef DEBUG_SYSCALL
     printk("[exec] pid: %d\n", t->pid);
+#endif
     strncpy(t->name, path, sizeof(t->name));
 
     struct elf64_hdr ehdr;
@@ -229,7 +231,9 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     t->tf->sp = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);
+#ifdef DEBUG_SYSCALL
     printk("[exec] end\n");
+#endif
     usertrapret();
 }
 

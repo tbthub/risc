@@ -49,9 +49,5 @@ void syscall()
 {
     struct thread_info *p = myproc();
     int n = p->tf->a7;
-#ifdef DEBUG_SYSCALL
-    printk("[syscall] pid:%d, name:%s, sysno:%d\n", p->pid, p->name, n);
-#endif
-    // intr_on();
     p->tf->a0 = (int64)syscalls[n]();
 }

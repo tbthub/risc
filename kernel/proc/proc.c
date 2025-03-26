@@ -474,17 +474,18 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 }
 
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
+extern void mm_debug2();
 int do_fork()
 {
-
+    mm_debug2();
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();
     if (!ch)
         panic("do_fork uthread_struct_init\n");
-
+#ifdef DEBUG_SYSCALL
     printk("[fork] pa-pid: %d, child-pid: %d\n", pa->pid, ch->pid);
-
+#endif
     copy_proc(ch, pa);
 
     ch->parent = pa;
@@ -495,7 +496,9 @@ int do_fork()
     // vma_list_cat(ch->task->mm.mmap);
     strdup(ch->name, pa->name);
     wakeup_process(ch);
+#ifdef DEBUG_SYSCALL
     printk("[fork] end\n");
+#endif
     return ch->pid;
 }
 
@@ -580,7 +583,9 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
 
     // TODO 发给所有子线程并睡眠在上
     struct thread_info *t = myproc();
+#ifdef DEBUG_SYSCALL
     printk("[exit], pid: %d\n", t->pid);
+#endif
     if (t == init_t) {
         panic("init_t try to exit!\n");
     }
@@ -608,7 +613,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
         t->exit_code = exit_code;
 
         sem_signal(&t->parent->child_exit_sem);
-#ifdef DEBUG_EXIT
+#ifdef DEBUG_SYSCALL
         printk("[exit] end pid: %d, thread: %s exit\n", t->pid, t->name);
 #endif
 
@@ -631,7 +636,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
         return -1;
 
     // (wait) 释放顶层页表
-    free_user_pgd(&ch->task->mm);
+    // free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
     kmem_cache_free(&task_struct_kmem_cache, ch->task);
@@ -642,8 +647,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     if (status)
         *status = ch->exit_code;
     _pid = ch->pid;
-
-#ifdef DEBUG_WAIT
+#ifdef DEBUG_SYSCALL
     printk("[wait]: pid: %d, thread: %s code: %d ok. by %d\n", ch->pid, ch->name, ch->exit_code, ch->parent->pid);
 #endif
     kmem_cache_free(&thread_info_kmem_cache, ch);

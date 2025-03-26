@@ -1,221 +1,450 @@
 riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/kernel/proc/proc.o kernel/proc/proc.c
-riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/mm/mm.o mm/mm.c
-riscv64-unknown-elf-ld -z max-page-size=4096   -T ./boot/kernel.ld -o build/Kernel  ./build/boot/start.o  ./build/drive/virtio/virtio_disk.o  ./build/drive/uart.o  ./build/drive/mydev.o  ./build/drive/blk/mvir_blk.o  ./build/drive/plic.o  ./build/fs/easyfs/fs.o  ./build/fs/easyfs/super.o  ./build/fs/easyfs/inode.o  ./build/fs/easyfs/dentry.o  ./build/test/t_test_mm.o  ./build/test/t_kmem_cache.o  ./build/test/t_mkfs_tmp.o  ./build/test/t_timer.o  ./build/test/t_hash.o  ./build/test/t_thread.o  ./build/test/t_easy-fs.o  ./build/test/t_blk.o  ./build/test/t_semaphore_t.o  ./build/test/t_buf.o  ./build/test/t_sleeplock.o  ./build/test/t_mutex_t.o  ./build/test/t_workq.o  ./build/test/t_bitmap.o  ./build/test/t_mm.o  ./build/test/t_user_syswake.o  ./build/lib/bitmap.o  ./build/lib/print.o  ./build/lib/hash.o  ./build/lib/rbtree.o  ./build/lib/semaphore.o  ./build/lib/spinlock.o  ./build/lib/math.o  ./build/lib/string.o  ./build/lib/sleeplock.o  ./build/lib/lru.o  ./build/lib/mutex.o  ./build/kernel/trap/temp.o  ./build/kernel/trap/sysfile.o  ./build/kernel/trap/syscall.o  ./build/kernel/trap/trap.o  ./build/kernel/timer.o  ./build/kernel/work.o  ./build/kernel/dev/devs.o  ./build/kernel/dev/char/console.o  ./build/kernel/dev/blk/blk_dev.o  ./build/kernel/dev/blk/buf.o  ./build/kernel/dev/blk/bio.o  ./build/kernel/dev/blk/flush.o  ./build/kernel/dev/blk/gendisk.o  ./build/kernel/dev/blk/request.o  ./build/kernel/file.o  ./build/kernel/vm/vma.o  ./build/kernel/vm/kswapd.o  ./build/kernel/vm/vm.o  ./build/kernel/init.o  ./build/kernel/proc/signal.o  ./build/kernel/proc/sched.o  ./build/kernel/proc/proc.o  ./build/kernel/proc/elf.o  ./build/kernel/main.o  ./build/mm/kmalloc.o  ./build/mm/mm.o  ./build/mm/page.o  ./build/mm/slab.o  ./build/mm/slab_copy.o  ./build/boot/entry.o  ./build/kernel/trap/uservec.o  ./build/kernel/trap/kernelvec.o  ./build/kernel/swtch.o 
+riscv64-unknown-elf-gcc -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2 -mcmodel=medany -fno-common -nostdlib -ffreestanding -nostdlib -nostdinc -I./include -c -o build/kernel/vm/vm.o kernel/vm/vm.c
+riscv64-unknown-elf-ld -z max-page-size=4096   -T ./boot/kernel.ld -o build/Kernel  ./build/fs/easyfs/dentry.o  ./build/fs/easyfs/inode.o  ./build/fs/easyfs/fs.o  ./build/fs/easyfs/super.o  ./build/boot/start.o  ./build/drive/virtio/virtio_disk.o  ./build/drive/plic.o  ./build/drive/uart.o  ./build/drive/mydev.o  ./build/drive/blk/mvir_blk.o  ./build/test/t_user_syswake.o  ./build/test/t_mkfs_tmp.o  ./build/test/t_bitmap.o  ./build/test/t_timer.o  ./build/test/t_mutex_t.o  ./build/test/t_hash.o  ./build/test/t_thread.o  ./build/test/t_easy-fs.o  ./build/test/t_workq.o  ./build/test/t_sleeplock.o  ./build/test/t_mm.o  ./build/test/t_semaphore_t.o  ./build/test/t_blk.o  ./build/test/t_buf.o  ./build/test/t_kmem_cache.o  ./build/test/t_test_mm.o  ./build/kernel/main.o  ./build/kernel/timer.o  ./build/kernel/work.o  ./build/kernel/trap/temp.o  ./build/kernel/trap/sysfile.o  ./build/kernel/trap/trap.o  ./build/kernel/trap/syscall.o  ./build/kernel/proc/sched.o  ./build/kernel/proc/proc.o  ./build/kernel/proc/signal.o  ./build/kernel/proc/elf.o  ./build/kernel/dev/devs.o  ./build/kernel/dev/char/console.o  ./build/kernel/dev/blk/request.o  ./build/kernel/dev/blk/buf.o  ./build/kernel/dev/blk/flush.o  ./build/kernel/dev/blk/gendisk.o  ./build/kernel/dev/blk/bio.o  ./build/kernel/dev/blk/blk_dev.o  ./build/kernel/file.o  ./build/kernel/init.o  ./build/kernel/vm/vma.o  ./build/kernel/vm/vm.o  ./build/kernel/vm/kswapd.o  ./build/mm/page.o  ./build/mm/mm.o  ./build/mm/slab.o  ./build/mm/slab_copy.o  ./build/mm/kmalloc.o  ./build/lib/bitmap.o  ./build/lib/mutex.o  ./build/lib/math.o  ./build/lib/semaphore.o  ./build/lib/spinlock.o  ./build/lib/string.o  ./build/lib/sleeplock.o  ./build/lib/hash.o  ./build/lib/print.o  ./build/lib/lru.o  ./build/lib/rbtree.o  ./build/boot/entry.o  ./build/kernel/swtch.o  ./build/kernel/trap/kernelvec.o  ./build/kernel/trap/uservec.o 
 # riscv64-unknown-elf-objcopy -S -O binary build/Kernel ./build/Kernel_BIN
 riscv64-unknown-elf-objdump -j .text -S build/Kernel > ./build/kernel.asm
 riscv64-unknown-elf-objdump -t build/Kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > ./build/kernel.sym
 qemu-system-riscv64 -machine virt -bios none -kernel ./build/Kernel -m 128M -smp 4 -nographic -serial mon:stdio -global virtio-mmio.force-legacy=false -drive file=virtio_disk.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+alloc: page: 31744 ord:0
+alloc: page: 31745 ord:0
+alloc: page: 31746 ord:0
+alloc: page: 31747 ord:0
+alloc: page: 31748 ord:0
+alloc: page: 31749 ord:0
+alloc: page: 31750 ord:0
+alloc: page: 31751 ord:0
+alloc: page: 31752 ord:0
+alloc: page: 31760 ord:3
+alloc: page: 31753 ord:0
+alloc: page: 31768 ord:3
+alloc: page: 31754 ord:0
+alloc: page: 31776 ord:3
+alloc: page: 31755 ord:0
+alloc: page: 31784 ord:3
+alloc: page: 31756 ord:0
+alloc: page: 31757 ord:0
+alloc: page: 31758 ord:0
+alloc: page: 31759 ord:0
+alloc: page: 31792 ord:0
+alloc: page: 31793 ord:0
+alloc: page: 31794 ord:0
+alloc: page: 31795 ord:0
+alloc: page: 31796 ord:0
+alloc: page: 31797 ord:0
+alloc: page: 31798 ord:0
+alloc: page: 31799 ord:0
+alloc: page: 31800 ord:0
+alloc: page: 31801 ord:0
+alloc: page: 31802 ord:0
+alloc: page: 31803 ord:0
+alloc: page: 31804 ord:0
+alloc: page: 31805 ord:0
+alloc: page: 31806 ord:0
+alloc: page: 31807 ord:0
+alloc: page: 31808 ord:0
+alloc: page: 31809 ord:0
+alloc: page: 31810 ord:0
+alloc: page: 31811 ord:0
+alloc: page: 31812 ord:0
+alloc: page: 31813 ord:0
+alloc: page: 31814 ord:0
+alloc: page: 31815 ord:0
+alloc: page: 31816 ord:0
+alloc: page: 31817 ord:0
+alloc: page: 31818 ord:0
+alloc: page: 31819 ord:0
+alloc: page: 31820 ord:0
+alloc: page: 31821 ord:0
+alloc: page: 31822 ord:0
+alloc: page: 31823 ord:0
+alloc: page: 31824 ord:0
+alloc: page: 31825 ord:0
+alloc: page: 31826 ord:0
+alloc: page: 31827 ord:0
+alloc: page: 31828 ord:0
+alloc: page: 31829 ord:0
+alloc: page: 31830 ord:0
+alloc: page: 31831 ord:0
+alloc: page: 31832 ord:0
+alloc: page: 31833 ord:0
+alloc: page: 31834 ord:0
+alloc: page: 31835 ord:0
+alloc: page: 31836 ord:0
+alloc: page: 31837 ord:0
+alloc: page: 31838 ord:0
+alloc: page: 31839 ord:0
+alloc: page: 31840 ord:0
+alloc: page: 31841 ord:0
+alloc: page: 31842 ord:0
+alloc: page: 31843 ord:0
+alloc: page: 31844 ord:0
+alloc: page: 31845 ord:0
+alloc: page: 31846 ord:0
+alloc: page: 31847 ord:0
+alloc: page: 31848 ord:0
+alloc: page: 31849 ord:0
+alloc: page: 31850 ord:0
+alloc: page: 31851 ord:0
+alloc: page: 31852 ord:0
+alloc: page: 31853 ord:0
+alloc: page: 31854 ord:0
+alloc: page: 31855 ord:0
+alloc: page: 31856 ord:0
+alloc: page: 31857 ord:0
+alloc: page: 31858 ord:0
+alloc: page: 31859 ord:0
+alloc: page: 31860 ord:0
+alloc: page: 31861 ord:0
+alloc: page: 31862 ord:0
+alloc: page: 31863 ord:0
+alloc: page: 31864 ord:0
+alloc: page: 31865 ord:0
+alloc: page: 31866 ord:0
+alloc: page: 31867 ord:0
+alloc: page: 31868 ord:0
+alloc: page: 31869 ord:0
+alloc: page: 31870 ord:0
+alloc: page: 31871 ord:0
+alloc: page: 31872 ord:0
+alloc: page: 31873 ord:0
+alloc: page: 31874 ord:0
+alloc: page: 31875 ord:0
+alloc: page: 31876 ord:0
+alloc: page: 31877 ord:0
+alloc: page: 31878 ord:0
+alloc: page: 31879 ord:0
+alloc: page: 31880 ord:0
+alloc: page: 31881 ord:0
+alloc: page: 31882 ord:0
+alloc: page: 31883 ord:0
+alloc: page: 31884 ord:0
+alloc: page: 31885 ord:0
+alloc: page: 31886 ord:0
+alloc: page: 31887 ord:0
+alloc: page: 31888 ord:0
+alloc: page: 31889 ord:0
+alloc: page: 31890 ord:0
+alloc: page: 31891 ord:0
+alloc: page: 31892 ord:0
+alloc: page: 31893 ord:0
+alloc: page: 31894 ord:0
+alloc: page: 31895 ord:0
+alloc: page: 31896 ord:0
+alloc: page: 31897 ord:0
+alloc: page: 31898 ord:0
+alloc: page: 31899 ord:0
+alloc: page: 31900 ord:0
+alloc: page: 31901 ord:0
+alloc: page: 31902 ord:0
+alloc: page: 31903 ord:0
+alloc: page: 31904 ord:0
+alloc: page: 31905 ord:0
+alloc: page: 31906 ord:0
+alloc: page: 31907 ord:0
+alloc: page: 31908 ord:0
+alloc: page: 31910 ord:1
+alloc: page: 31909 ord:0
+alloc: page: 31912 ord:1
+alloc: page: 31914 ord:0
+alloc: page: 31916 ord:1
+alloc: page: 31915 ord:0
+alloc: page: 31918 ord:1
+alloc: page: 31920 ord:0
+alloc: page: 31924 ord:2
+alloc: page: 31921 ord:0
+alloc: page: 31928 ord:2
+alloc: page: 31922 ord:0
+alloc: page: 31932 ord:2
+alloc: page: 31923 ord:0
+alloc: page: 31936 ord:2
+alloc: page: 31940 ord:0
+alloc: page: 31944 ord:3
+alloc: page: 31941 ord:0
+alloc: page: 31952 ord:3
+alloc: page: 31942 ord:0
+alloc: page: 31960 ord:3
+alloc: page: 31943 ord:0
+alloc: page: 31968 ord:3
 mm_init ok
 { L: 0, N: 0 }	{ L: 1, N: 0 }	{ L: 2, N: 0 }	{ L: 3, N: 1 }	{ L: 4, N: 1 }	{ L: 5, N: 0 }	{ L: 6, N: 0 }	{ L: 7, N: 0 }	{ L: 8, N: 1 }	{ L: 9, N: 1 }	{ L: 10, N: 30 }	
+alloc: page: 31976 ord:0
+alloc: page: 31977 ord:0
+alloc: page: 31978 ord:0
+alloc: page: 31979 ord:0
+alloc: page: 31980 ord:0
+alloc: page: 31981 ord:0
+alloc: page: 31982 ord:0
+alloc: page: 31983 ord:0
+alloc: page: 31984 ord:0
+alloc: page: 31985 ord:0
+alloc: page: 31986 ord:0
+alloc: page: 31987 ord:0
+alloc: page: 31988 ord:0
+alloc: page: 31989 ord:0
+alloc: page: 31990 ord:0
+alloc: page: 31991 ord:0
+alloc: page: 31992 ord:0
+alloc: page: 31993 ord:0
+alloc: page: 31994 ord:0
+alloc: page: 31995 ord:0
+alloc: page: 31996 ord:0
+alloc: page: 31997 ord:0
+alloc: page: 31998 ord:0
+alloc: page: 31999 ord:0
+alloc: page: 32000 ord:0
+alloc: page: 32001 ord:0
+alloc: page: 32002 ord:0
+alloc: page: 32003 ord:0
+alloc: page: 32004 ord:0
+alloc: page: 32005 ord:0
+alloc: page: 32006 ord:0
+alloc: page: 32007 ord:0
+alloc: page: 32008 ord:0
+alloc: page: 32009 ord:0
+alloc: page: 32010 ord:0
+alloc: page: 32011 ord:0
+alloc: page: 32012 ord:0
+alloc: page: 32013 ord:0
+alloc: page: 32014 ord:0
+alloc: page: 32015 ord:0
+alloc: page: 32016 ord:0
+alloc: page: 32017 ord:0
+alloc: page: 32018 ord:0
+alloc: page: 32019 ord:0
+alloc: page: 32020 ord:0
+alloc: page: 32021 ord:0
+alloc: page: 32022 ord:0
+alloc: page: 32023 ord:0
+alloc: page: 32024 ord:0
+alloc: page: 32025 ord:0
+alloc: page: 32026 ord:0
+alloc: page: 32027 ord:0
+alloc: page: 32028 ord:0
+alloc: page: 32029 ord:0
+alloc: page: 32030 ord:0
+alloc: page: 32031 ord:0
+alloc: page: 32032 ord:0
+alloc: page: 32033 ord:0
+alloc: page: 32034 ord:0
+alloc: page: 32035 ord:0
+alloc: page: 32036 ord:0
+alloc: page: 32037 ord:0
+alloc: page: 32038 ord:0
+alloc: page: 32039 ord:0
+alloc: page: 32040 ord:0
+alloc: page: 32041 ord:0
+alloc: page: 32042 ord:0
+alloc: page: 32043 ord:0
+alloc: page: 32044 ord:0
+alloc: page: 32045 ord:0
+alloc: page: 32046 ord:0
+alloc: page: 32047 ord:0
+alloc: page: 32048 ord:0
+alloc: page: 32049 ord:0
+alloc: page: 32050 ord:0
+alloc: page: 32051 ord:0
+alloc: page: 32052 ord:0
+alloc: page: 32053 ord:0
+alloc: page: 32054 ord:0
+alloc: page: 32055 ord:0
+alloc: page: 32056 ord:0
+alloc: page: 32057 ord:0
+alloc: page: 32058 ord:0
+alloc: page: 32059 ord:0
+alloc: page: 32060 ord:0
+alloc: page: 32061 ord:0
+alloc: page: 32062 ord:0
+alloc: page: 32063 ord:0
+alloc: page: 32064 ord:0
+alloc: page: 32065 ord:0
+alloc: page: 32066 ord:0
+alloc: page: 32067 ord:0
+alloc: page: 32068 ord:0
+alloc: page: 32069 ord:0
+alloc: page: 32070 ord:0
+alloc: page: 32071 ord:0
+alloc: page: 32072 ord:0
+alloc: page: 32073 ord:0
+alloc: page: 32074 ord:0
+alloc: page: 32075 ord:0
 kvm init ok!
+alloc: page: 32076 ord:0
 hart 0 init_s ok
 xv6 kernel is booting
 hart 0 starting
-hart 1 starting
 hart 3 starting
-pid: 0, 	name: init_t, in running on hart 0
+alloc: page: 32077 ord:0
 hart 2 starting
+alloc: page: 32078 ord:0
+alloc: page: 32079 ord:0
+alloc: page: 32080 ord:0
+hart 1 starting
+alloc: page: 32081 ord:0
+alloc: page: 32082 ord:0
+alloc: page: 32088 ord:3
+alloc: page: 32083 ord:0
+alloc: page: 32084 ord:0
+alloc: page: 32085 ord:0
 easy fs init start...
-pid: 1, 	name: work_handler, in running on hart 0
-pid: 4, 	name: work_handler, in running on hart 3
-pid: 2, 	name: work_handler, in running on hart 1
-pid: 3, 	name: work_handler, in running on hart 2
-pid: 6, 	name: gen_flush_bhash, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 0, 	name: init_t, in running on hart 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 0, 	name: init_t, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 0, 	name: init_t, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 7, 	name: efs_sync, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 0, 	name: init_t, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 0, 	name: init_t, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 0, 	name: init_t, in running on hart 3
+alloc: page: 32086 ord:0
+alloc: page: 32087 ord:0
+alloc: page: 32096 ord:0
+alloc: page: 32112 ord:4
+alloc: page: 32097 ord:0
+alloc: page: 32098 ord:0
+alloc: page: 32099 ord:0
+alloc: page: 32100 ord:0
+alloc: page: 32101 ord:0
+alloc: page: 32102 ord:0
+alloc: page: 32103 ord:0
 easy fs init done
+alloc: page: 32104 ord:0
+alloc: page: 32105 ord:0
+alloc: page: 32106 ord:0
+alloc: page: 32107 ord:0
 [exec] pid: 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 8, 	name: kswapd, in running on hart 0
-pid: 0, 	name: /init, in running on hart 2
-aa, pid: 0
-aa2, pid: 0
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 0, 	name: /init, in running on hart 1
-aa, pid: 0
-aa2, pid: 0
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 0, 	name: /init, in running on hart 3
-aa, pid: 0
-aa2, pid: 0
+alloc: page: 32108 ord:0
+alloc: page: 32109 ord:0
+alloc: page: 32110 ord:0
+alloc: page: 32111 ord:0
+alloc: page: 32128 ord:0
 [exec] end
-aa, pid: 0
-0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
-b, pid: 0
-pid: 0, 	name: /init, in running on hart 0
-aa, pid: 0
-aa2, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
-b, pid: 0
-pid: 8, 	name: kswapd, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 8, 	name: kswapd, in running on hart 0
-pid: 0, 	name: /init, in running on hart 1
-aa, pid: 0
-aa2, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000000,0x0000000087c17ff0
-b, pid: 0
+alloc: page: 32129 ord:0
+alloc: page: 32130 ord:0
+alloc: page: 32131 ord:0
+alloc: page: 32132 ord:0
 [fork] pa-pid: 0, child-pid: 9
+alloc: page: 32133 ord:0
+alloc: page: 32134 ord:0
+alloc: page: 32135 ord:0
+alloc: page: 32136 ord:0
+alloc: page: 32137 ord:0
 [fork] end
-aa, pid: 0
-0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
-b, pid: 0
-pid: 9, 	name: /init, in running on hart 2
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000042,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000042,0x0000000087c1dff0
-b, pid: 9
-pid: 8, 	name: kswapd, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 8, 	name: kswapd, in running on hart 2
-pid: 9, 	name: /init, in running on hart 3
-aa, pid: 9
-aa2, pid: 9
+alloc: page: 32138 ord:0
+alloc: page: 32139 ord:0
 [exec] pid: 9
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 9, 	name: /bin/sh, in running on hart 1
-aa, pid: 9
-aa2, pid: 9
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 9, 	name: /bin/sh, in running on hart 0
-aa, pid: 9
-aa2, pid: 9
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 9, 	name: /bin/sh, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 5, 	name: gen_start_io, in running on hart 0
-pid: 5, 	name: gen_start_io, in running on hart 1
-pid: 9, 	name: /bin/sh, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 9, 	name: /bin/sh, in running on hart 0
-aa, pid: 9
-aa2, pid: 9
+alloc: page: 32140 ord:0
+alloc: page: 32141 ord:0
+free : 32138, ref 0, ord: 0
+Break merge: 32139 buddy busy
+Add page 32138 to free_lists[0]
+
+alloc: page: 32138 ord:0
+alloc: page: 32142 ord:0
+alloc: page: 32143 ord:0
+alloc: page: 32144 ord:0
 [exec] end
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-pid: 8, 	name: kswapd, in running on hart 1
-pid: 5, 	name: gen_start_io, in running on hart 2
-pid: 5, 	name: gen_start_io, in running on hart 3
-pid: 8, 	name: kswapd, in running on hart 0
-pid: 9, 	name: /bin/sh, in running on hart 1
-aa, pid: 9
-aa2, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x0000000200000000,0x0000000087c1dff0
-b, pid: 9
-pid: 2, 	name: work_handler, in running on hart 1
-pid: 9, 	name: /bin/sh, in running on hart 2
-aa, pid: 9
-aa2, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
-b, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
-b, pid: 9
-pid: 9, 	name: /bin/sh, in running on hart 3
-aa, pid: 9
-aa2, pid: 9
-aa, pid: 9
-10x0000000087c1c000,0x00000002000000b4,0x0000000087c1dff0
-b, pid: 9
+alloc: page: 32145 ord:0
+alloc: page: 32146 ord:0
+alloc: page: 32147 ord:0
+alloc: page: 32148 ord:0
 [exit], pid: 9
+free : 32147, ref 0, ord: 0
+Break merge: 32146 buddy busy
+Add page 32147 to free_lists[0]
+
+free : 32142, ref 0, ord: 0
+Break merge: 32143 buddy busy
+Add page 32142 to free_lists[0]
+
 [exit] end pid: 9, thread: /bin/sh exit
-pid: 0, 	name: /init, in running on hart 0
-aa, pid: 0
-aa2, pid: 0
+free_user_pgd, pgd: 0x0000000087d8a000, kern:0x0000000087ce8000
+free : 32138, ref 0, ord: 0
+Break merge: 32139 buddy busy
+Add page 32138 to free_lists[0]
+
 [wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000102,0x0000000087c17ff0
-b, pid: 0
 [fork] pa-pid: 0, child-pid: 10
+alloc: page: 32138 ord:0
+alloc: page: 32142 ord:0
+alloc: page: 32147 ord:0
+alloc: page: 32149 ord:0
+alloc: page: 32150 ord:0
 [fork] end
-aa, pid: 0
-0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
-b, pid: 0
-aa, pid: 0
-0x0000000087c16000,0x0000000200000042,0x0000000087c17ff0
-b, pid: 0
-pid: 10, 	name: /init, in running on hart 1
-aa, pid: 10
-10x0000000087d58000,0x0000000200000042,0x0000000087d59ff0
-b, pid: 10
-pid: 10, unknown scause
-pid: 10, unknown scause: 0x0000000000000002, sepc: 0x0000000200000042, stval: 0x0000000000000000
-[panic]: !!!
-[panic]: pid: 10, name:/init
-excep_handler unknown scause, sp:0x00000001ffffefd8
-[panic]: !!!
-pid: 3, 	name: work_handler, in running on hart 2
-pid: 7, 	name: efs_sync, in running on hart 2
-pid: 3, 	name: work_handler, in running on hart 2
-pid: 6, 	name: gen_flush_bhash, in running on hart 3
-pid: 3, 	name: work_handler, in running on hart 2
-pid: 7, 	name: efs_sync, in running on hart 0
+alloc: page: 32151 ord:0
+[exec] pid: 10
+free : 32151, ref 0, ord: 0
+Break merge: 32150 buddy busy
+Add page 32151 to free_lists[0]
+
+alloc: page: 32151 ord:0
+alloc: page: 32152 ord:0
+alloc: page: 32153 ord:0
+alloc: page: 32154 ord:0
+[exec] end
+alloc: page: 32155 ord:0
+alloc: page: 32156 ord:0
+alloc: page: 32157 ord:0
+[exit], pid: 10
+free : 32157, ref 0, ord: 0
+Break merge: 32156 buddy busy
+Add page 32157 to free_lists[0]
+
+free : 32152, ref 0, ord: 0
+Break merge: 32153 buddy busy
+Add page 32152 to free_lists[0]
+
+[exit] end pid: 10, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087d97000, kern:0x0000000087ce8000
+free : 32151, ref 0, ord: 0
+Break merge: 32150 buddy busy
+Add page 32151 to free_lists[0]
+
+[wait]: pid: 10, thread: /bin/sh code: 11 ok. by 0
+[fork] pa-pid: 0, child-pid: 9
+alloc: page: 32151 ord:0
+alloc: page: 32152 ord:0
+alloc: page: 32157 ord:0
+alloc: page: 32158 ord:0
+alloc: page: 32159 ord:0
+[fork] end
+alloc: page: 32160 ord:0
+[exec] pid: 9
+free : 32160, ref 0, ord: 0
+Merged to level 1, new page: 32160
+Merged to level 2, new page: 32160
+Merged to level 3, new page: 32160
+Merged to level 4, new page: 32160
+Merged to level 5, new page: 32160
+Break merge: 32128 buddy busy
+Add page 32160 to free_lists[5]
+
+alloc: page: 32160 ord:0
+alloc: page: 32161 ord:0
+alloc: page: 32162 ord:0
+alloc: page: 32163 ord:0
+[exec] end
+alloc: page: 32164 ord:0
+alloc: page: 32165 ord:0
+alloc: page: 32166 ord:0
+[exit], pid: 9
+free : 32166, ref 0, ord: 0
+Merged to level 1, new page: 32166
+Break merge: 32164 buddy busy
+Add page 32166 to free_lists[1]
+
+free : 32161, ref 0, ord: 0
+Break merge: 32160 buddy busy
+Add page 32161 to free_lists[0]
+
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087da0000, kern:0x0000000087ce8000
+free : 32160, ref 0, ord: 0
+Merged to level 1, new page: 32160
+Break merge: 32162 buddy busy
+Add page 32160 to free_lists[1]
+
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+alloc: page: 32160 ord:0
+alloc: page: 32161 ord:0
+alloc: page: 32166 ord:0
+alloc: page: 32168 ord:3
+[fork] pa-pid: 0, child-pid: 11
+alloc: page: 32167 ord:0
+alloc: page: 32176 ord:0
+alloc: page: 32177 ord:0
+alloc: page: 32178 ord:0
+alloc: page: 32179 ord:0
+[fork] end
 QEMU: Terminated
 

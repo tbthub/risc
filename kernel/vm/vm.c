@@ -418,8 +418,10 @@ int alloc_kern_pgd(struct mm_struct *mm)
 {
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
-    if (!mm->pgd)
+    if (!mm->pgd) {
+        panic("alloc_kern_pgd mm->pgd\n");
         return -1;
+    }
 
     // 把内核也映射到用户地址空间
     memcpy(mm->pgd, kernel_pagetable, PGSIZE);
@@ -432,8 +434,11 @@ void free_user_pgd(struct mm_struct *mm)
         panic("mm\n");
     }
     // 内核线程是没有页表的
-    if (mm->pgd)
+    if (mm->pgd) {
+        printk("free_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
         __free_page(mm->pgd);
+        mm->pgd = NULL;
+    }
 }
 
 // ! 我们暂时没有实现页表本身的释放，后面补充

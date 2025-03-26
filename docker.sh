@@ -1,5 +1,5 @@
 #!/bin/bash
-docker exec -it  riscv64-new bash
+docker exec -it  risc bash
 
 #cloc .
 

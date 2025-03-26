@@ -2,10 +2,10 @@ version: '3.8'
 services:
   os:
     image: bwtang/xv6-env
-    container_name: riscv64-new
+    container_name: risc
     volumes:
-      - ./:/riscv64
-    working_dir: /riscv64
+      - ./:/risc
+    working_dir: /risc
     command: bash
     cpus: '1'  # 限制最多使用 1 个 CPU 的算力
     restart: unless-stopped

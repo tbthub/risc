@@ -80,10 +80,10 @@ void sched()
         // 如果发生了进程切换
         if (r_satp() != MAKE_SATP(thread->task->mm.pgd)) {
             sfence_vma();
-            printk("aa, pid: %d\n",thread->pid);
+            // printk("aa, pid: %d\n",thread->pid);
             w_satp(MAKE_SATP(thread->task->mm.pgd));
             sfence_vma();
-            printk("aa2, pid: %d\n",thread->pid);
+            // printk("aa2, pid: %d\n",thread->pid);
         }
         spin_unlock(&thread->task->mm.lock);
     }

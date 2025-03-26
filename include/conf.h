@@ -17,14 +17,12 @@
 // #define DEBUG_BIO          // 显示 bio 请求链
 // #define DEBUG_GEN_BUF      // 显示 gendisk buf 读写情况
 // #define DEBUG_TASK_ADD_CPU // 显示任务添加到所在的 cpuid
-#define DEBUG_TASK_ON_CPU  // 显示当前 CPU 上运行的线程名
+// #define DEBUG_TASK_ON_CPU  // 显示当前 CPU 上运行的线程名
 // #define DEBUG_RQ           // 显示 IO 请求
 // #define DEBUG_COW          // 显示 COW
 // #define DEBUG_PF           // 显示缺页
 // #define DEBUG_SF_PFMAP  // 显示栈、文件页面映射（因缺页）
 // #define DEBUG_SYSCALL      // 显示来自用户空间的系统调用
-#define DEBUG_EXIT  // 显示线程退出情况
-#define DEBUG_WAIT  // 显示 wait 回收情况
 
 #endif
 // TODO
