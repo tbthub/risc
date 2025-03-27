@@ -636,8 +636,8 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     if (ch == NULL)
         return -1;
 
-    // (wait) 释放顶层页表
-    free_user_pgd(&ch->task->mm);
+    // ! (wait) 释放顶层页表
+    // free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
     kmem_cache_free(&task_struct_kmem_cache, ch->task);

@@ -142,10 +142,7 @@ static void vma_gen_close(struct mm_struct *mm, struct vm_area_struct *v)
             continue;
         }
         else if (*pte & PTE_V) {
-            {
-                printk("vma close: %p\n", PTE2PA(*pte));
-                __free_page((void *)PTE2PA(*pte));
-            }
+            __free_page((void *)PTE2PA(*pte));
             *pte = 0;
         }
 

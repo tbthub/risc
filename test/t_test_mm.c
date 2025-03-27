@@ -270,13 +270,13 @@ int t_mem_test3()
     }
     
     printk("----------4----------\n");
-    for (i = 0; i < PAGE_CNT; i++) {
+    for (i = PAGE_CNT / 2; i < PAGE_CNT; i++) {
         __free_pages(mem_test[i], i % 4);
         mem_test[i] = NULL;
     }
 
     printk("----------5----------\n");
-    for (i = 0; i < PAGE_CNT; i++) {
+    for (i = PAGE_CNT / 2; i < PAGE_CNT; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
         if (!ptr) {
             panic("__alloc_page returned NULL\n");
@@ -293,7 +293,18 @@ int t_mem_test3()
         }
     }
 
+    printk("----------6----------\n");
+    for (i = 0; i < PAGE_CNT; i++) {
+        __free_pages(mem_test[i], i % 4);
+        mem_test[i] = NULL;
+    }
     
+    printk("----------7----------\n");
+    for (i = 0; i < PAGE_CNT; i++) {
+        __free_pages(mem_test[i], i % 4);
+        mem_test[i] = NULL;
+    }
+   
     printk("over...\n");
     mm_debug();
     return 0;

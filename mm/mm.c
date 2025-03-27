@@ -55,7 +55,7 @@ void mm_debug2()
         uint len = list_len(&Buddy.free_lists[i]);
         free_cnt += (1 << i) * len;
     }
-    printk("p:%d\n",free_cnt);
+    printk("free mem:%d\n", free_cnt);
 }
 
 // 分配
@@ -78,18 +78,18 @@ static struct page *buddy_alloc(const int order)
             // 弹出一个 page
             page = list_entry(list_pop(&Buddy.free_lists[i]), struct page, buddy);
 
-            // printk("page: %p l: %d i: %d\n", PG2PA(page), i, page - mem_map.pages);
+            // printk("page: %p order: %d\n", page - mem_map.pages, i);
 
             // 拆分块直到满足所需 order
             for (j = i; j > order; j--) {
                 // 寻找下一级的伙伴(这里的伙伴存在的话一定是空闲的)
                 buddy_page = find_buddy(page, j - 1);
-                // printk("bu: %p, l: %d i: %d\n", PG2PA(buddy_page), j - 1, buddy_page - mem_map.pages);
+                // printk("cut budddy: %d, order: %d\n", buddy_page - mem_map.pages, j - 1);
                 if (!buddy_page)
                     goto bad;
 
-                // if(!page_is_free(buddy_page))
-                //     break;
+                if (!page_is_free(buddy_page))
+                    break;
 
                 // 加到下一级的链表中
                 list_add_head(&buddy_page->buddy, &Buddy.free_lists[j - 1]);
@@ -224,24 +224,34 @@ void *__alloc_page(uint32 flags)
 // 释放 pages
 void free_pages(struct page *pages, const int order)
 {
-    assert(page_count(pages) > 0, "free_pages page_count\n");
-    if (put_page_test(pages))
+    if (pages == 0)
+        return;
+    assert(page_count(pages) > 0, "free_pages page_count: %d\n", page_count(pages));
+    if (put_page_test(pages)) {
+        // printk("put_page_test: %d, %d\n",pages - mem_map.pages,page_count(pages));
         buddy_free(pages, order);
+    }
 }
 
 inline void __free_pages(void *addr, const int order)
 {
+    if (addr == NULL)
+        return;
     free_pages(PA2PG(addr), order);
 }
 
 // 释放一个 page
 inline void free_page(struct page *page)
 {
+    if (page == NULL)
+        return;
     free_pages(page, 0);
 }
 
 inline void __free_page(void *addr)
 {
+    if (addr == NULL)
+        return;
     free_pages(PA2PG(addr), 0);
 }
 
@@ -253,5 +263,5 @@ void mm_init()
     kmem_cache_init();
     kmalloc_init();
     printk("mm_init ok\n");
-    mm_debug();
+    mm_debug2();
 }

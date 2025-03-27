@@ -138,10 +138,6 @@ __attribute__((noreturn)) void usertrapret()
 {
     intr_off();
     struct thread_info *p = myproc();
-    // printk("aa, pid: %d\n",p->pid);
-    // if(p->pid != 0){
-    //     printk("1");
-    // }
     signal_handler(&p->task->sigs);
     // printk("[u-ret]: sig ok.\n");
     // 我们即将把陷阱的目标从
@@ -167,8 +163,8 @@ __attribute__((noreturn)) void usertrapret()
     x &= ~SSTATUS_SPP;  // clear SPP to 0 for user mode
     x |= SSTATUS_SPIE;  // enable interrupts in user mode
     w_sstatus(x);
-    printk("b, pid: %d\n",p->pid);
-    vm2pa_show(&myproc()->task->mm);
+    // printk("b, pid: %d\n",p->pid);
+    // vm2pa_show(&myproc()->task->mm);
     userret();
 }
 

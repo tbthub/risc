@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  os:
+  riscv:
     image: bwtang/xv6-env
     container_name: risc
     volumes:
