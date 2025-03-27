@@ -1,0 +1,614 @@
+qemu-system-riscv64 -machine virt -bios none -kernel ./build/Kernel -m 128M -smp 4 -nographic -serial mon:stdio -global virtio-mmio.force-legacy=false -drive file=virtio_disk.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+mm_init ok
+{ L: 0, N: 0 }	{ L: 1, N: 0 }	{ L: 2, N: 0 }	{ L: 3, N: 1 }	{ L: 4, N: 1 }	{ L: 5, N: 0 }	{ L: 6, N: 0 }	{ L: 7, N: 0 }	{ L: 8, N: 1 }	{ L: 9, N: 1 }	{ L: 10, N: 30 }	
+kvm init ok!
+hart 0 init_s ok
+xv6 kernel is booting
+hart 0 starting
+hart 3 starting
+hart 1 starting
+hart 2 starting
+easy fs init start...
+easy fs init done
+alloc_user_pgd, pgd: 0x0000000087d6b000, kern:0x0000000087ce8000
+[exec] pid: 0
+alloc_user_pgd, pgd: 0x0000000087d6d000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087d6d, proc satp: 0x8000000000087d6d
+page_fault: pid: 0, name:/init
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c69f80 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 0, f-maps: 0x0000000200000000 - 0x0000000087d83000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+----------------
+p:31355
+[fork] pa-pid: 0, child-pid: 9
+alloc_user_pgd, pgd: 0x0000000087d85000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087d85, proc satp: 0x8000000000087d85
+page_fault: pid: 9, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c6bf40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 9, f-maps: 0x0000000200001000 - 0x0000000087d8a000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087d8a000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 9
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087d8a000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087d8a000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087d8a, proc satp: 0x8000000000087d8a
+page_fault: pid: 9, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 9, f-maps: 0x0000000200000000 - 0x0000000087d93000
+va: 0x0000000200000000, pa: 0x0000000087d93000
+va: 0x00000001ffffe000, pa: 0x0000000087d8e000
+----------------
+[exit], pid: 9
+vma close: 0x0000000087d93000
+vma close: 0x0000000087d8e000
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087d8a000, kern:0x0000000087ce8000
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+p:31342
+[fork] pa-pid: 0, child-pid: 10
+alloc_user_pgd, pgd: 0x0000000087d8a000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087d8a, proc satp: 0x8000000000087d8a
+page_fault: pid: 10, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c65f00 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 10, f-maps: 0x0000000200001000 - 0x0000000087d97000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087d97000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 10
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087d97000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087d97000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087d97, proc satp: 0x8000000000087d97
+page_fault: pid: 10, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 10, f-maps: 0x0000000200000000 - 0x0000000087d9d000
+va: 0x0000000200000000, pa: 0x0000000087d9d000
+va: 0x00000001ffffe000, pa: 0x0000000087d98000
+----------------
+[exit], pid: 10
+vma close: 0x0000000087d9d000
+vma close: 0x0000000087d98000
+[exit] end pid: 10, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087d97000, kern:0x0000000087ce8000
+[wait]: pid: 10, thread: /bin/sh code: 11 ok. by 0
+p:31333
+[fork] pa-pid: 0, child-pid: 9
+alloc_user_pgd, pgd: 0x0000000087d97000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087d97, proc satp: 0x8000000000087d97
+page_fault: pid: 9, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c6bf40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 9, f-maps: 0x0000000200001000 - 0x0000000087da0000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087da0000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 9
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087da0000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087da0000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087da0, proc satp: 0x8000000000087da0
+page_fault: pid: 9, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c65f80 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 9, f-maps: 0x0000000200000000 - 0x0000000087da6000
+va: 0x0000000200000000, pa: 0x0000000087da6000
+va: 0x00000001ffffe000, pa: 0x0000000087da1000
+----------------
+[exit], pid: 9
+vma close: 0x0000000087da6000
+vma close: 0x0000000087da1000
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087da0000, kern:0x0000000087ce8000
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+p:31324
+[fork] pa-pid: 0, child-pid: 11
+alloc_user_pgd, pgd: 0x0000000087da0000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087da0, proc satp: 0x8000000000087da0
+page_fault: pid: 11, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c69ec0 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 11, f-maps: 0x0000000200001000 - 0x0000000087da9000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087da9000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 11
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087da9000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087da9000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087da9, proc satp: 0x8000000000087da9
+page_fault: pid: 11, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c6bfc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 11, f-maps: 0x0000000200000000 - 0x0000000087daf000
+va: 0x0000000200000000, pa: 0x0000000087daf000
+va: 0x00000001ffffe000, pa: 0x0000000087daa000
+----------------
+[exit], pid: 11
+vma close: 0x0000000087daf000
+vma close: 0x0000000087daa000
+[exit] end pid: 11, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087da9000, kern:0x0000000087ce8000
+[wait]: pid: 11, thread: /bin/sh code: 11 ok. by 0
+p:31315
+[fork] pa-pid: 0, child-pid: 12
+alloc_user_pgd, pgd: 0x0000000087da9000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087da9, proc satp: 0x8000000000087da9
+page_fault: pid: 12, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c67f40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 12, f-maps: 0x0000000200001000 - 0x0000000087db2000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087db2000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 12
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087db2000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087db2000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087db2, proc satp: 0x8000000000087db2
+page_fault: pid: 12, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c69f40 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 12, f-maps: 0x0000000200000000 - 0x0000000087db8000
+va: 0x0000000200000000, pa: 0x0000000087db8000
+va: 0x00000001ffffe000, pa: 0x0000000087db3000
+----------------
+[exit], pid: 12
+vma close: 0x0000000087db8000
+vma close: 0x0000000087db3000
+[exit] end pid: 12, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087db2000, kern:0x0000000087ce8000
+[wait]: pid: 12, thread: /bin/sh code: 11 ok. by 0
+p:31306
+[fork] pa-pid: 0, child-pid: 10
+alloc_user_pgd, pgd: 0x0000000087db2000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087db2, proc satp: 0x8000000000087db2
+page_fault: pid: 10, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c65f00 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 10, f-maps: 0x0000000200001000 - 0x0000000087dbb000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087dbb000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 10
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087dbb000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087dbb000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087dbb, proc satp: 0x8000000000087dbb
+page_fault: pid: 10, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 10, f-maps: 0x0000000200000000 - 0x0000000087dc1000
+va: 0x0000000200000000, pa: 0x0000000087dc1000
+va: 0x00000001ffffe000, pa: 0x0000000087dbc000
+----------------
+[exit], pid: 10
+vma close: 0x0000000087dc1000
+vma close: 0x0000000087dbc000
+[exit] end pid: 10, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087dbb000, kern:0x0000000087ce8000
+[wait]: pid: 10, thread: /bin/sh code: 11 ok. by 0
+p:31297
+[fork] pa-pid: 0, child-pid: 9
+alloc_user_pgd, pgd: 0x0000000087dbb000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087dbb, proc satp: 0x8000000000087dbb
+page_fault: pid: 9, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c6bf40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 9, f-maps: 0x0000000200001000 - 0x0000000087dc4000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087dc4000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 9
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087dc4000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087dc4000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087dc4, proc satp: 0x8000000000087dc4
+page_fault: pid: 9, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 9, f-maps: 0x0000000200000000 - 0x0000000087dca000
+va: 0x0000000200000000, pa: 0x0000000087dca000
+va: 0x00000001ffffe000, pa: 0x0000000087dc5000
+----------------
+[exit], pid: 9
+vma close: 0x0000000087dca000
+vma close: 0x0000000087dc5000
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087dc4000, kern:0x0000000087ce8000
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+p:31288
+[fork] pa-pid: 0, child-pid: 9
+alloc_user_pgd, pgd: 0x0000000087dc4000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087dc4, proc satp: 0x8000000000087dc4
+page_fault: pid: 9, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c6bf40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 9, f-maps: 0x0000000200001000 - 0x0000000087dcd000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087dcd000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 9
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087dcd000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087dcd000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087dcd, proc satp: 0x8000000000087dcd
+page_fault: pid: 9, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c65f80 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 9, f-maps: 0x0000000200000000 - 0x0000000087dd3000
+va: 0x0000000200000000, pa: 0x0000000087dd3000
+va: 0x00000001ffffe000, pa: 0x0000000087dce000
+----------------
+[exit], pid: 9
+vma close: 0x0000000087dd3000
+vma close: 0x0000000087dce000
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087dcd000, kern:0x0000000087ce8000
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+p:31279
+[fork] pa-pid: 0, child-pid: 11
+alloc_user_pgd, pgd: 0x0000000087dcd000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087dcd, proc satp: 0x8000000000087dcd
+page_fault: pid: 11, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c69ec0 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 11, f-maps: 0x0000000200001000 - 0x0000000087dd6000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087dd6000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 11
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087dd6000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087dd6000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087dd6, proc satp: 0x8000000000087dd6
+page_fault: pid: 11, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c6bfc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 11, f-maps: 0x0000000200000000 - 0x0000000087ddc000
+va: 0x0000000200000000, pa: 0x0000000087ddc000
+va: 0x00000001ffffe000, pa: 0x0000000087dd7000
+----------------
+[exit], pid: 11
+vma close: 0x0000000087ddc000
+vma close: 0x0000000087dd7000
+[exit] end pid: 11, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087dd6000, kern:0x0000000087ce8000
+[wait]: pid: 11, thread: /bin/sh code: 11 ok. by 0
+p:31270
+[fork] pa-pid: 0, child-pid: 12
+alloc_user_pgd, pgd: 0x0000000087dd6000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087dd6, proc satp: 0x8000000000087dd6
+page_fault: pid: 12, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c67f40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 12, f-maps: 0x0000000200001000 - 0x0000000087ddf000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087ddf000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 12
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087ddf000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087ddf000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087ddf, proc satp: 0x8000000000087ddf
+page_fault: pid: 12, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c69f40 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 12, f-maps: 0x0000000200000000 - 0x0000000087de5000
+va: 0x0000000200000000, pa: 0x0000000087de5000
+va: 0x00000001ffffe000, pa: 0x0000000087de0000
+----------------
+[exit], pid: 12
+vma close: 0x0000000087de5000
+vma close: 0x0000000087de0000
+[exit] end pid: 12, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087ddf000, kern:0x0000000087ce8000
+[wait]: pid: 12, thread: /bin/sh code: 11 ok. by 0
+p:31261
+[fork] pa-pid: 0, child-pid: 10
+alloc_user_pgd, pgd: 0x0000000087ddf000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087ddf, proc satp: 0x8000000000087ddf
+page_fault: pid: 10, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c65f00 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 10, f-maps: 0x0000000200001000 - 0x0000000087de8000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087de8000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 10
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087de8000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087de8000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087de8, proc satp: 0x8000000000087de8
+page_fault: pid: 10, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 10, f-maps: 0x0000000200000000 - 0x0000000087dee000
+va: 0x0000000200000000, pa: 0x0000000087dee000
+va: 0x00000001ffffe000, pa: 0x0000000087de9000
+----------------
+[exit], pid: 10
+vma close: 0x0000000087dee000
+vma close: 0x0000000087de9000
+[exit] end pid: 10, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087de8000, kern:0x0000000087ce8000
+[wait]: pid: 10, thread: /bin/sh code: 11 ok. by 0
+p:31252
+[fork] pa-pid: 0, child-pid: 9
+alloc_user_pgd, pgd: 0x0000000087de8000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087de8, proc satp: 0x8000000000087de8
+page_fault: pid: 9, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c6bf40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 9, f-maps: 0x0000000200001000 - 0x0000000087df1000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087df1000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 9
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087df1000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087df1000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087df1, proc satp: 0x8000000000087df1
+page_fault: pid: 9, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c65f80 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 9, f-maps: 0x0000000200000000 - 0x0000000087df7000
+va: 0x0000000200000000, pa: 0x0000000087df7000
+va: 0x00000001ffffe000, pa: 0x0000000087df2000
+----------------
+[exit], pid: 9
+vma close: 0x0000000087df7000
+vma close: 0x0000000087df2000
+[exit] end pid: 9, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087df1000, kern:0x0000000087ce8000
+[wait]: pid: 9, thread: /bin/sh code: 11 ok. by 0
+p:31243
+[fork] pa-pid: 0, child-pid: 11
+alloc_user_pgd, pgd: 0x0000000087df1000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087df1, proc satp: 0x8000000000087df1
+page_fault: pid: 11, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c69ec0 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 11, f-maps: 0x0000000200001000 - 0x0000000087dfa000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087dfa000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 11
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087dfa000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087dfa000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087dfa, proc satp: 0x8000000000087dfa
+page_fault: pid: 11, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c6bfc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 11, f-maps: 0x0000000200000000 - 0x0000000087e00000
+va: 0x0000000200000000, pa: 0x0000000087e00000
+va: 0x00000001ffffe000, pa: 0x0000000087dfb000
+----------------
+[exit], pid: 11
+vma close: 0x0000000087e00000
+vma close: 0x0000000087dfb000
+[exit] end pid: 11, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087dfa000, kern:0x0000000087ce8000
+[wait]: pid: 11, thread: /bin/sh code: 11 ok. by 0
+p:31234
+[fork] pa-pid: 0, child-pid: 12
+alloc_user_pgd, pgd: 0x0000000087dfa000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087dfa, proc satp: 0x8000000000087dfa
+page_fault: pid: 12, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c67f40 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 12, f-maps: 0x0000000200001000 - 0x0000000087e03000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087e03000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 12
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087e03000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087e03000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087e03, proc satp: 0x8000000000087e03
+page_fault: pid: 12, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c69f40 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 12, f-maps: 0x0000000200000000 - 0x0000000087e09000
+va: 0x0000000200000000, pa: 0x0000000087e09000
+va: 0x00000001ffffe000, pa: 0x0000000087e04000
+----------------
+[exit], pid: 12
+vma close: 0x0000000087e09000
+vma close: 0x0000000087e04000
+[exit] end pid: 12, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087e03000, kern:0x0000000087ce8000
+[wait]: pid: 12, thread: /bin/sh code: 11 ok. by 0
+p:31225
+[fork] pa-pid: 0, child-pid: 10
+alloc_user_pgd, pgd: 0x0000000087e03000, kern:0x0000000087ce8000
+[fork] end
+now satp: 0x8000000000087e03, proc satp: 0x8000000000087e03
+page_fault: pid: 10, name:/init
+scause: 0x000000000000000d spec: 0x0000000080004a4c stval: 0x0000000200001000 
+mmap: 0x0000000087c65f00 
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+start - end 0x0000000200001000 - 0x0000000200001fff
+start - end 0x0000000200000000 - 0x0000000200000fff
+pid: 10, f-maps: 0x0000000200001000 - 0x0000000087e0c000
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200001000, pa: 0x0000000087e0c000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+----------------
+[exec] pid: 10
+vma close: 0x0000000087d6e000
+vma close: 0x0000000087e0c000
+vma close: 0x0000000087d83000
+alloc_user_pgd, pgd: 0x0000000087e0c000, kern:0x0000000087ce8000
+[exec] end
+now satp: 0x8000000000087e0c, proc satp: 0x8000000000087e0c
+page_fault: pid: 10, name:/bin/sh
+scause: 0x000000000000000c spec: 0x0000000200000000 stval: 0x0000000200000000 
+mmap: 0x0000000087c67fc0 
+start - end 0x0000000200000000 - 0x0000000200000fff
+start - end 0x00000001ffffe000 - 0x00000001ffffefff
+pid: 10, f-maps: 0x0000000200000000 - 0x0000000087e12000
+va: 0x0000000200000000, pa: 0x0000000087e12000
+va: 0x00000001ffffe000, pa: 0x0000000087e0d000
+----------------
+[exit], pid: 10
+vma close: 0x0000000087e12000
+vma close: 0x0000000087e0d000
+[exit] end pid: 10, thread: /bin/sh exit
+free_user_pgd, pgd: 0x0000000087e0c000, kern:0x0000000087ce8000
+[wait]: pid: 10, thread: /bin/sh code: 11 ok. by 0
+p:31216
+[fork] pa-pid: 0, child-pid: 10
+alloc_user_pgd, pgd: 0x0000000087e0c000, kern:0x0000000087ce8000
+[fork] end
+pid: 10, unknown scause
+pid: 10, unknown scause: 0x0000000000000002, sepc: 0x0000000200000042, stval: 0x0000000000000000
+satp: 0x8000000000087e0c
+proc satp: 0x0000000087e0c000
+page: 1
+va: 0x00000001ffffe000, pa: 0x0000000087d6e000
+va: 0x0000000200000000, pa: 0x0000000087d83000
+[panic]: !!!
+[panic]: pid: 10, name:/init
+excep_handler unknown scause, sp:0x00000001ffffefd8
+[panic]: !!!
+QEMU: Terminated
+

@@ -40,7 +40,8 @@ static void init_thread(void *a)
     alloc_user_pgd(&p->task->mm);
     p->tf = kmem_cache_alloc(&tf_kmem_cache);
     spin_unlock(&p->lock);
-
+    
+    intr_off();
     do_exec("/init", NULL);
 }
 

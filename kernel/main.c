@@ -31,6 +31,7 @@ extern void init_s();
 extern void mm_init();
 extern int t_mem_test2();
 extern int t_mem_test1();
+extern int t_mem_test3();
 void main()
 {
      if (cpuid() == 0)
@@ -38,29 +39,29 @@ void main()
 
           cons_init();
           mm_init();
-          // t_mem_test2();
-          // intr_off();
-          // for (;;);
+          t_mem_test3();
+          intr_off();
+          for (;;);
           
-          kvm_init();
-          trap_init();
-          plic_init();
+          // kvm_init();
+          // trap_init();
+          // plic_init();
           
-          proc_init();
-          sched_init();
+          // proc_init();
+          // sched_init();
           
-          kvm_init_hart();
-          trap_inithart();
-          plic_inithart();
+          // kvm_init_hart();
+          // trap_inithart();
+          // plic_inithart();
           
-          init_s();
+          // init_s();
           
 
-          printk("hart 0 init_s ok\n");
-          printk("xv6 kernel is booting\n");
+          // printk("hart 0 init_s ok\n");
+          // printk("xv6 kernel is booting\n");
 
-          __sync_synchronize();
-          started = 1;
+          // __sync_synchronize();
+          // started = 1;
      }
      else
      {

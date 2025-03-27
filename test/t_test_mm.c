@@ -218,3 +218,83 @@ int t_mem_test2()
     mm_debug();
     return 0;
 }
+
+
+int t_mem_test3()
+{
+    mm_debug();
+    int i;
+    uint64 *ptr;
+    memset(mem_test, 0, sizeof(mem_test));
+    int aaa = 0;
+    printk("----------1----------\n");
+    for (i = 0; i < PAGE_CNT; i++) {
+        ptr = (uint64 *)__alloc_pages(0, i % 4);
+        if (!ptr) {
+            panic("__alloc_page returned NULL\n");
+        }
+        // printk("i: %d, ptr: %p\n",i, ptr);
+        if (ele_exist(ptr)) {
+            mm_debug();
+            panic("PAGE_CNT ele_exist\n");
+        }
+        mem_test[i] = ptr;
+
+        if (i % 100 == 0) {
+            printk("100- page: %d\n", aaa++);
+        }
+    }
+
+    printk("----------2----------\n");
+    for (i = 0; i < PAGE_CNT / 2; i++) {
+        __free_pages(mem_test[i], i % 4);
+        mem_test[i] = NULL;
+    }
+
+    printk("----------3----------\n");
+    for (i = 0; i < PAGE_CNT / 2; i++) {
+        ptr = (uint64 *)__alloc_pages(0, i % 4);
+        if (!ptr) {
+            panic("__alloc_page returned NULL\n");
+        }
+        // printk("i: %d, ptr: %p\n",i, ptr);
+        if (ele_exist(ptr)) {
+            mm_debug();
+            panic("PAGE_CNT ele_exist\n");
+        }
+        mem_test[i] = ptr;
+
+        if (i % 100 == 0) {
+            printk("100- page: %d\n", aaa++);
+        }
+    }
+    
+    printk("----------4----------\n");
+    for (i = 0; i < PAGE_CNT; i++) {
+        __free_pages(mem_test[i], i % 4);
+        mem_test[i] = NULL;
+    }
+
+    printk("----------5----------\n");
+    for (i = 0; i < PAGE_CNT; i++) {
+        ptr = (uint64 *)__alloc_pages(0, i % 4);
+        if (!ptr) {
+            panic("__alloc_page returned NULL\n");
+        }
+        // printk("i: %d, ptr: %p\n",i, ptr);
+        if (ele_exist(ptr)) {
+            mm_debug();
+            panic("PAGE_CNT ele_exist\n");
+        }
+        mem_test[i] = ptr;
+
+        if (i % 100 == 0) {
+            printk("100- page: %d\n", aaa++);
+        }
+    }
+
+    
+    printk("over...\n");
+    mm_debug();
+    return 0;
+}

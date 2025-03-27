@@ -247,6 +247,7 @@ inline int cpuid()
     return r_tp();
 }
 
+
 // 返回该 CPU 的 cpu 结构体。
 // * 必须在关中断环境下。
 inline struct cpu *mycpu()
@@ -636,7 +637,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
         return -1;
 
     // (wait) 释放顶层页表
-    // free_user_pgd(&ch->task->mm);
+    free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
     kmem_cache_free(&task_struct_kmem_cache, ch->task);

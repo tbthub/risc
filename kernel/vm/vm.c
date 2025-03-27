@@ -377,8 +377,8 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
     w_satp(MAKE_SATP(mm->pgd));
     sfence_vma();
 
-    // vm2pa_show(&th->task->mm);
-    // printk("----------------\n");
+    vm2pa_show(&th->task->mm);
+    printk("----------------\n");
 }
 
 /*
@@ -408,7 +408,7 @@ int alloc_user_pgd(struct mm_struct *mm)
     mm->pgd = __alloc_page(0);
     if (!mm->pgd)
         return -1;
-
+    printk("alloc_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
     // 把内核也映射到用户地址空间
     memcpy(mm->pgd, kernel_pagetable, PGSIZE);
     return 0;
