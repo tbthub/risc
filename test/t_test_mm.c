@@ -30,6 +30,10 @@
     (PAGE_CNT + SLAB_TASK_CNT + SLAB_TINFO_CNT + SLAB_BUF_CNT + SLAB_TIMER_CNT + SLAB_INDDE_CNT + SLAB_DENTRY_CNT + SLAB_FILE_CNT + SLAB_TF_CNT + SLAB_VMA_CNT + KMALLOC16 + KMALLOC32 + KMALLOC64 +   \
      KMALLOC128 + KMALLOC256 + KMALLOC512 + KMALLOC1024 + KMALLOC2048 + KMALLOC4096 + KMALLOC8192)
 
+#define SLAB_ALL                                                                                                                                                                                       \
+    (SLAB_TASK_CNT + SLAB_TINFO_CNT + SLAB_BUF_CNT + SLAB_TIMER_CNT + SLAB_INDDE_CNT + SLAB_DENTRY_CNT + SLAB_FILE_CNT + SLAB_TF_CNT + SLAB_VMA_CNT + KMALLOC16 + KMALLOC32 + KMALLOC64 + KMALLOC128 + \
+     KMALLOC256 + KMALLOC512 + KMALLOC1024 + KMALLOC2048 + KMALLOC4096 + KMALLOC8192)
+
 static uint64 *mem_test[ALL];
 
 extern struct kmem_cache task_struct_kmem_cache;
@@ -131,13 +135,16 @@ int t_mem_test1()
     return 0;
 }
 
+extern void mm_debug2();
 int t_mem_test2()
 {
     mm_debug();
+    mm_debug2();
+
     int i;
     uint64 *ptr;
     memset(mem_test, 0, sizeof(mem_test));
-    int aaa = 0;
+    // int aaa = 0;
     for (i = 0; i < PAGE_CNT; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
         if (!ptr) {
@@ -151,7 +158,7 @@ int t_mem_test2()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
 
@@ -162,6 +169,9 @@ int t_mem_test2()
 
     printk("------------FREE ALL------------\n");
 
+    mm_debug();
+    mm_debug2();
+
     for (i = 0; i < PAGE_CNT; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
         if (!ptr) {
@@ -175,7 +185,7 @@ int t_mem_test2()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
 
@@ -201,7 +211,7 @@ int t_mem_test2()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
 
@@ -216,17 +226,18 @@ int t_mem_test2()
 
     printk("over...\n");
     mm_debug();
+    mm_debug2();
     return 0;
 }
-
 
 int t_mem_test3()
 {
     mm_debug();
+    mm_debug2();
     int i;
     uint64 *ptr;
     memset(mem_test, 0, sizeof(mem_test));
-    int aaa = 0;
+    // int aaa = 0;
     printk("----------1----------\n");
     for (i = 0; i < PAGE_CNT; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
@@ -241,17 +252,20 @@ int t_mem_test3()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
 
-    printk("----------2----------\n");
+    mm_debug();
+    mm_debug2();
+
+    printk("----------2---------- free forhead half\n");
     for (i = 0; i < PAGE_CNT / 2; i++) {
         __free_pages(mem_test[i], i % 4);
         mem_test[i] = NULL;
     }
 
-    printk("----------3----------\n");
+    printk("----------3---------- alloc forhead half\n");
     for (i = 0; i < PAGE_CNT / 2; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
         if (!ptr) {
@@ -265,17 +279,20 @@ int t_mem_test3()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
-    
-    printk("----------4----------\n");
+
+    mm_debug();
+    mm_debug2();
+
+    printk("----------4---------- free posthead half\n");
     for (i = PAGE_CNT / 2; i < PAGE_CNT; i++) {
         __free_pages(mem_test[i], i % 4);
         mem_test[i] = NULL;
     }
 
-    printk("----------5----------\n");
+    printk("----------5---------- alloc posthead half\n");
     for (i = PAGE_CNT / 2; i < PAGE_CNT; i++) {
         ptr = (uint64 *)__alloc_pages(0, i % 4);
         if (!ptr) {
@@ -289,23 +306,85 @@ int t_mem_test3()
         mem_test[i] = ptr;
 
         if (i % 100 == 0) {
-            printk("100- page: %d\n", aaa++);
+            // printk("100- page: %d\n", aaa++);
         }
     }
 
-    printk("----------6----------\n");
+    // mm_debug();
+    // mm_debug2();
+
+    printk("----------6---------- free all\n");
     for (i = 0; i < PAGE_CNT; i++) {
         __free_pages(mem_test[i], i % 4);
         mem_test[i] = NULL;
     }
-    
-    printk("----------7----------\n");
-    for (i = 0; i < PAGE_CNT; i++) {
-        __free_pages(mem_test[i], i % 4);
-        mem_test[i] = NULL;
-    }
-   
+
+    // printk("----------7----------\n");
+    // for (i = 0; i < PAGE_CNT; i++) {
+    //     __free_pages(mem_test[i], i % 4);
+    //     mem_test[i] = NULL;
+    // }
+
     printk("over...\n");
     mm_debug();
+    mm_debug2();
+    return 0;
+}
+
+int t_mem_test4()
+{
+    int i;
+    uint64 *ptr;
+    memset(mem_test, 0, sizeof(mem_test));
+    struct kmem_cache *slabs[] = {
+            &task_struct_kmem_cache, &thread_info_kmem_cache, &buf_kmem_cache, &timer_kmem_cache, &efs_inode_kmem_cache, &efs_dentry_kmem_cache, &file_kmem_cache, &tf_kmem_cache, &vma_kmem_cache};
+    int slab_counts[] = {SLAB_TASK_CNT, SLAB_TINFO_CNT, SLAB_BUF_CNT, SLAB_TIMER_CNT, SLAB_INDDE_CNT, SLAB_DENTRY_CNT, SLAB_FILE_CNT, SLAB_TF_CNT, SLAB_VMA_CNT};
+    int slab_len = sizeof(slab_counts) / sizeof(slab_counts[0]);
+    for (i = 0; i < SLAB_ALL; i++) {
+        ptr = kmem_cache_alloc(slabs[i % slab_len]);
+        if (!ptr) {
+            panic("kmem_cache_alloc returned NULL\n");
+        }
+        if (ele_exist(ptr)) {
+            panic("SLAB - %d allocation ele_exist\n", i);
+        }
+        mem_test[i] = ptr;
+    }
+    printk("1\n");
+    for (i = 0; i < SLAB_ALL / 2; i++) {
+        kmem_cache_free(slabs[i % slab_len], mem_test[i]);
+        mem_test[i] = NULL;
+    }
+    printk("2\n");
+
+    for (i = 0; i < SLAB_ALL / 2; i++) {
+        ptr = kmem_cache_alloc(slabs[i % slab_len]);
+        if (!ptr) {
+            panic("kmem_cache_alloc returned NULL\n");
+        }
+        if (ele_exist(ptr)) {
+            panic("SLAB - %d allocation ele_exist\n", i);
+        }
+        mem_test[i] = ptr;
+    }
+    printk("3\n");
+
+    for (i = SLAB_ALL / 2; i < SLAB_ALL; i++) {
+        kmem_cache_free(slabs[i % slab_len], mem_test[i]);
+        mem_test[i] = NULL;
+    }
+    printk("4\n");
+
+    for (i = SLAB_ALL / 2; i < SLAB_ALL; i++) {
+        ptr = kmem_cache_alloc(slabs[i % slab_len]);
+        if (!ptr) {
+            panic("kmem_cache_alloc returned NULL\n");
+        }
+        if (ele_exist(ptr)) {
+            panic("SLAB - %d allocation ele_exist\n", i);
+        }
+        mem_test[i] = ptr;
+    }
+    printk("5\n");
     return 0;
 }

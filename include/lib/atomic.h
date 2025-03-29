@@ -56,7 +56,7 @@ static inline int atomic_dec_and_test(atomic_t *v)
     );
 
     // 检查新值是否为零
-    return (old - 1 == 0); // amoadd.w 返回旧值，因此需要减 1 检查
+    return old == 1; // amoadd.w 返回旧值，因此需要减 1 检查
 }
 
 static inline int atomic_dec_and_test_1(atomic_t *v)

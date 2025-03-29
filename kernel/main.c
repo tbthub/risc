@@ -32,6 +32,7 @@ extern void mm_init();
 extern int t_mem_test2();
 extern int t_mem_test1();
 extern int t_mem_test3();
+extern int t_mem_test4();
 void main()
 {
      if (cpuid() == 0)
@@ -39,7 +40,7 @@ void main()
 
           cons_init();
           mm_init();
-          // t_mem_test3();
+          // t_mem_test4();
           // intr_off();
           // for (;;);
           

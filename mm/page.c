@@ -7,6 +7,7 @@
 #include "std/stdio.h"
 #include "lib/spinlock.h"
 #include "defs.h"
+#include "mm/buddy.h"
 #include "mm/slab.h"
 
 // 需要持有 mem_map 锁
@@ -22,6 +23,7 @@ static inline void init_page(struct page *pg, flags_t flags)
 	atomic_set(&pg->refcnt, PG_FREE);
 	INIT_LIST_HEAD(&pg->buddy);
 	pg->slab = NULL;
+	pg->order = MAX_LEVEL;
 	spin_init(&pg->lock, "page");
 }
 
@@ -81,6 +83,7 @@ void first_all_page_init()
 	for (i = 0; i < ALL_PFN; i++)
 		init_page(&mem_map.pages[i], 0);
 
+	// 不归伙伴系统管
 	for (i = 0; i < kernel_pfn_end; i++) {
 		get_page(&mem_map.pages[i]);
 		SET_FLAG(&mem_map.pages[i].flags, PG_reserved | PG_anon);

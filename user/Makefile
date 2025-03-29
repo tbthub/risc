@@ -30,9 +30,10 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
 # 编译选项
-CFLAGS = -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
+CFLAGS = -Wall -O0 -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -mcmodel=medany -fno-common -nostdlib -ffunction-sections -fdata-sections
 CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include -I../include
+CFLAGS += -march=rv64gc
 
 # 链接选项
 LDFLAGS = -z max-page-size=4096 -nostdlib -static

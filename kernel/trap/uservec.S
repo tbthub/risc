@@ -29,7 +29,7 @@ uservec:
         sd       ra, 16(a0)
         sd       sp, 24(a0)       # * 此时 sp 是用户栈顶
         sd       gp, 32(a0)
-        # sd       tp, 40(a0)
+        sd       tp, 40(a0)
         sd       t0, 48(a0)
         sd       t1, 56(a0)
         sd       t2, 64(a0)

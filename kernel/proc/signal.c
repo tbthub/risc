@@ -64,7 +64,7 @@ static void sigterm_handler(int sig)
 
 static void sigchld_handler(int sig)
 {
-    do_waitpid(-1, NULL, 1);
+    // do_waitpid(-1, NULL, 1);
 }
 
 static void sigcont_handler(int sig)

@@ -216,7 +216,7 @@ void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
                 continue;
             if ((*pte & PTE_V) == 0)
                 continue;
-            printk("va: %p, pa: %p\n", va, PTE2PA(*pte));
+            printk("va: %p, pa: %p  %d\n", va, PTE2PA(*pte),*pte & 0b1110);
         }
         v = v->vm_next;
         spin_unlock(&mem_map.lock);
@@ -308,6 +308,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
     v = find_vma(mm, fault_addr);
     if (!v) {
         panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause);  // TODO 杀死进程，不过我们暂时先报错
+        // return;
     }
 
     switch (scause) {
@@ -414,6 +415,7 @@ int alloc_kern_pgd(struct mm_struct *mm)
 {
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
+    // printk("alloc_kern_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
     if (!mm->pgd) {
         panic("alloc_kern_pgd mm->pgd\n");
         return -1;
@@ -431,7 +433,7 @@ void free_user_pgd(struct mm_struct *mm)
     }
     // 内核线程是没有页表的
     if (mm->pgd) {
-        printk("free_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
+        // printk("free_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
         __free_page(mm->pgd);
         mm->pgd = NULL;
     }

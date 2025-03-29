@@ -34,15 +34,6 @@ void pop_off()
     uint64 sp1 = r_sp();
     // 如果中断已经打开
     if (intr_get()) {
-        // struct thread_info *t = c->thread;
-        // if (!t)
-        // {
-        // printk("user");
-        // }
-        // else
-        // {
-        // printk("kernel");
-        // }
         panic("spinlock pop_off: intr on! hart: %d\n", cpuid());
     }
     struct cpu *c = mycpu();
@@ -52,7 +43,6 @@ void pop_off()
 
     c->noff -= 1;
     if (c->noff == 0 && c->intena) {
-        // printk("spi intr on: %d\n", cpuid());
         intr_on();
     }
 

@@ -45,7 +45,9 @@ static void quit()
     struct thread_info *thread = cpu->thread;
 
     spin_lock(&cpu->sched_list.lock);
+    // spin_lock(&thread->lock);
     list_add_tail(&thread->sched, &cpu->sched_list.out);
+    // spin_unlock(&thread->lock);
     spin_unlock(&cpu->sched_list.lock);
 
     do_exit(0);
@@ -246,7 +248,6 @@ inline int cpuid()
 {
     return r_tp();
 }
-
 
 // 返回该 CPU 的 cpu 结构体。
 // * 必须在关中断环境下。
@@ -490,6 +491,7 @@ int do_fork()
     copy_proc(ch, pa);
 
     ch->parent = pa;
+
     spin_lock(&pa->lock);
     list_add_head(&ch->sibling, &pa->child);
     spin_unlock(&pa->lock);
@@ -604,8 +606,10 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
 
         free_user_memory(&task->mm);
 
-        if (t->tf)
+        if (t->tf) {
             kmem_cache_free(&tf_kmem_cache, t->tf);
+            t->tf = NULL;
+        }
 
         send_sig(SIGCHLD, t->parent->pid);
 
@@ -654,4 +658,30 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     kmem_cache_free(&thread_info_kmem_cache, ch);
 
     return _pid;
+}
+
+void show_all_args(struct thread_info *t)
+{
+    struct trapframe *tf = t->tf;
+    struct context *ctx = &t->context;
+    struct task_struct *task = t->task;
+
+    printk("pid: %d, name: %s, pcb:%p\n", t->pid, t->name, t);
+
+    printk("tf info:\n");
+    printk("    tf:%p, kernel_sp: %p, epc: %p,\n    ra: %p, sp: %p, a0: %p\n", tf, tf->kernel_sp, tf->epc, tf->ra, tf->sp, tf->a0);
+
+    printk("context info:\n");
+    printk("    ra: %p, sp: %p\n", ctx->ra, ctx->sp);
+
+    printk("task info:\n");
+    printk("    pgd: %p\n", MAKE_SATP(task->mm.pgd));
+
+    printk("regs info:\n");
+    printk("    sstatus: %p, sscratch:%p, satp: %p\n", r_sstatus(), r_sscratch(), r_satp());
+
+    vm2pa_show(&t->task->mm);
+
+    printk("----------\n");
+    panic("");
 }

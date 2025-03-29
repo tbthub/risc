@@ -196,8 +196,13 @@ void kmem_cache_destory(struct kmem_cache *cache)
 // 申请对象
 void *kmem_cache_alloc(struct kmem_cache *cache)
 {
-    if (!cache)
+    if (!cache){
+        if(myproc()){
+            printk("Aaaaaaaaa\n");
+        }
         panic("kmem_cache_alloc: does not exist! Due to NULL!\n");
+        
+    }
 
     if (list_empty(&cache->list))
         panic("kmem_cache_alloc: '%s' has already been freed!\n", cache->name);

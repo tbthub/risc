@@ -1,5 +1,5 @@
 #include "core/trap.h"
-#include "mm/page.h"
+
 #include "core/proc.h"
 #include "core/sched.h"
 #include "core/timer.h"
@@ -10,6 +10,7 @@
 #include "lib/semaphore.h"
 #include "lib/string.h"
 #include "mm/memlayout.h"
+#include "mm/page.h"
 #include "riscv.h"
 #include "std/stdio.h"
 
@@ -102,14 +103,15 @@ static inline void intr_handler(uint64 scause)
         break;
     }
 }
-void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
+extern void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 
+extern void show_all_args(struct thread_info *t);
 // 异常
 static void excep_handler(uint64 scause)
 {
     switch (scause) {
     case E_SYSCALL:
-    syscall();
+        syscall();
         break;
 
     case E_INS_PF:
@@ -117,19 +119,22 @@ static void excep_handler(uint64 scause)
     case E_STORE_AMO_PF:
         page_fault_handler(r_stval(), scause);
         break;
+        
     default:
         struct thread_info *t = myproc();
         printk("pid: %d, unknown scause\n", t->pid);
         if (t)
             printk("pid: %d, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
         else
-        printk("kerl, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
-        printk("satp: %p\n",r_satp());
-        printk("proc satp: %p\n",myproc()->task->mm.pgd);
-        printk("page: %d\n",page_count(PA2PG(myproc()->task->mm.pgd)));
-        
-        vm2pa_show(&t->task->mm);
+            printk("kerl, unknown scause: %p, sepc: %p, stval: %p\n", t->pid, scause, r_sepc(), r_stval());
+        printk("satp: %p\n", r_satp());
+        printk("proc satp: %p\n", myproc()->task->mm.pgd);
+        printk("page: %d\n", page_count(PA2PG(myproc()->task->mm.pgd)));
+
+        // vm2pa_show(&t->task->mm);
+        // show_all_args(t);
         panic("excep_handler unknown scause, sp:%p\n", t->tf->sp);
+        panic("\n");
         break;
     }
 }
@@ -180,26 +185,26 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     if (!(argv && READ_ONCE(*argv)))
         ;
-    
+
     // assert(intr_get() == 0,"exec intr 1\n");
     struct thread_info *t = myproc();
 #ifdef DEBUG_SYSCALL
     printk("[exec] pid: %d\n", t->pid);
 #endif
     strncpy(t->name, path, sizeof(t->name));
-    assert(intr_get() == 0,"exec intr 2\n");
-    
+    assert(intr_get() == 0, "exec intr 2\n");
+
     struct elf64_hdr ehdr;
     struct file *f = file_open(path, FILE_READ);
-    assert(intr_get() == 0,"exec intr 3\n");
+    assert(intr_get() == 0, "exec intr 3\n");
 
     if (!f)
-    panic("do_exec f is NULL\n");
-    
+        panic("do_exec f is NULL\n");
+
     file_read(f, &ehdr, sizeof(ehdr));
-    
-    assert(intr_get() == 0,"exec intr 4\n");
-    
+
+    assert(intr_get() == 0, "exec intr 4\n");
+
     struct mm_struct *mm = &t->task->mm;
 
     // ! 解析参数的时候，前面已经 free_user_memory
@@ -210,11 +215,11 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
         if (args_list == 0)
             panic("do_exec parse_argv\n");
     }
-    assert(intr_get() == 0,"exec xxxxxxxxn\n");
+    assert(intr_get() == 0, "exec xxxxxxxxn\n");
 
     if (mm->pgd)
         free_user_memory(mm);
-    
+
     alloc_user_pgd(mm);
 
     if (argv) {

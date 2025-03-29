@@ -61,9 +61,6 @@ void mm_debug2()
 // 分配
 static struct page *buddy_alloc(const int order)
 {
-    // printk("\n----\n");
-    // printk("order: %d\n", order);
-    // mm_debug();
     if (order < 0 || order > MAX_LEVEL_INDEX)
         return NULL;
 
@@ -78,8 +75,6 @@ static struct page *buddy_alloc(const int order)
             // 弹出一个 page
             page = list_entry(list_pop(&Buddy.free_lists[i]), struct page, buddy);
 
-            // printk("page: %p order: %d\n", page - mem_map.pages, i);
-
             // 拆分块直到满足所需 order
             for (j = i; j > order; j--) {
                 // 寻找下一级的伙伴(这里的伙伴存在的话一定是空闲的)
@@ -89,18 +84,18 @@ static struct page *buddy_alloc(const int order)
                     goto bad;
 
                 if (!page_is_free(buddy_page))
-                    break;
+                    goto bad;
 
                 // 加到下一级的链表中
+                buddy_page->order = j - 1;
                 list_add_head(&buddy_page->buddy, &Buddy.free_lists[j - 1]);
             }
-            // mm_debug();
 
             if (page_count(page) != 0)
                 panic("buddy_alloc page_count, %d,page: %d\n", page_count(page), page - mem_map.pages);
             // 循环接受，该 page 也就是这个被拆分大块的起始地址（现在变成小块了）
             spin_unlock(&Buddy.lock);
-            // printk("alloc: page: %d ord:%d\n", page - mem_map.pages,order);
+            page->order = order;
             return page;
         }
     }
@@ -114,7 +109,6 @@ bad:
 // 回收
 static void buddy_free(struct page *pg, const int order)
 {
-    // mm_debug();
     assert(page_count(pg) == 0, "buddy_free\n");
     int level;
     struct page *page = pg, *buddy_page;
@@ -125,18 +119,21 @@ static void buddy_free(struct page *pg, const int order)
     // 向上合并伙伴
     for (level = order; level < MAX_LEVEL_INDEX; level++) {
         buddy_page = find_buddy(page, level);
-        if (buddy_page == NULL || !page_is_free(buddy_page)) {
-            // printk("Break merge: %d buddy %s\n",buddy_page - mem_map.pages, buddy_page ? "busy" : "invalid");
+        if (buddy_page == NULL || !page_is_free(buddy_page) || buddy_page->order != level) {
+            // printk("Break merge: %d buddy %s\n", buddy_page - mem_map.pages, buddy_page ? "busy" : "invalid");
             break;
         }
 
         // 直接调用 list_del 避免冗余检查
+        page->order = MAX_LEVEL;
+        buddy_page->order = MAX_LEVEL;
         list_del_init(&buddy_page->buddy);
         page = min(page, buddy_page);
         // printk("Merged to level %d, new page: %d\n", level + 1, page - mem_map.pages);
     }
 
     // 将合并后的块添加到对应链表
+    page->order = level;
     // printk("Add page %d to free_lists[%d]\n", page - mem_map.pages, level);
     list_add_head(&page->buddy, &Buddy.free_lists[level]);
     spin_unlock(&Buddy.lock);
@@ -165,34 +162,8 @@ static void buddy_init()
     for (i = start_pfn; i + chunk_size <= ALL_PFN; i += chunk_size) {
         struct page *page = &mem_map.pages[i];
         list_add_head(&page->buddy, &Buddy.free_lists[max_order]);
+        page->order = MAX_LEVEL_INDEX;
     }
-
-    // // 计算剩余页面的起始地址和大小
-    // uint64 remaining_start = start_pfn + chunk_size * ((ALL_PFN - start_pfn) / chunk_size);
-    // uint64 remaining_pages = ALL_PFN - remaining_start;
-
-    // // 处理剩余页面，按伙伴系统规则分割到低阶
-    // for (int order = max_order - 1; order >= 0 && remaining_pages > 0; order--) {
-    //     uint64 block_size = 1UL << order;
-    //     // 确保剩余起始地址对齐到当前 order 的块大小
-    //     if (remaining_start % block_size != 0) {
-    //         // 调整起始地址到对齐位置
-    //         remaining_start = (remaining_start / block_size + 1) * block_size;
-    //         remaining_pages = ALL_PFN - remaining_start;
-    //         if (remaining_pages < block_size) {
-    //             continue;  // 当前 order 的块无法分割，跳过
-    //         }
-    //     }
-    //     // 分割剩余页面
-    //     while (remaining_pages >= block_size) {
-    //         struct page *page = &mem_map.pages[remaining_start];
-    //         list_add_head(&page->buddy, &Buddy.free_lists[order]);
-    //         remaining_start += block_size;
-    //         remaining_pages -= block_size;
-    //     }
-    // }
-
-    __sync_synchronize();
 }
 
 // 分配 pages

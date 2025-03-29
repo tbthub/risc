@@ -59,6 +59,7 @@ static void add_runnable_task(struct thread_info *thread)
     spin_lock(&c->sched_list.lock);
     spin_lock(&thread->lock);
     list_add_head(&thread->sched, &(c->sched_list.run));
+    
     spin_unlock(&c->sched_list.lock);
 }
 
@@ -80,10 +81,8 @@ void sched()
         // 如果发生了进程切换
         if (r_satp() != MAKE_SATP(thread->task->mm.pgd)) {
             sfence_vma();
-            // printk("aa, pid: %d\n",thread->pid);
             w_satp(MAKE_SATP(thread->task->mm.pgd));
             sfence_vma();
-            // printk("aa2, pid: %d\n",thread->pid);
         }
         spin_unlock(&thread->task->mm.lock);
     }
