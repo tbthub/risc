@@ -5,7 +5,7 @@
 #include "mm/memlayout.h"
 #include "lib/list.h"
 #include "lib/atomic.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 
 /*
  *

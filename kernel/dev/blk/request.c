@@ -1,7 +1,7 @@
 #include "dev/blk/request.h"
 #include "dev/blk/bio.h"
 #include "mm/kmalloc.h"
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 #include "dev/blk/gendisk.h"
 
 // 申请空白的一个 request

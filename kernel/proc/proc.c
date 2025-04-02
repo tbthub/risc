@@ -557,13 +557,24 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
 static void reparent(struct thread_info *t)
 {
     struct thread_info *cur = myproc();
+    if(cur == init_t)
+        return;
 
     spin_lock(&init_t->lock);
     spin_lock(&cur->lock);
 
-    if (list_len(&cur->child) != 0) {
-        printk("reparent\n");
-        list_splice_head(&cur->child, &init_t->child);
+    struct thread_info *ch;
+    struct thread_info *tmp;
+    // printk("reparent\n");
+   
+    list_for_each_entry_safe(ch,tmp,&cur->child,sibling){
+        // 只有父进程才会修改子进程的 parent 指针，不会造成并发冲突
+        // ! 假如父子一起死，这里貌似有问题。。
+        spin_lock(&ch->lock);
+        ch->parent = init_t;
+        list_del(&ch->sibling);
+        list_add_head(&ch->sibling,&init_t->child);
+        spin_unlock(&ch->lock);
     }
 
     spin_unlock(&cur->lock);
@@ -610,16 +621,15 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
             kmem_cache_free(&tf_kmem_cache, t->tf);
             t->tf = NULL;
         }
-
-        send_sig(SIGCHLD, t->parent->pid);
-
+    
         spin_lock(&t->lock);
+        send_sig(SIGCHLD, t->parent->pid);
+        sem_signal(&t->parent->child_exit_sem);
+      
         t->state = ZOMBIE;
         t->exit_code = exit_code;
-
-        sem_signal(&t->parent->child_exit_sem);
 #ifdef DEBUG_SYSCALL
-        printk("[exit] end pid: %d, thread: %s exit\n", t->pid, t->name);
+        printk("[exit] end pid: %d, thread: %s exit pa:%d\n", t->pid, t->name,t->parent->pid);
 #endif
 
         sched();

@@ -5,7 +5,7 @@
 #include "defs.h"
 #include "fs/file.h"
 #include "lib/atomic.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"

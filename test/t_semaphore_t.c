@@ -1,4 +1,4 @@
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 #include "std/stdio.h"
 #include "core/proc.h"
 static semaphore_t sem1;

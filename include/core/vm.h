@@ -1,7 +1,7 @@
 #ifndef __VM_H__
 #define __VM_H__
 #include "std/stddef.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "riscv.h"
 #include "lib/list.h"
 

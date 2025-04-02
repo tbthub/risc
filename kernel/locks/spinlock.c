@@ -1,4 +1,4 @@
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 
 #include "core/proc.h"
 #include "defs.h"

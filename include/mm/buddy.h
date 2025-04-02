@@ -1,6 +1,6 @@
 #ifndef __BUDDT_H__
 #define __BUDDY_H__
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/list.h"
 
 #define MAX_LEVEL 11

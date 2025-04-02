@@ -1,6 +1,6 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 
 // 基于信号量机制的互斥量
 // 由于会睡眠，不能在临界区或者中断上下文中使用

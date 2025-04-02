@@ -1,7 +1,7 @@
 #ifndef __SLAB_H__
 #define __SLAB_H__
 #include "lib/list.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "param.h"
 #include "lib/stack.h"
 

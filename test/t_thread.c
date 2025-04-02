@@ -1,6 +1,6 @@
 #include "core/proc.h"
 #include "std/stdio.h"
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 
 static void testB_fun()
 {

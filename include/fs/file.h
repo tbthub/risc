@@ -1,6 +1,6 @@
 #ifndef __FS_H__
 #define __FS_H__
-#include "lib/mutex.h"
+#include "core/locks/mutex.h"
 #include "lib/atomic.h"
 #include "param.h"
 

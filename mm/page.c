@@ -5,7 +5,7 @@
 #include "lib/list.h"
 #include "riscv.h"
 #include "std/stdio.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "defs.h"
 #include "mm/buddy.h"
 #include "mm/slab.h"

@@ -12,7 +12,7 @@
 #include "lib/fifo.h"
 #include "lib/atomic.h"
 #include "lib/string.h"
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 
 #include "core/vm.h"
 #include "core/trap.h"

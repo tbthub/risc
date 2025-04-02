@@ -4,8 +4,6 @@
 #include "std/stddef.h"
 #include "lib/list.h"
 #include "std/stdio.h"
-// #include "lib/string.h"
-// #include "lib/spinlock.h"
 
 struct fifo
 {
@@ -19,19 +17,15 @@ static inline void fifo_init(struct fifo *fifo)
     fifo->f_size = 0;
 }
 
-
 static inline void fifo_push(struct fifo *fifo, struct list_head *entry)
 {
-    // if(fifo->f_list.next == NULL || fifo->f_list.prev == NULL){
-        // panic("fifo push, name: %s\n",fifo->f_name);
-    // }
     assert(fifo != NULL ,"fifo\n");
     assert(entry != NULL ,"entry\n");
     list_add_tail(entry, &fifo->f_list);
     fifo->f_size++;
 }
 
-static inline int fifo_empty(struct fifo *fifo)
+static inline int fifo_empty(const struct fifo *fifo)
 {
     return fifo->f_size == 0;
 }
@@ -43,6 +37,11 @@ static inline struct list_head *fifo_pop(struct fifo *fifo)
     fifo->f_size--;
     struct list_head * list = list_pop(&fifo->f_list);
     return list;
+}
+
+static inline int fifo_size(const struct fifo *fifo)
+{
+    return fifo->f_size;
 }
 
 #endif

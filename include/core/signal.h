@@ -1,7 +1,7 @@
 #ifndef __SIGNAL_H__
 #define __SIGNAL_H__
 #include "lib/list.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/fifo.h"
 
 #define _NSIG 64

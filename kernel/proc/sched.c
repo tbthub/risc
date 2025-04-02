@@ -3,7 +3,7 @@
 #include "core/proc.h"
 #include "core/vm.h"
 #include "lib/atomic.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/string.h"
 #include "riscv.h"
 #include "std/stddef.h"

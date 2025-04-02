@@ -1,4 +1,4 @@
-#include "lib/mutex.h"
+#include "core/locks/mutex.h"
 #include "std/stdio.h"
 #include "core/proc.h"
 #include "core/sched.h"

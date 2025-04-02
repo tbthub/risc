@@ -1,6 +1,6 @@
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 #include "lib/fifo.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "core/proc.h"
 #include "core/sched.h"
 #include "lib/atomic.h"

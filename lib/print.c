@@ -2,7 +2,7 @@
 #include "defs.h"
 #include "dev/cons.h"
 #include "dev/uart.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "riscv.h"
 #include "std/stdarg.h"
 #include "std/stdio.h"

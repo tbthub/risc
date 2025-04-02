@@ -1,6 +1,6 @@
 #include "core/signal.h"
 #include "defs.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "mm/memlayout.h"
 #include "riscv.h"
 #include "std/stddef.h"

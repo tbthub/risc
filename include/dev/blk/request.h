@@ -4,8 +4,8 @@
 #include "std/stddef.h"
 
 #include "lib/list.h"
-#include "lib/semaphore.h"
-#include "lib/sleeplock.h"
+#include "core/locks/semaphore.h"
+#include "core/locks/sleeplock.h"
 
 #include "dev/blk/bio.h"
 

@@ -3,7 +3,7 @@
 #include "std/stddef.h"
 #include "lib/hash.h"
 #include "lib/list.h"
-#include "lib/sleeplock.h"
+#include "core/locks/sleeplock.h"
 #include "dev/blk/blk_dev.h"
 
 #define EASYFS_MAGIC 0x12345678

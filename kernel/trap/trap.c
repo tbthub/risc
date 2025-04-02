@@ -7,7 +7,7 @@
 #include "dev/uart.h"
 #include "elf.h"
 #include "fs/file.h"
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 #include "lib/string.h"
 #include "mm/memlayout.h"
 #include "mm/page.h"

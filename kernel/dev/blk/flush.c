@@ -1,7 +1,7 @@
 #include "dev/blk/bio.h"
 #include "dev/blk/buf.h"
 #include "dev/blk/gendisk.h"
-#include "lib/semaphore.h"
+#include "core/locks/semaphore.h"
 #include "dev/devs.h"
 #include "core/timer.h"
 #include "core/proc.h"

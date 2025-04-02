@@ -1,7 +1,7 @@
 #ifndef __STDIO_H__
 #define __STDIO_H__
 #include "std/stdarg.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "std/stddef.h"
 #include "dev/cons.h"
 #define INPUT_BUF_SIZE 128

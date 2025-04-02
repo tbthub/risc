@@ -2,9 +2,9 @@
 
 #include "core/proc.h"
 #include "lib/list.h"
-#include "lib/mutex.h"
-#include "lib/semaphore.h"
-#include "lib/spinlock.h"
+#include "core/locks/mutex.h"
+#include "core/locks/semaphore.h"
+#include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 
 // 工作队列机制

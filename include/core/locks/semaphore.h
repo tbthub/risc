@@ -2,7 +2,7 @@
 #define __SEMAPHORE_H__
 
 #include "lib/fifo.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/atomic.h"
 
 typedef struct semaphore

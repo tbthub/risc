@@ -1,8 +1,8 @@
 #include "core/signal.h"
 
 #include "core/proc.h"
-#include "lib/semaphore.h"
-#include "lib/spinlock.h"
+#include "core/locks/semaphore.h"
+#include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 #include "std/stdio.h"
 extern  pid_t do_waitpid(pid_t pid, int *status, int options);
@@ -223,7 +223,7 @@ void send_sig(int sig, pid_t pid)
     }
 
     if (p->state == ZOMBIE) {
-        printk("send_sig process ZOMBIE\n");
+        // printk("send_sig process ZOMBIE\n");
         return;
     }
 

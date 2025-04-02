@@ -1,6 +1,6 @@
 // #include "core/sched.h"
 // #include "core/proc.h"
-// #include "lib/semaphore.h"
+// #include "core/locks/semaphore.h"
 // #include "core/timer.h"
 // #include "t_head.h"
 

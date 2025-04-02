@@ -1,4 +1,4 @@
-#include "lib/sleeplock.h"
+#include "core/locks/sleeplock.h"
 #include "std/stdio.h"
 #include "core/proc.h"
 static sleeplock_t lock1;

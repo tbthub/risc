@@ -4,7 +4,7 @@
 #include "dev/blk/gendisk.h"
 #include "lib/atomic.h"
 #include "lib/hash.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "std/stdio.h"

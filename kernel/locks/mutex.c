@@ -1,5 +1,5 @@
-#include "lib/semaphore.h"
-#include "lib/mutex.h"
+#include "core/locks/semaphore.h"
+#include "core/locks/mutex.h"
 #include "std/stddef.h"
 #include "core/proc.h"
 

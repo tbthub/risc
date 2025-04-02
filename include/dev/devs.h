@@ -1,7 +1,7 @@
 #ifndef __DEVS_H__
 #define __DEVS_H__
 #include "std/stddef.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/list.h"
 #include "dev/blk/blk_dev.h"
 

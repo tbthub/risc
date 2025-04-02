@@ -5,8 +5,8 @@
 #include "lib/list.h"
 #include "lib/hash.h"
 #include "lib/atomic.h"
-#include "lib/sleeplock.h"
-#include "lib/spinlock.h"
+#include "core/locks/sleeplock.h"
+#include "core/locks/spinlock.h"
 
 #include "std/stddef.h"
 

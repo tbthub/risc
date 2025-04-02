@@ -2,7 +2,7 @@
 
 #include "defs.h"
 #include "lib/list.h"
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/string.h"
 #include "mm/buddy.h"
 #include "mm/page.h"

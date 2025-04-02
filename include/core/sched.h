@@ -1,7 +1,7 @@
 #ifndef __SCHED_H__
 #define __SCHED_H__
 
-#include "lib/spinlock.h"
+#include "core/locks/spinlock.h"
 #include "lib/list.h"
 
 struct thread_info;

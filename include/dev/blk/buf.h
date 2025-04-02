@@ -4,9 +4,9 @@
 #include "lib/list.h"
 #include "lib/hash.h"
 #include "lib/atomic.h"
-#include "lib/spinlock.h"
-#include "lib/sleeplock.h"
-#include "lib/semaphore.h"
+#include "core/locks/spinlock.h"
+#include "core/locks/sleeplock.h"
+#include "core/locks/semaphore.h"
 
 #include "std/stddef.h"
 #include "core/timer.h"
