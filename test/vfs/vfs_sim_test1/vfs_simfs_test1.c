@@ -4,9 +4,9 @@
 #include <assert.h>
 
 // 包含被测试的代码
-#include "vfs_io.h"
-#include "vfs_interface.h"
-#include "simfs.h"
+#include "vfs/vfs_io.h"
+#include "vfs/vfs_interface.h"
+#include "driver/fs/simfs/simfs.h"
 
 // 测试配置
 #define TEST_FILE_PATH "/test.txt"
@@ -27,10 +27,10 @@ void print_test_result(const char *test_name, int passed) {
     printf("[%s] %s\n", passed ? "PASS" : "FAIL", test_name);
 }
 
-void reset_test_env(){
+void reset_test_env() {
     malloc_should_fail = 0;
-    total_frees = 0;
-    total_allocs = 0;
+    total_frees        = 0;
+    total_allocs       = 0;
 }
 
 // 测试用例
@@ -87,7 +87,7 @@ void test_read_write() {
 
     // 重置读取位置
     simfs_file_t *file = (simfs_file_t *)ctx.file_ptr;
-    file->pos    = 0;
+    file->pos          = 0;
 
     // 读取验证
     uint8_t buffer[64];
@@ -120,7 +120,7 @@ void test_large_file() {
     assert(file->node->capacity >= LARGE_FILE_SIZE);
 
     // 读取验证
-    file->pos      = 0;
+    file->pos            = 0;
     uint8_t *read_buffer = malloc(LARGE_FILE_SIZE);
     int32_t read_bytes   = simfs_read(&ctx, read_buffer, LARGE_FILE_SIZE);
     assert(read_bytes == LARGE_FILE_SIZE);

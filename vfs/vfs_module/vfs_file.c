@@ -1,8 +1,8 @@
 
-#include "vfs_io.h"
-#include "vfs_interface.h"
-#include "vfs_util.h"
-#include "vfs_process.h"
+#include "vfs/vfs_io.h"
+#include "vfs/vfs_interface.h"
+#include "vfs/vfs_util.h"
+#include "vfs/vfs_process.h"
 #include <string.h>
 
 int vfs_open(const char *path, int flag, int mode) {
@@ -91,7 +91,7 @@ int vfs_open(const char *path, int flag, int mode) {
 
 int vfs_close(int fd) {
 
-    if (fd >= VFS_FD_SIZE){
+    if (fd >= VFS_FD_SIZE) {
         return -1;
     }
 
@@ -257,7 +257,7 @@ int vfs_dup(int oldfd) {
 
     vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
 
-    if (new_ctx == NULL){
+    if (new_ctx == NULL) {
         vfs_get_fd_context_done(proc, oldfd);
         vfs_set_fd_context_done(proc, newfd, _t, _f);
         vfs_process_write_done();
@@ -274,7 +274,6 @@ int vfs_dup(int oldfd) {
         vfs_process_write_done();
         return -1;
     }
-
 
     vfs_get_fd_context_done(proc, oldfd);
     vfs_set_fd_context_done(proc, newfd, (uintptr_t)new_ctx, old_flag);

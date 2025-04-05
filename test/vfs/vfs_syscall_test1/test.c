@@ -6,23 +6,23 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "vfs_process.h"
-#include "vfs_module.h"
-#include "vfs_interface.h"
-#include "simfs.h"
+#include "vfs/vfs_process.h"
+#include "vfs/vfs_module.h"
+#include "vfs/vfs_interface.h"
+#include "driver/fs/simfs/simfs.h"
 
 extern int mem_ref;
 
-void check_mem_ref(){
+void check_mem_ref() {
     assert(mem_ref == 0);
 }
 
-void test_simple_proc1(){
+void test_simple_proc1() {
     int res = fork();
 
     assert(res >= 0);
 
-    if (res > 0){
+    if (res > 0) {
         wait(NULL);
         return;
     }
@@ -46,10 +46,9 @@ void test_simple_proc1(){
 
     printf("test_simple_proc successful!\n");
     exit(0);
-
 }
 
-void test_simple_vfs(){
+void test_simple_vfs() {
     int res = fork();
     assert(res >= 0);
     if (res > 0) {
@@ -68,7 +67,7 @@ void test_simple_vfs(){
     assert(fd == 0);
 
     char *test_str = "test1";
-    int write_res = vfs_write(fd, test_str, strlen(test_str));
+    int write_res  = vfs_write(fd, test_str, strlen(test_str));
 
     assert(write_res == strlen(test_str));
     assert(vfs_close(fd) == 0);
@@ -89,7 +88,6 @@ void test_simple_vfs(){
     printf("test_simple_vfs successful!\n");
     exit(0);
 }
-
 
 void test_error_handling() {
 
@@ -132,7 +130,7 @@ void test_lseek_operations() {
 
     vfs_process_init("/", "", 1, 0);
     vfs_io_t fs;
-    fs.mountTag= "simfs";
+    fs.mountTag = "simfs";
     simfs_io_table_init(&fs);
     assert(vfs_mount(&fs) == 0);
 
@@ -210,7 +208,6 @@ void test_file_descriptor_ops() {
     assert(vfs_read(fd2, buf2, sizeof(buf2)) == strlen(str2));
     assert(strcmp(buf2, str2) == 0);
 
-
     vfs_close(fd2);
     vfs_close(fd3);
     vfs_umount("simfs");
@@ -269,7 +266,7 @@ void test_cross_process_isolation() {
     printf("test_cross_process_isolation successful!\n");
 }
 
-int main(){
+int main() {
     test_simple_proc1();
     test_simple_vfs();
     test_error_handling();

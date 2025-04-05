@@ -1,9 +1,9 @@
 
-#include <stdint.h>
-#include <stddef.h>
+#include "std/stdint.h"
+#include "std/stddef.h"
 #include <string.h>
-#include "vfs_interface.h"
-#include "vfs_process.h"
+#include "vfs/vfs_interface.h"
+#include "vfs/vfs_process.h"
 
 static char *resolve_path(const char *root, const char *path) {
     char *stack[64];
@@ -126,13 +126,13 @@ char *construct_full_path(uint8_t *root_path, uint8_t *work_path, uint16_t root_
     size_t path_len   = strlen(path);
     size_t total_full = base_len + path_len + 2;
 
-    if (total_full > VFS_MAX_PATH_SIZE){
+    if (total_full > VFS_MAX_PATH_SIZE) {
         if (need_free_base)
             vfs_free(base);
         return NULL;
     }
 
-    char *full        = vfs_malloc(total_full);
+    char *full = vfs_malloc(total_full);
     if (!full) {
         if (need_free_base)
             vfs_free(base);

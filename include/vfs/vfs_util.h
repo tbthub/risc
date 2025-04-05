@@ -4,7 +4,7 @@ extern "C" {
 
 #ifndef _VFS_UTIL_H
 #define _VFS_UTIL_H
-#include <stdint.h>
+#include "std/stdint.h"
 
 char *construct_full_path(uint8_t *root_path, uint8_t *work_path, uint16_t root_path_size, uint16_t work_path_size, const char *path);
 int parse_mount_tag(const char *full_path, char **mount_tag, char **open_path);

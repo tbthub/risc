@@ -3,12 +3,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <math.h>
-#include <stdint.h>
+#include "std/stdint.h"
 #include <string.h>
 #include "../fs/easyfs/easyfs.h"
 
-static void write_block(int fd, uint32_t block_no, const void *data, size_t size)
-{
+static void write_block(int fd, uint32_t block_no, const void *data, size_t size) {
     off_t offset = block_no * BLOCK_SIZE;
 
     // 清空块（填充零）
@@ -41,10 +40,8 @@ static struct
 
 // inode map 的第 0 位不给使用，标记错误
 // block map 要注意把超级块、inode 等信息占用的块标记为已使用
-int main(int argc, char *argv[])
-{
-    if (argc < 2)
-    {
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
         fprintf(stderr, "请提供文件路径作为参数。\n");
         return 1;
     }
@@ -54,16 +51,14 @@ int main(int argc, char *argv[])
 
     // 打开文件
     int fd = open(file_path, O_RDWR); // 修改为 O_RDWR，以便读取和写入
-    if (fd == -1)
-    {
+    if (fd == -1) {
         perror("文件打开失败");
         return 1;
     }
 
     // 获取文件的大小
     off_t disk_size = lseek(fd, 0, SEEK_END) - BLOCK_SIZE; // 使用 lseek 获取文件大小,保留第0个扇区空间
-    if (disk_size == -1)
-    {
+    if (disk_size == -1) {
         perror("获取文件大小失败");
         close(fd);
         return 1;
@@ -82,15 +77,15 @@ int main(int argc, char *argv[])
     // 计算数据块位图所占用的块数
     uint32_t data_map_blocks = (uint32_t)ceil((double)data_blocks / 8 / BLOCK_SIZE);
 
-    easy_sb.inode_count = inode_count - 1; // 0 号不用
-    easy_sb.inode_free = inode_count - 2;  // 0 和 root
-    easy_sb.inode_size = INODE_SIZE;
-    easy_sb.inode_map_start = SUPER_BLOCK_LOCATION + 1;
+    easy_sb.inode_count      = inode_count - 1; // 0 号不用
+    easy_sb.inode_free       = inode_count - 2; // 0 和 root
+    easy_sb.inode_size       = INODE_SIZE;
+    easy_sb.inode_map_start  = SUPER_BLOCK_LOCATION + 1;
     easy_sb.inode_area_start = easy_sb.inode_map_start + inode_map_blocks;
 
-    easy_sb.block_count = total_blocks;
-    easy_sb.block_size = BLOCK_SIZE;
-    easy_sb.block_map_start = easy_sb.inode_area_start + inode_area_blocks;
+    easy_sb.block_count      = total_blocks;
+    easy_sb.block_size       = BLOCK_SIZE;
+    easy_sb.block_map_start  = easy_sb.inode_area_start + inode_area_blocks;
     easy_sb.block_area_start = easy_sb.block_map_start + data_map_blocks;
 
     easy_sb.block_free = total_blocks - easy_sb.block_area_start - 1; // 除去前面被占用的以及 root 数据块
@@ -126,15 +121,14 @@ int main(int argc, char *argv[])
     printf("  文件系统名: %s\n", easy_sb.name);
     printf("  文件系统魔数: %x\n", easy_sb.magic);
 
-    for (int i = 0; i < 128; i++)
-    {
+    for (int i = 0; i < 128; i++) {
         root_inode.a[i] = '\0';
     }
 
-    root_inode._inode.i_no = 1;
-    root_inode._inode.i_type = F_DIR;
+    root_inode._inode.i_no    = 1;
+    root_inode._inode.i_type  = F_DIR;
     root_inode._inode.i_devno = 0;
-    root_inode._inode.i_size = 0;
+    root_inode._inode.i_size  = 0;
     // root_inode._inode.i_addrs[0] = easy_sb.block_area_start;
     atomic_set(&root_inode._inode.i_nlink, 1);
 
@@ -149,8 +143,8 @@ int main(int argc, char *argv[])
 
     // data bitmap 把前面占用的，以及其后紧邻的一个位置给 root
     uint8_t data_map[BLOCK_SIZE / 8] = {0};
-    int full_bytes = easy_sb.block_area_start / 8;
-    int remaining_bits = easy_sb.block_area_start % 8;
+    int full_bytes                   = easy_sb.block_area_start / 8;
+    int remaining_bits               = easy_sb.block_area_start % 8;
 
     // 设置前full_bytes个字节为0xFF
     for (int i = 0; i < full_bytes; i++)
@@ -165,8 +159,8 @@ int main(int argc, char *argv[])
 
     // 分配下一个块给root
     int root_block = easy_sb.block_area_start;
-    int root_byte = root_block / 8;
-    int root_bit = root_block % 8;
+    int root_byte  = root_block / 8;
+    int root_bit   = root_block % 8;
 
     // 检查是否超出data_map的范围
     if (root_byte < (BLOCK_SIZE / 8))

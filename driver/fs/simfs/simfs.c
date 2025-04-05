@@ -1,5 +1,5 @@
-#include "vfs_io.h"
-#include "vfs_interface.h"
+#include "vfs/vfs_io.h"
+#include "vfs/vfs_interface.h"
 #include "simfs.h"
 #include <string.h>
 
@@ -187,10 +187,10 @@ int8_t simfs_umount(uint8_t *sim_fs_ptr) {
         vfs_rwlock_deinit(current->lock);
         vfs_free(current->path);
 
-        if (current->data){
+        if (current->data) {
             vfs_free(current->data);
         }
-        
+
         vfs_free(current);
         current = next;
     }
@@ -240,17 +240,16 @@ int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
     return (int32_t)new_pos;
 }
 
-int8_t simfs_dup2(vfs_file_context_t *old_file, vfs_file_context_t *new_file){
+int8_t simfs_dup2(vfs_file_context_t *old_file, vfs_file_context_t *new_file) {
     simfs_file_t *file_ctx = (simfs_file_t *)old_file->file_ptr;
-    new_file->file_ptr = vfs_malloc(sizeof(simfs_file_t));
-    if (new_file->file_ptr == NULL){
+    new_file->file_ptr     = vfs_malloc(sizeof(simfs_file_t));
+    if (new_file->file_ptr == NULL) {
         return -1;
     }
 
     memcpy(new_file->file_ptr, file_ctx, sizeof(simfs_file_t));
     return 0;
 }
-
 
 //--------------------------------------------------
 // 文件系统表初始化

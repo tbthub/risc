@@ -7,7 +7,6 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/kernel",
                 "${workspaceFolder}/user/include",
-                "${workspaceFolder}/include/vfs"
             ],
             "defines": [],
             "cStandard": "gnu11",

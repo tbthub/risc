@@ -12,11 +12,10 @@
 #include "riscv.h"
 #include "std/stddef.h"
 #include "vm.h"
-
+#include "vfs/vfs_process.h"
 
 // Saved registers for kernel context switches.
-struct context
-{
+struct context {
     uint64 ra;
     uint64 sp;
 
@@ -36,23 +35,21 @@ struct context
 };
 
 // Per-CPU state.
-struct cpu
-{
-    struct context context;  // swtch() here to enter scheduler().
-    int noff;                // Depth of push_off() nesting.
-    int intena;              // Were interrupts enabled before push_off()?
+struct cpu {
+    struct context context; // swtch() here to enter scheduler().
+    int noff;               // Depth of push_off() nesting.
+    int intena;             // Were interrupts enabled before push_off()?
 
     // xv6中使用thread是为了方便找到当前进程。但是我们采取内核栈与PCB共占一个页面，也就是sp指针来确定即可
     // 暂时先不管
     struct thread_info *thread;
     struct thread_info *idle;
-    struct sched_struct sched_list;  // 每个CPU的进程调用链
+    struct sched_struct sched_list; // 每个CPU的进程调用链
 };
 extern struct cpu cpus[NCPU];
 
 // 线程状态
-enum task_state
-{
+enum task_state {
     UNUSED,
     USED,
     SLEEPING,
@@ -75,19 +72,18 @@ struct thread_info;
 // };
 
 // 主要管理资源，文件等。对个thread_info对应一个task_struct。操作task_struct时候需要加锁
-struct task_struct
-{
+struct task_struct {
     spinlock_t lock;
     struct mm_struct mm;
     struct signal sigs;
 
     struct files_struct files;
+    vfs_process_t vfs_proc;
 
     // struct th_table_struct th_table;  // TODO fork copy
 };
 
-struct trapframe
-{
+struct trapframe {
     /*   0 */ uint64 kernel_sp;
     /*   8 */ uint64 epc;
 
@@ -124,8 +120,7 @@ struct trapframe
     /* 256 */ uint64 t6;
 };
 
-struct thread_info
-{
+struct thread_info {
     tid_t tid;
     struct task_struct *task;
 
@@ -138,10 +133,10 @@ struct thread_info
     uint64 ticks;
 
     // wait_lock must be held when using this:
-    struct thread_info *parent;  // 父进程指针
+    struct thread_info *parent; // 父进程指针
     struct list_head child;
     struct list_head sibling;
-    struct list_head sched;  // 全局任务链表, 同时也是信号量等待队列
+    struct list_head sched; // 全局任务链表, 同时也是信号量等待队列
 
     semaphore_t child_exit_sem;
 
@@ -153,7 +148,7 @@ struct thread_info
     void *args;
     int cpu_affinity;
 
-    uint16 cpu_id;  // 用于记录当前线程在哪个核心上运行，这个暂时没想到干啥，先用着
+    uint16 cpu_id; // 用于记录当前线程在哪个核心上运行，这个暂时没想到干啥，先用着
 
     int exit_code;
 

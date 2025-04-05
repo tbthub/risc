@@ -1,11 +1,11 @@
 #include <pthread.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include "std/stdbool.h"
+#include "std/stdint.h"
 #include <stdlib.h>
 #include <string.h>
-#include "vfs_interface.h"
-#include "vfs_io.h"
-#include "vfs_process.h"
+#include "vfs/vfs_interface.h"
+#include "vfs/vfs_io.h"
+#include "vfs/vfs_process.h"
 
 /* 内存管理接口 */
 int mem_ref = 0;
@@ -17,7 +17,7 @@ int malloc_should_fail = 0;
 
 void *vfs_malloc(size_t size) {
 
-    if (malloc_should_fail == 1){
+    if (malloc_should_fail == 1) {
         return NULL;
     }
 
@@ -256,7 +256,6 @@ static void create_key() {
 
 static vfs_process_t process_desc;
 static int process_desc_isinit = 0;
-
 
 void *vfs_get_process() {
     return (void *)&process_desc;

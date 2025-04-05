@@ -1,13 +1,9 @@
-#include "vfs_interface.h"
-#include "vfs_io.h"
+#include "vfs/vfs_interface.h"
+#include "vfs/vfs_io.h"
 #include "vfs_syscall.h"
-#include "vfs_module.h"
-#include "simfs.h"
+#include "vfs/vfs_module.h"
+#include "driver/fs/simfs/simfs.h"
 #include <string.h>
-
-
-
-
 
 int kmount_simfs(const char *tag) {
     vfs_io_t io_table;
@@ -22,7 +18,6 @@ int kmount_simfs(const char *tag) {
 }
 
 int sys_mount(const char *source, const char *target, const char *filesystemtype, unsigned long mountflags, const void *data) {
-
 }
 
 int sys_umount(const char *target) {

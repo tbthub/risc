@@ -5,9 +5,9 @@ extern "C" {
 #ifndef _VFS_IO_H
 #define _VFS_IO_H
 
-#include "vfs_interface.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "vfs/vfs_interface.h"
+#include "std/stdint.h"
+#include "std/stddef.h"
 
 struct vfs_io_t;
 
@@ -31,7 +31,7 @@ typedef struct vfs_io_t {
     int8_t (*umount)(uint8_t *);
     int8_t (*dup2)(vfs_file_context_t *, vfs_file_context_t *);
 
-    //private
+    // private
     uint8_t *mount_ptr;
     size_t mountTagSize;
 } vfs_io_t;
@@ -54,4 +54,3 @@ typedef int vfs_off_t;
 #ifdef __cplusplus
 }
 #endif
-

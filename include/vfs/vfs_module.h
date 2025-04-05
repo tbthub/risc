@@ -5,12 +5,10 @@ extern "C" {
 #ifndef _VFS_MODULE_H
 #define _VFS_MODULE_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include "std/stdint.h"
+#include "std/stddef.h"
 
-#include "vfs_io.h"
-
-
+#include "vfs/vfs_io.h"
 
 int vfs_open(const char *path, int flag, int mode);
 int vfs_close(int fd);

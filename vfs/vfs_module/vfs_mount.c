@@ -1,13 +1,11 @@
 
-#include "vfs_io.h"
-#include "vfs_interface.h"
+#include "vfs/vfs_io.h"
+#include "vfs/vfs_interface.h"
 #include "string.h"
-
-
 
 int vfs_mount(vfs_io_t *mountIo) {
 
-    size_t mountTagSize = strlen(mountIo->mountTag) + 1;
+    size_t mountTagSize   = strlen(mountIo->mountTag) + 1;
     mountIo->mountTagSize = mountTagSize;
 
     // 调用驱动的mount函数
@@ -15,10 +13,9 @@ int vfs_mount(vfs_io_t *mountIo) {
     if (mount_ptr == NULL) {
         return -1;
     }
-    
+
     mountIo->mount_ptr = mount_ptr;
 
-    
     // 将mountTag和mountIo存入全局表
     if (vfs_data_global_put((uint8_t *)mountIo->mountTag, mountTagSize, mountIo, sizeof(vfs_io_t)) < 0) {
         mountIo->umount(mount_ptr);
@@ -45,5 +42,4 @@ int vfs_umount(const char *mountTag) {
     // 从全局表中删除
     vfs_data_global_del_end((uint8_t *)mountTag, mountTagSize);
     return 0;
-
 }

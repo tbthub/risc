@@ -5,8 +5,8 @@ extern "C" {
 #ifndef _SIMFS_H
 #define _SIMFS_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include "std/stdint.h"
+#include "std/stddef.h"
 
 // 文件节点结构体（链表形式）
 typedef struct simfs_file_node {
