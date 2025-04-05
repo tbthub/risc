@@ -3,15 +3,16 @@
 
 #include "core/sched.h"
 #include "core/signal.h"
-#include "fs/file.h"
-#include "lib/hash.h"
-#include "lib/list.h"
 #include "core/locks/semaphore.h"
 #include "core/locks/spinlock.h"
+#include "fs/file.h"
+#include "lib/list.h"
+#include "lib/hash.h"
 #include "param.h"
 #include "riscv.h"
 #include "std/stddef.h"
 #include "vm.h"
+
 
 // Saved registers for kernel context switches.
 struct context

@@ -26,30 +26,29 @@ static void init_thread(void *a)
     virtio_disk_init();
     efs_mount(&virtio_disk);
 
-    rw_test();
+    // rw_test();
 
-    
+    // while (1) {
+    // do_waitpid(-1, NULL, 0);
+    // }
+
+#ifdef CONF_MKFS
+    mkfs_tmp_test();
     while (1) {
-        do_waitpid(-1, NULL, 0);
+        thread_timer_sleep(myproc(), 100);
     }
+#endif
 
-    // #ifdef CONF_MKFS
-    //     mkfs_tmp_test();
-    //     while (1) {
-    //         thread_timer_sleep(myproc(), 100);
-    //     }
-    // #endif
+    kswapd_init();
+    struct thread_info *p = myproc();
+    // 在设置 tf 之前都是位于直接使用的内核页表，
+    spin_lock(&p->lock);
+    alloc_user_pgd(&p->task->mm);
+    p->tf = kmem_cache_alloc(&tf_kmem_cache);
+    spin_unlock(&p->lock);
 
-    //     kswapd_init();
-    //     struct thread_info *p = myproc();
-    //     // 在设置 tf 之前都是位于直接使用的内核页表，
-    //     spin_lock(&p->lock);
-    //     alloc_user_pgd(&p->task->mm);
-    //     p->tf = kmem_cache_alloc(&tf_kmem_cache);
-    //     spin_unlock(&p->lock);
-
-    //     intr_off();
-    //     do_exec("/init", NULL);
+    intr_off();
+    do_exec("/init", NULL);
 }
 
 void init_s()
