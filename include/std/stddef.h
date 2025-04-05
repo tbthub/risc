@@ -22,6 +22,9 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long uint64;
 
+typedef int64 ssize_t;
+typedef uint64 size_t;
+
 typedef char int8;
 typedef short int16;
 typedef int int32;
