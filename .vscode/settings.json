@@ -67,7 +67,8 @@
     "stack.h": "c",
     "rwlock.h": "c",
     "vfs_io.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "vfs_interface.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

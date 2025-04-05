@@ -15,6 +15,9 @@ void vfs_free(void *ptr);
 
 void vfs_raise_err(uint16_t error);
 
+
+vfs_data_global_put(fs, strlen(fs), value, strlen(value)); // 失败或已存在返回-1, 成功返回0
+
 int8_t vfs_data_global_put(uint8_t *key, size_t key_size, void *value, size_t value_size); // 若存在或处于删除状态则返回-1
 void *vfs_data_global_get(uint8_t *key, size_t key_size); // 获取，若处于删除状态中则返回NULL
 void vfs_data_global_get_done(uint8_t *key, size_t key_size);
