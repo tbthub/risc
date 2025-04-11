@@ -33,6 +33,7 @@ extern int t_mem_test2();
 extern int t_mem_test1();
 extern int t_mem_test3();
 extern int t_mem_test4();
+extern void vfs_init();
 void main()
 {
      if (cpuid() == 0)
@@ -47,7 +48,8 @@ void main()
           kvm_init();
           trap_init();
           plic_init();
-          
+          vfs_init();
+
           proc_init();
           sched_init();
           

@@ -1,19 +1,19 @@
 # 变量定义
 SRC_DIR := .
 BUILD_DIR := $(SRC_DIR)/build
-OUT_KERNEL_NAME := Kernel
+OUT_KERNEL_NAME := Kernel.out
 
 # 相关文件位置
 KERN_LD_SCRIPT := $(SRC_DIR)/boot/kernel.ld
 USER_LD_SCRIPT := $(SRC_DIR)/user/user.ld
 USER_SRC := $(SRC_DIR)/user
 EXT_TOOLS := $(SRC_DIR)/tools
-
+TEST_SRC := $(SRC_DIR)/test
 USER_ELF_DIR := $(BUILD_DIR)/user/elf
 # kernel src
 # 查找源文件，排除 EXT_TOOLS  USER_SRC 目录
-K_SRCS_C := $(shell find $(SRC_DIR) -type f -name '*.c' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*")
-K_SRCS_S := $(shell find $(SRC_DIR) -type f -name '*.S' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*")
+K_SRCS_C := $(shell find $(SRC_DIR) -type f -name '*.c' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*" -not -path "$(TEST_SRC)/*")
+K_SRCS_S := $(shell find $(SRC_DIR) -type f -name '*.S' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*" -not -path "$(TEST_SRC)/*")
 # 目标文件列表
 K_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(K_SRCS_C))
 K_OBJS += $(patsubst $(SRC_DIR)/%.S, $(BUILD_DIR)/%.o, $(K_SRCS_S))

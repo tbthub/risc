@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include <assert.h>
-#include <string.h>
+#include "lib/string.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -31,7 +31,7 @@ void test_simple_proc1() {
     char wp[32];
     char cp[32];
 
-    vfs_process_init("/", "", 1, 0);
+    vfs_process_init(vfs_get_process(), "/", "", 1, 0);
     vfs_chroot("/fatfs/data");
     vfs_chdir("/test1");
 
@@ -56,7 +56,7 @@ void test_simple_vfs() {
         return;
     }
 
-    vfs_process_init("/", "", 1, 0);
+    vfs_process_init(vfs_get_process(), "/", "", 1, 0);
     vfs_io_t io_table;
     io_table.mountTag = "simfs";
     simfs_io_table_init(&io_table);
@@ -98,7 +98,7 @@ void test_error_handling() {
         return;
     }
 
-    vfs_process_init("/", "", 1, 0);
+    vfs_process_init(vfs_get_process(), "/", "", 1, 0);
 
     // 测试重复挂载
     vfs_io_t fs1;
@@ -128,7 +128,7 @@ void test_lseek_operations() {
         return;
     }
 
-    vfs_process_init("/", "", 1, 0);
+    vfs_process_init(vfs_get_process(), "/", "", 1, 0);
     vfs_io_t fs;
     fs.mountTag = "simfs";
     simfs_io_table_init(&fs);
@@ -176,7 +176,7 @@ void test_file_descriptor_ops() {
         return;
     }
 
-    vfs_process_init("/", "", 1, 0);
+    vfs_process_init(vfs_get_process(), "/", "", 1, 0);
     vfs_io_t io_table;
     io_table.mountTag = "simfs";
     simfs_io_table_init(&io_table);
@@ -224,7 +224,7 @@ void test_path_operations() {
         return;
     }
 
-    vfs_process_init("/base", "work", 5, 4);
+    vfs_process_init(vfs_get_process(), "/base", "work", 5, 4);
 
     vfs_io_t io_table;
     io_table.mountTag = "base";
@@ -259,7 +259,7 @@ void test_cross_process_isolation() {
         vfs_process_t *proc = vfs_get_process();
         assert(strcmp(proc->root_path, "/origin") == 0);
     } else { // Child
-        vfs_process_init("/modified", "", 1, 0);
+        vfs_process_init(vfs_get_process(), "/modified", "", 1, 0);
         exit(0);
     }
 

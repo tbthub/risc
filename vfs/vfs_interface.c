@@ -4,7 +4,7 @@
 #include "core/locks/rwlock.h"
 #include "core/proc.h"
 #include "vfs/vfs_interface.h"
-#include <string.h>
+#include "lib/string.h"
 
 typedef struct vfs_hash_t {
     uint8_t *key;
@@ -16,7 +16,7 @@ typedef struct vfs_hash_t {
     int ref;
 } vfs_hash_t;
 
-extern struct hash_table hash_table_g;
+static struct hash_table hash_table_g;
 
 int vfshash(uint8_t *key, size_t size) {
     unsigned long hash = 5381;
@@ -93,6 +93,7 @@ int8_t vfs_data_global_put(uint8_t *key, size_t key_size, void *value, size_t va
     return 0;
 cleanup:
     vfs_raise_err(3);
+    return -1;
 }
 
 void *vfs_data_global_get(uint8_t *key, size_t key_size) {
@@ -100,7 +101,7 @@ void *vfs_data_global_get(uint8_t *key, size_t key_size) {
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
 
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
@@ -126,7 +127,7 @@ void vfs_data_global_get_done(uint8_t *key, size_t key_size) {
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
 
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
@@ -136,10 +137,9 @@ void vfs_data_global_get_done(uint8_t *key, size_t key_size) {
 
     if (find_it == -1) {
         vfs_raise_err(4);
-    });
+    };
 
     tmp->ref--;
-    return tmp;
 }
 
 void *vfs_data_global_del_start(uint8_t *key, size_t key_size) {
@@ -147,7 +147,7 @@ void *vfs_data_global_del_start(uint8_t *key, size_t key_size) {
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
 
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
@@ -169,7 +169,7 @@ void vfs_data_global_del_rollback(uint8_t *key, size_t key_size) {
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
 
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
@@ -183,7 +183,6 @@ void vfs_data_global_del_rollback(uint8_t *key, size_t key_size) {
 
     tmp->ref++;
 
-    return tmp;
 }
 
 void vfs_data_global_del_end(uint8_t *key, size_t key_size) {
@@ -191,7 +190,7 @@ void vfs_data_global_del_end(uint8_t *key, size_t key_size) {
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
 
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
@@ -232,5 +231,9 @@ void vfs_rwlock_deinit(void *lock) {
 }
 
 void *vfs_get_process() {
-    return &myproc()->task->vfs_process;
+    return &myproc()->task->vfs_proc;
+}
+
+void vfs_init(){
+    hash_init(&hash_table_g, 128, "vfs_tag");
 }

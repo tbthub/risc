@@ -12,6 +12,7 @@
 #include "mm/slab.h"
 #include "riscv.h"
 #include "std/stdarg.h"
+#include "sys.h"
 
 static struct
 {
@@ -29,7 +30,6 @@ struct thread_info *init_t;
 extern void usertrapret() __attribute__((noreturn));
 extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
-extern void files_init(struct files_struct *files);
 extern void sig_release_all(struct signal *s);
 __attribute__((noreturn)) int64 do_exit(int exit_code);
 
@@ -142,7 +142,7 @@ static inline void task_struct_init(struct task_struct *task)
     spin_init(&task->lock, "task");
     mm_init(&task->mm);
     sig_init(&task->sigs);
-    files_init(&task->files);
+    k_file_init(task);
     // th_table_init(&task->th_table);
 }
 
@@ -354,50 +354,40 @@ bad:
  *  下面的函数都需要有 file_lock
  */
 
-fd_t get_unused_fd(struct files_struct *files)
-{
-    for (int i = 0; i < NOFILE; i++) {
-        if (files->fdt[i] == NULL)
-            return i;
-    }
-    return -EMFILE;
-}
+// fd_t get_unused_fd(struct files_struct *files)
+// {
+//     for (int i = 0; i < NOFILE; i++) {
+//         if (files->fdt[i] == NULL)
+//             return i;
+//     }
+//     return -EMFILE;
+// }
 
-void fd_install(struct files_struct *files, fd_t fd, struct file *f)
-{
-    assert(f != NULL, "fd_install");
-    assert(fd > -1 && fd < NOFILE, "fd_install fd");
-    files->fdt[fd] = f;
-}
+// void fd_install(struct files_struct *files, fd_t fd, struct file *f)
+// {
+//     assert(f != NULL, "fd_install");
+//     assert(fd > -1 && fd < NOFILE, "fd_install fd");
+//     files->fdt[fd] = f;
+// }
 
-void fd_close(struct files_struct *files, fd_t fd)
-{
-    struct file **f;
-    if (!files)
-        return;
-    assert(fd > -1 && fd < NOFILE, "fd_close fd");
+// void fd_close(struct files_struct *files, fd_t fd)
+// {
+//     struct file **f;
+//     if (!files)
+//         return;
+//     assert(fd > -1 && fd < NOFILE, "fd_close fd");
 
-    f = files->fdt + fd;
-    if (*f != NULL) {
-        file_close(*f);
-        *f = NULL;
-    }
-}
+//     f = files->fdt + fd;
+//     if (*f != NULL) {
+//         file_close(*f);
+//         *f = NULL;
+//     }
+// }
 
-void fd_close_all(struct files_struct *files)
-{
-    struct file **f;
-    if (!files)
-        return;
+// void fd_close_all(struct files_struct *files)
+// {
 
-    for (int i = 0; i < NOFILE; i++) {
-        f = files->fdt + i;
-        if (*f != NULL) {
-            file_close(*f);
-            *f = NULL;
-        }
-    }
-}
+// }
 
 /*
  * fork
@@ -435,19 +425,8 @@ static void copy_vm(struct task_struct *ch, struct task_struct *pa)
 
 static void copy_files(struct task_struct *ch, struct task_struct *pa)
 {
-    struct files_struct *pa_files = &ch->files;
-    struct files_struct *ch_files = &pa->files;
-
-    spin_lock(&pa_files->file_lock);
-    struct file **pa_fdt = pa_files->fdt;
-    struct file **ch_fdt = ch_files->fdt;
-
-    for (int i = 0; i < NOFILE; i++, pa_fdt++, ch_fdt++) {
-        if (*pa_fdt)
-            file_dup(*pa_fdt);
-        *ch_fdt = *pa_fdt;
-    }
-    spin_unlock(&pa_files->file_lock);
+    assert(pa == myproc()->task, "pa == myproc()");
+    assert(k_copy_file(ch) >= 0, "k_copy_file(ch) >= 0");
 }
 
 static void copy_sigs(struct task_struct *ch, struct task_struct *pa)
@@ -609,7 +588,8 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
     if (t->tid == 0) {
         // th_table_free(&task->th_table);
 
-        fd_close_all(&task->files);
+
+        k_file_deinit(task);
 
         reparent(t);
 

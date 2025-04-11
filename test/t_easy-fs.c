@@ -5,7 +5,6 @@
 // #include "core/timer.h"
 // #include "lib/string.h"
 // #include "../fs/easyfs/easyfs.h"
-// #include "fs/file.h"
 // // 必须等到文件系统初始化完成后才可以测试
 // static void __easy_fs_test()
 // {

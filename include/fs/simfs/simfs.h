@@ -7,6 +7,7 @@ extern "C" {
 
 #include "std/stdint.h"
 #include "std/stddef.h"
+#include "vfs/vfs_io.h"
 
 // 文件节点结构体（链表形式）
 typedef struct simfs_file_node {

@@ -70,7 +70,11 @@
         "vfs/vfs_io.h": "c",
         "stdint.h": "c",
         "vfs/vfs_interface.h": "c",
-        "vfs/vfs_process.h": "c"
+        "vfs/vfs_process.h": "c",
+        "sys.h": "c",
+        "vfs_module.h": "c",
+        "vfs_process.h": "c",
+        "fcntl.h": "c"
     },
     "workbench.list.horizontalScrolling": true,
     "files.insertFinalNewline": true

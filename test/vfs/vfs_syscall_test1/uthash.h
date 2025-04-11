@@ -26,7 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define UTHASH_VERSION 2.3.0
 
-#include <string.h>     /* memcmp, memset, strlen */
+#include "lib/string.h" /* memcmp, memset, strlen */
 #include "std/stddef.h" /* ptrdiff_t */
 #include <stdlib.h>     /* exit */
 

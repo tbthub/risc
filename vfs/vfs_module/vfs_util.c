@@ -1,7 +1,7 @@
 
 #include "std/stdint.h"
 #include "std/stddef.h"
-#include <string.h>
+#include "lib/string.h"
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_process.h"
 
@@ -92,7 +92,7 @@ char *construct_full_path(uint8_t *root_path, uint8_t *work_path, uint16_t root_
 
     if (path[0] == '/') {
         // 绝对路径：直接使用root_path
-        base_ptr = "/";
+        base_ptr = (const uint8_t*) "/";
         base_len = 1;
     } else {
         // 相对路径：需要拼接root_path和work_path

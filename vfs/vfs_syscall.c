@@ -1,47 +1,46 @@
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_io.h"
-#include "vfs_syscall.h"
 #include "vfs/vfs_module.h"
-#include "driver/fs/simfs/simfs.h"
-#include <string.h>
+#include "std/stdint.h"
+#include "core/proc.h"
+#include "sys.h"
 
-int kmount_simfs(const char *tag) {
-    vfs_io_t io_table;
 
-    if (tag == NULL) {
-        return -1;
-    }
-
-    simfs_io_table_init(&io_table);
-
-    return VFS_ENTRY_MODULE(&io_table, tag, strlen(tag) - 1, 0, 0, 0, vfs_mount);
+int do_open(const char *path, int flags, int mod){
+    return vfs_open(path, flags, mod);
 }
 
-int sys_mount(const char *source, const char *target, const char *filesystemtype, unsigned long mountflags, const void *data) {
+int do_close(int fd){
+    return vfs_close(fd);
 }
 
-int sys_umount(const char *target) {
-
-    if (target == NULL) {
-        return -1;
-    }
-
-    return VFS_ENTRY_MODULE(target, strlen(target) - 1, 0, 0, 0, 0, vfs_umount);
+int do_read(int fd, const void *buf, size_t count){
+    return vfs_read(fd, buf, count);
 }
 
-ssize_t sys_read(int fd, void *buf, size_t count) {
-
-    return (ssize_t)VFS_ENTRY_MODULE(get_vfs_process(), fd, buf, count, 0, 0, vfs_read);
+int do_write(int fd, void *buf, size_t count) {
+    return vfs_write(fd, buf, count);
 }
 
-ssize_t sys_write(int fd, const void *buf, size_t count) {
-    return (ssize_t)VFS_ENTRY_MODULE(get_vfs_process(), fd, buf, count, 0, 0, vfs_write);
+int do_lseek(int fd, off_t offset, int whence){
+    return vfs_lseek(fd, offset, whence);
 }
 
-int sys_open(const char *pathname, int flags, mode_t mode) {
-    return VFS_ENTRY_MODULE(get_vfs_process(), pathname, strlen(pathname) - 1, flags, mode, 0, vfs_open);
+int k_copy_file(struct task_struct *ch) {
+    vfs_copy_filectx_to_new_proc(&ch->vfs_proc);
+    return 0;
 }
 
-int sys_close(int fd) {
-    return VFS_ENTRY_MODULE(get_vfs_process(), fd, 0, 0, 0, 0, vfs_close);
+int k_file_init(struct task_struct *task) {
+
+    vfs_process_t *proc = &task->vfs_proc;
+    vfs_process_init(proc, proc->root_path, proc->work_path, proc->root_path_size, proc->work_path_size);
+    return 0;
+
+}
+
+int k_file_deinit(struct task_struct *task) {
+    vfs_process_t *proc = &task->vfs_proc;
+    vfs_process_deinit(proc);
+    return 0;
 }

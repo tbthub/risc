@@ -1,14 +1,15 @@
 #include "elf.h"
 #include "core/proc.h"
 #include "core/vm.h"
-#include "fs/file.h"
 #include "conf.h"
 #include "riscv.h"
 #include "lib/string.h"
 #include "mm/kmalloc.h"
+#include "fs/fcntl.h"
+#include "sys.h"
 
 
-int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file *f)
+int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f)
 {
     struct vm_area_struct *v;
     struct proghdr *ph;
@@ -20,8 +21,8 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
 
     // 读出程序头表
     void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
-    file_llseek(f, ehdr->phoff, SEEK_SET);
-    file_read(f, pht, ehdr->phnum * ehdr->phentsize);
+    do_lseek(f, ehdr->phoff, SEEK_SET);
+    do_read(f, pht, ehdr->phnum * ehdr->phentsize);
 
     // 3. 遍历Program Header，加载各个段
     ph = (struct proghdr *)pht + ehdr->phnum - 1;

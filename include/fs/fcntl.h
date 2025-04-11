@@ -1,14 +1,28 @@
-#ifndef __FCNTL_H__
-#define __FCNTL_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define O_RDONLY    0
-#define O_WRONLY    (1 << 0)
-#define O_RDWR      (1 << 1)
-// #define O_CREAT     (1 << 6)    // 文件不存在则创建
-// #define O_EXCL      (1 << 7)    // 与 O_CREAT 配合，文件存在则失败
-#define O_TRUNC     (1 << 8)    // 打开时清空文件内容
-#define O_APPEND    (1 << 10)   // 追加写入模式
+#ifndef _FCNTL_H
+#define _FCNTL_H
+
+#include "vfs/vfs_io.h"
+
+#define O_RDONLY VFS_O_RDONLY
+#define O_WRONLY VFS_O_WRONLY
+#define O_RDWR VFS_O_RDWR
+
+#define O_CREAT VFS_O_CREAT
+#define O_APPEND VFS_O_APPEND
+
+#define SEEK_SET VFS_SEEK_SET
+#define SEEK_CUR VFS_SEEK_CUR
+#define SEEK_END VFS_SEEK_END
+
+typedef vfs_off_t off_t;
+
+#endif
 
 
-
+#ifdef __cplusplus
+}
 #endif

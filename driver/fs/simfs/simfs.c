@@ -1,7 +1,7 @@
 #include "vfs/vfs_io.h"
 #include "vfs/vfs_interface.h"
-#include "simfs.h"
-#include <string.h>
+#include "fs/simfs/simfs.h"
+#include "lib/string.h"
 
 //--------------------------------------------------
 // 内部工具函数：通过路径查找文件节点（假设调用者已持有适当的锁）
@@ -229,7 +229,7 @@ int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
     }
 
     // 检查新位置是否合法
-    if (new_pos < 0 || new_pos > INT32_MAX) {
+    if (new_pos < 0 || new_pos > 0x7fffffff) {
         vfs_wlock_release(node->lock);
         return -1;
     }

@@ -1,6 +1,5 @@
 #include "core/proc.h"
 #include "core/signal.h"
-#include "fs/file.h"
 #include "lib/string.h"
 #include "std/stddef.h"
 

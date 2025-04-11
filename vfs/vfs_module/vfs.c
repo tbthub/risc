@@ -1,11 +1,13 @@
 
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_process.h"
-#include <string.h>
+#include "vfs/vfs_module.h"
+#include "vfs/vfs_util.h"
+#include "vfs/vfs_io.h"
+#include "lib/string.h"
 
-void vfs_process_init(uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s) {
+void vfs_process_init(vfs_process_t *proc, uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s) {
 
-    vfs_process_t *proc = (vfs_process_t *)vfs_get_process();
     memset(proc, 0, sizeof(vfs_process_t));
 
     proc->root_path      = vfs_malloc(root_path_size_s);
@@ -60,6 +62,17 @@ cleanup:
     }
 
     return;
+}
+
+void vfs_process_deinit(vfs_process_t *proc) {
+
+    for (int i = 0; i < VFS_FD_SIZE; i++) {
+        vfs_rwlock_deinit(proc->fd_list[i].rwlock);
+    }
+
+    vfs_rwlock_deinit(proc->rwlock);
+    vfs_free(proc->work_path);
+    vfs_free(proc->root_path);
 }
 
 int vfs_alloc_fd(vfs_process_t *process) {
@@ -118,4 +131,141 @@ vfs_process_t *vfs_process_write() {
 void vfs_process_write_done() {
     vfs_process_t *proc = (vfs_process_t *)vfs_get_process();
     vfs_wlock_release(proc->rwlock);
+}
+
+int vfs_copy_filectx_to_new_proc(vfs_process_t *new_proc) {
+
+    uintptr_t old_ctx_ptr;
+    uint8_t old_flag;
+    vfs_process_t *proc = vfs_process_read();
+
+    for (int i = 0; i < VFS_FD_SIZE; i++) {
+
+        vfs_get_fd_context(proc, i, &old_ctx_ptr, &old_flag);
+
+        if (old_ctx_ptr == 0) {
+            vfs_get_fd_context_done(proc, i);
+            continue;
+        }
+
+        vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
+
+        if (new_ctx == NULL) {
+            vfs_get_fd_context_done(proc, i);
+            goto failed;
+        }
+
+        if (vfs_dup_with_context((vfs_file_context_t *)old_ctx_ptr, new_ctx) < 0) {
+            vfs_get_fd_context_done(proc, i);
+            vfs_free(new_ctx);
+            goto failed;
+        }
+
+        new_proc->fd_list[i].ptr  = (uintptr_t)new_ctx;
+        new_proc->fd_list[i].flag = old_flag;
+        vfs_get_fd_context_done(proc, i);
+    }
+
+    vfs_process_read_done();
+    return 0;
+
+failed:
+
+    for (int i = 0; i < VFS_FD_SIZE; i++) {
+
+        if (new_proc->fd_list[i].ptr != 0) {
+
+            if (vfs_close_with_context((vfs_file_context_t *)new_proc->fd_list[i].ptr) < 0) {
+                vfs_raise_err(6);
+            }
+
+            new_proc->fd_list[i].ptr  = 0;
+            new_proc->fd_list[i].flag = 0;
+        }
+    }
+
+    vfs_process_read_done();
+    return -1;
+}
+
+vfs_file_context_t *vfs_open_with_context(vfs_process_t *proc, const char *path, int flag, int mode) {
+
+    char *full_path = construct_full_path(proc->root_path, proc->work_path, proc->root_path_size, proc->work_path_size, path);
+    if (!full_path) {
+        return NULL;
+    }
+
+    char *mount_tag, *open_path;
+    if (parse_mount_tag(full_path, &mount_tag, &open_path) != 0) {
+        vfs_free(full_path);
+        return NULL;
+    }
+
+    size_t mountTagSize = strlen(mount_tag) + 1;
+
+    vfs_io_t *mount_io = vfs_data_global_get((uint8_t *)mount_tag, mountTagSize);
+
+    if (!mount_io) {
+        vfs_free(mount_tag);
+        vfs_free(open_path);
+        vfs_free(full_path);
+        return NULL;
+    }
+
+    vfs_file_context_t *ctx = vfs_malloc(sizeof(vfs_file_context_t));
+    ctx->mount_ptr          = mount_io->mount_ptr;
+    ctx->op                 = mount_io;
+    ctx->file_ptr           = NULL;
+    ctx->flag               = flag;
+
+    // 文件操作使用驱动内部锁
+    if (mount_io->open(ctx, (uint8_t *)open_path, flag, mode) < 0) {
+        vfs_free(ctx);
+        vfs_data_global_get_done((uint8_t *)ctx->op->mountTag, ctx->op->mountTagSize);
+        vfs_free(mount_tag);
+        vfs_free(open_path);
+        vfs_free(full_path);
+        return NULL;
+    }
+
+    vfs_free(mount_tag);
+    vfs_free(open_path);
+    vfs_free(full_path);
+    return ctx;
+}
+
+int vfs_close_with_context(vfs_file_context_t *ctx) {
+
+    if (!ctx) {
+        return -1;
+    }
+
+    return (int)ctx->op->close(ctx);
+}
+
+int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size) {
+    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_RDONLY)) {
+        return -1;
+    }
+
+    return (int)ctx->op->read(ctx, (uint8_t *)buf, size);
+}
+
+int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size) {
+    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_WRONLY)) {
+        return -1;
+    }
+
+    return (int)ctx->op->write(ctx, (uint8_t *)buf, size);
+}
+
+int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ctx) {
+    memcpy(new_ctx, old_ctx, sizeof(vfs_file_context_t));
+    new_ctx->file_ptr = NULL;
+
+    if (old_ctx->op->dup2 == NULL || old_ctx->op->dup2(old_ctx, new_ctx) < 0) {
+        return -1;
+    }
+
+    return 0;
 }

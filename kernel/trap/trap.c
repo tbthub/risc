@@ -6,13 +6,14 @@
 #include "dev/plic.h"
 #include "dev/uart.h"
 #include "elf.h"
-#include "fs/file.h"
 #include "core/locks/semaphore.h"
 #include "lib/string.h"
 #include "mm/memlayout.h"
 #include "mm/page.h"
 #include "riscv.h"
 #include "std/stdio.h"
+#include "fs/fcntl.h"
+#include "sys.h"
 
 extern void virtio_disk_intr();
 // in kernelvec.S, calls kerneltrap().
@@ -21,11 +22,12 @@ extern void uservec();
 extern void userret() __attribute__((noreturn));
 extern void syscall();
 extern int alloc_user_stack(struct mm_struct *mm, tid_t tid);
-extern int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file *f);
+extern int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f);
 extern void page_fault_handler(uint64 fault_addr, uint64 scause);
 extern uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]);
 extern void signal_handler(struct signal *s);
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+
 
 void trap_init()
 {
@@ -195,13 +197,14 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     assert(intr_get() == 0, "exec intr 2\n");
 
     struct elf64_hdr ehdr;
-    struct file *f = file_open(path, FILE_READ);
+
+    int f = do_open(path, O_RDONLY, 0);
     assert(intr_get() == 0, "exec intr 3\n");
 
-    if (!f)
+    if (f < 0)
         panic("do_exec f is NULL\n");
 
-    file_read(f, &ehdr, sizeof(ehdr));
+    do_read(f, (void *)&ehdr, sizeof(ehdr));
 
     assert(intr_get() == 0, "exec intr 4\n");
 
@@ -223,7 +226,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     alloc_user_pgd(mm);
 
     if (argv) {
-        struct vm_area_struct *v = vma_alloc_proghdr(USER_ARGS_PAGE, USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + USER_ARGV_MAX_SIZE) * PGSIZE - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_args_ops);
+        struct vm_area_struct *v = vma_alloc_proghdr(USER_ARGS_PAGE, USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + USER_ARGV_MAX_SIZE) * PGSIZE - 1, VM_PROT_READ | VM_PROT_WRITE, 0, -1, &vma_args_ops);
         vma_insert(mm, v);
 
         mappages(mm->pgd, PGROUNDDOWN(USER_ARGS_PAGE), args_list, PGSIZE, PTE_R | PTE_W | PTE_U);

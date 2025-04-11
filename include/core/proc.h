@@ -5,7 +5,6 @@
 #include "core/signal.h"
 #include "core/locks/semaphore.h"
 #include "core/locks/spinlock.h"
-#include "fs/file.h"
 #include "lib/list.h"
 #include "lib/hash.h"
 #include "param.h"
@@ -77,7 +76,6 @@ struct task_struct {
     struct mm_struct mm;
     struct signal sigs;
 
-    struct files_struct files;
     vfs_process_t vfs_proc;
 
     // struct th_table_struct th_table;  // TODO fork copy

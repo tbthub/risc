@@ -7,12 +7,12 @@ extern "C" {
 
 #include "std/stdint.h"
 #include "std/stddef.h"
-
+#include "vfs/vfs_process.h"
 #include "vfs/vfs_io.h"
 
 int vfs_open(const char *path, int flag, int mode);
 int vfs_close(int fd);
-int vfs_read(int fd, void *buf, size_t size);
+int vfs_read(int fd, const void *buf, size_t size);
 int vfs_write(int fd, void *buf, size_t size);
 int vfs_dup(int oldfd);
 int vfs_dup2(int oldfd, int newfd);

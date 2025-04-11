@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "lib/string.h"
 #include <assert.h>
 
 // 包含被测试的代码

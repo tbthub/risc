@@ -1,9 +1,7 @@
-#include "../fs/easyfs/easyfs.h"
 #include "core/proc.h"
 #include "core/timer.h"
 #include "dev/blk/bio.h"
 #include "dev/blk/buf.h"
-#include "fs/file.h"
 #include "lib/math.h"
 #include "lib/string.h"
 #include "mm/mm.h"
@@ -294,9 +292,9 @@ void kmem_cache_init()
     kmem_cache_create(&buf_kmem_cache, "buf_kmem_cache", sizeof(struct buf_head), 0);
     kmem_cache_create(&bio_kmem_cache, "bio_kmem_cache", sizeof(struct bio), 0);
     kmem_cache_create(&timer_kmem_cache, "timer_kmem_cache", sizeof(struct timer), 0);
-    kmem_cache_create(&efs_inode_kmem_cache, "inode_kmem_cache", sizeof(struct easy_m_inode), 0);
-    kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
-    kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
+    // kmem_cache_create(&efs_inode_kmem_cache, "inode_kmem_cache", sizeof(struct easy_m_inode), 0);
+    // kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
+    // kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
     kmem_cache_create(&tf_kmem_cache, "tf_kmem_cache", sizeof(struct trapframe), 0);
     kmem_cache_create(&vma_kmem_cache, "vma_kmem_cache", sizeof(struct vm_area_struct), 0);
 }

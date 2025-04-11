@@ -1,10 +1,8 @@
 #include "std/stddef.h"
 #include "core/proc.h"
-#include "fs/file.h"
 #include "elf.h"
 #include "core/proc.h"
 #include "core/vm.h"
-#include "fs/file.h"
 #include "conf.h"
 
 extern int do_fork();

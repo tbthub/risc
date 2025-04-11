@@ -22,9 +22,6 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long uint64;
 
-typedef int64 ssize_t;
-typedef uint64 size_t;
-
 typedef char int8;
 typedef short int16;
 typedef int int32;
@@ -36,6 +33,9 @@ typedef uint32 mode_t;
 typedef uint32 flags_t;
 typedef uint64 flags64_t;
 typedef int fd_t;
+
+typedef int64 ssize_t;
+typedef uint64 size_t;
 
 #define VM_PROT_NONE (1L << 0)
 #define VM_PROT_READ (1L << 1)

@@ -3,7 +3,6 @@
 #include "core/proc.h"
 #include "core/trap.h"
 #include "defs.h"
-#include "fs/file.h"
 #include "lib/atomic.h"
 #include "core/locks/spinlock.h"
 #include "lib/string.h"
@@ -392,7 +391,7 @@ int alloc_user_stack(struct mm_struct *mm, tid_t tid)
     if (!stack)
         return -1;
 
-    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_stack_ops);
+    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, VM_PROT_READ | VM_PROT_WRITE, 0, -1, &vma_stack_ops);
 
     vma_insert(mm, v);
     mappages(mm->pgd, PGROUNDDOWN(USER_STACK_TOP(tid)), (uint64)stack, PGSIZE, PTE_R | PTE_W | PTE_U);

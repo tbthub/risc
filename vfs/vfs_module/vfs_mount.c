@@ -1,7 +1,8 @@
 
 #include "vfs/vfs_io.h"
 #include "vfs/vfs_interface.h"
-#include "string.h"
+#include "vfs/vfs_module.h"
+#include "lib/string.h"
 
 int vfs_mount(vfs_io_t *mountIo) {
 
