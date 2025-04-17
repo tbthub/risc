@@ -26,7 +26,6 @@ static void init_thread(void *a)
     virtio_disk_init();
     efs_mount(&virtio_disk);
 
-
 #ifdef CONF_MKFS
     mkfs_tmp_test();
     while (1) {

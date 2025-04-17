@@ -381,6 +381,7 @@ struct rb_node *rb_next(struct rb_node *node)
     return NULL;  // 到达根节点且没有更高值的祖先
 }
 
+#ifdef RBT_DEBUG
 static int __validate_subtree(struct rb_node *node)
 {
     if (!node)
@@ -417,3 +418,4 @@ void validate_rbtree(struct rb_root *root)
     // 深度优先遍历验证
     __validate_subtree(root->rb_node);
 }
+#endif
