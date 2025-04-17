@@ -49,13 +49,12 @@ extern struct rb_node *rb_first(struct rb_root *root);
 extern struct rb_node *rb_next(struct rb_node *node);
 
 /* 调试接口 */
-// #define RBT_DEBUG
+#define RBT_DEBUG
 #ifdef RBT_DEBUG
 extern void validate_rbtree(struct rb_root *root);
 #else
 static inline void validate_rbtree(struct rb_root *root)
 {
-    (void)root;
 }
 #endif
 
