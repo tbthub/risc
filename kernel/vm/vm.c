@@ -270,7 +270,6 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
         void *new_page = __alloc_page(0);
         memcpy(new_page, (void *)PGROUNDDOWN(fault_addr), PGSIZE);
 #ifdef DEBUG_COW
-
         printk("pid %d: cow NEW page, cow-maps: %p - %p\n", th->pid, PGROUNDDOWN(fault_addr), (uint64)new_page);
 #endif
         // 先保留原PTE的权限位(0 - 9,即低10位)
@@ -431,15 +430,16 @@ void free_user_pgd(struct mm_struct *mm)
     if (!mm) {
         panic("mm\n");
     }
-    // 内核线程是没有页表的
+
     if (mm->pgd) {
-        // printk("free_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
+        printk("free_user_pgd, pgd: %p\n", mm->pgd);
         __free_page(mm->pgd);
         mm->pgd = NULL;
     }
 }
 
 // ! 我们暂时没有实现页表本身的释放，后面补充
+// ! 页表自身需要父进程来回收，但是我们在这里有 bug
 void free_user_memory(struct mm_struct *mm)
 {
     // 根据 mm->map 指导释放内存，尽管页表可能没有映射

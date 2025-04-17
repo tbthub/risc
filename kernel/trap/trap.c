@@ -130,9 +130,8 @@ static void excep_handler(uint64 scause)
         printk("satp: %p\n", r_satp());
         printk("proc satp: %p\n", myproc()->task->mm.pgd);
         printk("page: %d\n", page_count(PA2PG(myproc()->task->mm.pgd)));
-
-        // vm2pa_show(&t->task->mm);
-        // show_all_args(t);
+        printk("intr noff: %d\n",cpus[cpuid()].noff);
+        show_all_args(t);
         panic("excep_handler unknown scause, sp:%p\n", t->tf->sp);
         panic("\n");
         break;

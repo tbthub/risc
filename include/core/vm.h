@@ -12,6 +12,9 @@ struct thread_info;
 // Virtual Memory Area
 struct vm_area_struct
 {
+    // 这里对引用的操作时机：进程创建、进程销毁、kwback。不会出现释放一般时突然有人加引用
+    // atomic_t ref;   
+
     uint64 vm_start;      // 区域起始地址
     uint64 vm_end;        // 区域结束地址
     flags64_t vm_prot;    // 区域标志 RWX

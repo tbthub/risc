@@ -11,7 +11,7 @@
 
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
 
-struct
+static struct
 {
     spinlock_t lock;
     struct fifo queue;
@@ -72,3 +72,4 @@ void kswapd_init()
 
     kthread_create(get_init(),kswapd, NULL, "kswapd", NO_CPU_AFF);
 }
+

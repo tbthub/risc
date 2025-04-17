@@ -136,9 +136,9 @@ static void vma_gen_close(struct mm_struct *mm, struct vm_area_struct *v)
     assert(v != NULL, "vma_gen_close v == NULL");
     pte_t *pte;
     pte = walk(mm->pgd, v->vm_start, 0);
-    for (uint64 _i_ = 0, _va_ = v->vm_start; _va_ < v->vm_end; _va_ += PGSIZE, _i_++) {
+    for (uint64 va = v->vm_start; va < v->vm_end; va += PGSIZE) {
         if (!pte) {
-            pte = walk(mm->pgd, _va_ + PGSIZE, 0);
+            pte = walk(mm->pgd, va + PGSIZE, 0);
             continue;
         }
         else if (*pte & PTE_V) {
@@ -148,7 +148,7 @@ static void vma_gen_close(struct mm_struct *mm, struct vm_area_struct *v)
 
         pte += 1;
         if (((uint64)pte & (PGSIZE - 1)) == 0)
-            pte = walk(mm->pgd, _va_ + PGSIZE, 0);
+            pte = walk(mm->pgd, va + PGSIZE, 0);
     }
 }
 
@@ -160,7 +160,7 @@ static void vma_gen_dup(struct mm_struct *mm, struct vm_area_struct *v, struct m
     struct vm_area_struct *vma2;
 
     pte = walk(mm->pgd, v->vm_start, 0);
-    for (uint64 _i_ = 0, va = v->vm_start; va < v->vm_end; va += PGSIZE, _i_++) {
+    for (uint64 va = v->vm_start; va < v->vm_end; va += PGSIZE) {
         if (!pte) {
             pte = walk(mm->pgd, va + PGSIZE, 0);
             continue;

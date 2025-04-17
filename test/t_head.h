@@ -28,5 +28,5 @@ extern void user_syswake_test();   // 用户唤醒测试
 extern void mkfs_tmp_test();
 
 
-extern void rw_test();
+extern int t_rbtree();
 #endif

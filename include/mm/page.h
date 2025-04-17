@@ -21,6 +21,8 @@
 #define PG_reserved (1 << 3) // 是否为保留页面，避免被操作系统的分配器使用
 #define PG_Slab (1 << 4)     // 用于 Slab
 
+#define PG_WBACKING (1 << 31)     // 用于 kwback
+
 #define PG_FREE 0
 
 // 描述每一个物理页面
