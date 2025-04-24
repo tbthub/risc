@@ -95,7 +95,7 @@ void vma_insert(struct mm_struct *mm, struct vm_area_struct *vma)
     mm->mmap = vma;
 }
 
-struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghdr_flags, uint32 pgoff, int file, struct vm_operations_struct *ops)
+struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghdr_flags, uint32 pgoff, void* file, struct vm_operations_struct *ops)
 {
     struct vm_area_struct *v = kmem_cache_alloc(&vma_kmem_cache);
     assert(v != NULL, "vma_alloc_proghdr");
@@ -182,7 +182,7 @@ static void vma_gen_dup(struct mm_struct *mm, struct vm_area_struct *v, struct m
 
 static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
 {
-    assert(v->vm_file != -1, "vma_gen_file_fault");
+    assert(v->vm_file != NULL, "vma_gen_file_fault");
 
     // * 注意，必须先获取到进程的锁之后才能去 kswap_wake
     // ＊ 你也不想我这边还没进入调度那边就已经完成了吧，为了避免不必要的麻烦
@@ -197,16 +197,17 @@ static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, 
 
 static void vma_gen_file_dup(struct mm_struct *mm, struct vm_area_struct *v, struct mm_struct *new_mm)
 {
-    assert(v->vm_file != -1, "vma_gen_file_dup");
+    assert(v->vm_file != NULL, "vma_gen_file_dup");
     vma_gen_dup(mm, v, new_mm);
-    // TODO
+    new_mm->mmap->vm_file = k_file_mmap_dup(v->vm_file);
+    assert(v->vm_file != NULL, "v->vm_file != NULL vma_gen_file_dup");
 }
 
 static void vma_gen_file_close(struct mm_struct *mm, struct vm_area_struct *v)
 {
-    assert(v->vm_file != -1, "vma_gen_file_close");
+    assert(v->vm_file != NULL, "vma_gen_file_close");
     vma_gen_close(mm, v);
-    do_close(v->vm_file);
+    k_file_mmap_close(v->vm_file);
 }
 
 // 堆栈的缺页发生在越界的时候
@@ -259,6 +260,12 @@ int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, ui
     struct mm_struct *mm = &myproc()->task->mm;
     struct vm_area_struct *v;
 
+    void *file_ctx = k_file_mmap_init(fd);
+
+    if (file_ctx == NULL){
+        return -1;
+    }
+
     if (len <= 0 || offset & (PGSIZE - 1)) {
         printk("do_mmap len <= 0 || offset & (PGSIZE - 1)\n");
         return -1;
@@ -269,7 +276,8 @@ int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, ui
     v = kmem_cache_alloc(&vma_kmem_cache);
     assert(v != NULL, "do_mmap");
 
-    v->vm_file = fd;
+    v->vm_file = file_ctx;
+
     if ((void *)addr == NULL)
         v->vm_end = find_free_region_map(mm, aligned_len);
     else

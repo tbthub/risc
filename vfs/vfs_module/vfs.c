@@ -244,7 +244,7 @@ int vfs_close_with_context(vfs_file_context_t *ctx) {
 }
 
 int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size) {
-    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_RDONLY)) {
+    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_RDONLY) || ctx->op->read == NULL) {
         return -1;
     }
 
@@ -252,7 +252,7 @@ int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size)
 }
 
 int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size) {
-    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_WRONLY)) {
+    if (!ctx || ((ctx->flag & 0b11) != VFS_O_RDWR && (ctx->flag & 0b11) != VFS_O_WRONLY) || ctx->op->write == NULL) {
         return -1;
     }
 
@@ -268,4 +268,12 @@ int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ct
     }
 
     return 0;
+}
+
+int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence) {
+    if (!ctx || ctx->op->lseek == NULL){
+        return -1;
+    }
+
+    return (int)ctx->op->lseek(ctx, offset, whence);
 }

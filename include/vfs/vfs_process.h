@@ -47,6 +47,7 @@ int vfs_close_with_context(vfs_file_context_t *ctx);
 int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size);
 int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size);
 int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ctx);
+int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence);
 
 // 注意此函数不会获取目标的锁
 int vfs_copy_filectx_to_new_proc(vfs_process_t *new_proc);

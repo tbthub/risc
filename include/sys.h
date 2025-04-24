@@ -22,6 +22,13 @@ int do_dup2(int oldfd, int newfd);
 int k_copy_file(struct task_struct *ch);
 int k_file_init(struct task_struct *task);
 int k_file_deinit(struct task_struct *task);
+
+void* k_file_mmap_init(int fd);
+void k_file_mmap_close(void *ctx);
+void *k_file_mmap_dup(void *ctx);
+int k_file_mmap_read(void *ctx, const void *buf, size_t size);
+int k_file_mmap_lseek(void *ctx, off_t offset, int whence);
+
 #endif
 
 #ifdef __cplusplus

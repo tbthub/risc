@@ -74,7 +74,8 @@
         "sys.h": "c",
         "vfs_module.h": "c",
         "vfs_process.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "vfs_io.h": "c"
     },
     "workbench.list.horizontalScrolling": true,
     "files.insertFinalNewline": true

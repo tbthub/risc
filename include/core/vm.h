@@ -17,7 +17,7 @@ struct vm_area_struct
     flags64_t vm_prot;    // 区域标志 RWX
     flags_t vm_flags;     // 暂时没有使用
     uint32 vm_pgoff;      // 文件页偏移
-    int vm_file; // 关联文件
+    void* vm_file; // 关联文件
     struct vm_area_struct *vm_next;
     struct vm_operations_struct *vm_ops;
 };
@@ -74,7 +74,7 @@ extern int vma_extra_prot(struct vm_area_struct *vma);
 extern void vma_prot_copy(struct vm_area_struct *vma, pte_t *pte);
 extern void vma_insert(struct mm_struct *mm, struct vm_area_struct *vma);
 extern struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghdr_flags, uint32 pgoff,
-                                                int file, struct vm_operations_struct *ops);
+                                                void* file, struct vm_operations_struct *ops);
 extern void vma_list_cat(struct vm_area_struct *vma);
 
 

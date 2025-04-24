@@ -44,3 +44,69 @@ int k_file_deinit(struct task_struct *task) {
     vfs_process_deinit(proc);
     return 0;
 }
+
+void *k_file_mmap_init(int fd) {
+
+    vfs_process_t *proc = vfs_process_read();
+
+    uintptr_t ctx_ptr;
+    uint8_t flag;
+
+    vfs_get_fd_context(proc, fd, &ctx_ptr, &flag);
+
+    if (!ctx_ptr) {
+        vfs_process_read_done();
+        return NULL;
+    }
+
+    vfs_file_context_t *old_ctx = (vfs_file_context_t *)ctx_ptr;
+    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
+
+    if (new_ctx == NULL) {
+        vfs_get_fd_context_done(proc, fd);
+        vfs_process_read_done();
+        return NULL;
+    }
+
+    if (vfs_dup_with_context(old_ctx, new_ctx) < 0) {
+        vfs_free(new_ctx);
+        vfs_get_fd_context_done(proc, fd);
+        vfs_process_read_done();
+        return NULL;
+    }
+
+    vfs_get_fd_context_done(proc, fd);
+    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize); // 增加引用计数
+    vfs_process_read_done();
+
+    return (void *)new_ctx;
+}
+
+void k_file_mmap_close(void* ctx){
+    vfs_file_context_t * ctx_ptr = (vfs_file_context_t *)ctx;
+    vfs_data_global_get_done((uint8_t *)ctx_ptr->op->mountTag, ctx_ptr->op->mountTagSize);
+    vfs_close_with_context(ctx_ptr);
+    vfs_free(ctx);
+}
+
+void *k_file_mmap_dup(void *ctx){
+
+    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
+
+    if (new_ctx == NULL) {
+        vfs_process_read_done();
+        return NULL;
+    }
+
+    vfs_dup_with_context((vfs_file_context_t *)ctx, new_ctx);
+    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize);
+    return (void *)new_ctx;
+}
+
+int k_file_mmap_read(void *ctx, const void *buf, size_t size){
+    return vfs_read_with_context((vfs_file_context_t *)ctx, buf, size);
+}
+
+int k_file_mmap_lseek(void *ctx, off_t offset, int whence) {
+    return vfs_lseek_with_context((vfs_file_context_t *)ctx, offset, whence);
+}
