@@ -44,8 +44,9 @@ static void init_thread(void *a)
     intr_off();
     do_exec("/init", NULL);
 }
-
+extern void user_init();
 void init_s()
 {
+    user_init();
     init_t = kthread_create(NULL, init_thread, NULL, "init_t", NO_CPU_AFF);
 }

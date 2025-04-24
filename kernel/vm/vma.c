@@ -142,6 +142,7 @@ static void vma_gen_close(struct mm_struct *mm, struct vm_area_struct *v)
             continue;
         }
         else if (*pte & PTE_V) {
+            // printk("vma_gen_close va: %p, pa:%p, ref %d\n",va,PTE2PA(*pte),page_count(PA2PG(PTE2PA(*pte))));
             __free_page((void *)PTE2PA(*pte));
             *pte = 0;
         }
@@ -169,7 +170,7 @@ static void vma_gen_dup(struct mm_struct *mm, struct vm_area_struct *v, struct m
             if (*pte & PTE_W)
                 set_cow_pte(pte);
             get_page(PA2PG(PTE2PA(*pte)));
-
+            // printk("npg: %p, opg: %p, va: %p, ref %d\n",mm->pgd,new_mm->pgd,va, page_count(PA2PG(PTE2PA(*pte))));
             pte2 = walk(new_mm->pgd, va, 1);
             *pte2 = *pte;
         }

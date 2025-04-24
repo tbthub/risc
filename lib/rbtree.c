@@ -350,7 +350,6 @@ struct rb_node *rb_search(struct rb_root *root, void *key, int (*cmp)(struct rb_
     return NULL;
 }
 
-/*---------------------- 遍历操作 ----------------------*/
 struct rb_node *rb_first(struct rb_root *root)
 {
     struct rb_node *n = root->rb_node;

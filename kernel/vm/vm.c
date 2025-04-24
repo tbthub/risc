@@ -113,7 +113,7 @@ int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
             return ERR;
 
         if (*pte & PTE_V)
-            panic("vm.c mappages: remap\n");
+            panic("vm.c mappages: remap va: %p\n",va);
 
         // 查看该文件上面对SV39的字段解释
         // 添加页面映射和权限信息
@@ -452,4 +452,15 @@ void free_user_memory(struct mm_struct *mm)
         vma = tmp;
     }
     mm->mmap = NULL;
+}
+
+
+// 用户程序引导代码，所有程序共享
+static const uchar _start_code[] = {0xb7, 0x00, 0x20, 0x00, 0x85, 0x20, 0xb2, 0x00, 0x82, 0x90, 0x01, 0x45, 0x89, 0x48, 0x73, 0x00, 0x00, 0x00};
+void *_start = NULL;
+void user_init()
+{
+    _start = __alloc_page(0);
+    memcpy(_start, _start_code, sizeof(_start_code));
+    mappages(kernel_pagetable, PGROUNDDOWN(TEXT_START), (uint64)_start, PGSIZE, PTE_R | PTE_X | PTE_U);
 }

@@ -13,6 +13,7 @@
 #include "mm/page.h"
 #include "riscv.h"
 #include "std/stdio.h"
+extern void* _start;
 
 extern void virtio_disk_intr();
 // in kernelvec.S, calls kerneltrap().
@@ -143,7 +144,6 @@ __attribute__((noreturn)) void usertrapret()
     intr_off();
     struct thread_info *p = myproc();
     signal_handler(&p->task->sigs);
-    // printk("[u-ret]: sig ok.\n");
     // 我们即将把陷阱的目标从
     // kerneltrap() 切换到 usertrap()，因此请关闭中断，直到
     // 我们回到用户空间，此ma时 usertrap() 是正确的。(系统调用之前会开中断)
@@ -160,15 +160,12 @@ __attribute__((noreturn)) void usertrapret()
     w_stvec((uint64)uservec);
     w_sepc(p->tf->epc);
     w_sscratch((uint64)(p->tf));
-    // printk("%p,%p,%p\n",p,p->tf->epc,p->tf->kernel_sp);
 
     // set S Previous Privilege mode to User.
     unsigned long x = r_sstatus();
     x &= ~SSTATUS_SPP;  // clear SPP to 0 for user mode
     x |= SSTATUS_SPIE;  // enable interrupts in user mode
     w_sstatus(x);
-    // printk("b, pid: %d\n",p->pid);
-    // vm2pa_show(&myproc()->task->mm);
     userret();
 }
 
@@ -237,9 +234,11 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     parse_elf_header(&ehdr, t, f);
 
+
     sig_refault_all(&t->task->sigs);
 
-    t->tf->epc = ehdr.entry;
+    // t->tf->epc = ehdr.entry;
+    t->tf->epc = TEXT_START;
     t->tf->sp = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);

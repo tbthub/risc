@@ -34,6 +34,18 @@ typedef uint32 flags_t;
 typedef uint64 flags64_t;
 typedef int fd_t;
 
+
+
+// typedef unsigned char uint8_t;
+// typedef unsigned short uint16_t;
+// typedef unsigned int uint32_t;
+// typedef unsigned long uint64_t;
+
+// typedef char int8_t;
+// typedef short int16_t;
+// typedef int int32_t;
+// typedef long int64_t;
+
 #define VM_PROT_NONE (1L << 0)
 #define VM_PROT_READ (1L << 1)
 #define VM_PROT_WRITE (1L << 2)
