@@ -165,13 +165,12 @@ void uartintr()
         break;
 
     default:
-        // printk("(%d): ",ch);
         uart_putc_sync(ch);
-        // printk("\n");
         break;
     }
     if (ch < 32) {
 		printk("(%d) sig\n",ch);
+        // TODO 给前台进程发信号
         send_sig(ch, 0);
     }
 }

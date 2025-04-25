@@ -405,7 +405,7 @@ void efs_i_root_init()
 {
     int offset = offset_ino(1);
     blk_read(efs_bd, m_esb.s_ds.inode_area_start, offset, sizeof(struct easy_d_inode), &root_m_inode.i_di);
-    assert(root_m_inode.i_di.i_no == 1, "root_m_inode.i_di.i_no !=1");
+    assert(root_m_inode.i_di.i_no == 1, "root_m_inode.i_di.i_no !=1, but %d",root_m_inode.i_di.i_no);
     root_m_inode.i_flags = 0;
     // spin_init(&m_inode->i_lock, "i_lock");
     sleep_init(&root_m_inode.i_slock, "i_slock");

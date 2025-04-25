@@ -174,11 +174,6 @@ void kvm_init()
 
     // 下面是我们暂时还没有实现的
 
-    // map the trampoline for trap entry/exit to
-    // the highest virtual address in the kernel.
-    // 映射 TRAMPOLINE 页面
-    // kvm_map(kpgtbl, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R |
-    // PTE_X);
     printk("kvm init ok!\n");
     kernel_pagetable = kpgtbl;
 }

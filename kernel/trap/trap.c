@@ -238,8 +238,9 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     sig_refault_all(&t->task->sigs);
 
-    // t->tf->epc = ehdr.entry;
+    memset(t->tf,0,sizeof(*t->tf));
     t->tf->epc = (uint64)user_entry;
+    t->tf->a0 = ehdr.entry;
     t->tf->sp = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);

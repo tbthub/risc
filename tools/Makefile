@@ -6,7 +6,7 @@ TARGET_DIR = out
 
 
 mkfs: mkfs.c mkdir_out
-	qemu-img create -f raw ../virtio_disk.img 500M
+	qemu-img create -f raw  ../virtio_disk.img 500M
 	$(CC) mkfs.c -o $(TARGET_DIR)/mkfs $(CFLAGS)
 	$(TARGET_DIR)/mkfs ../virtio_disk.img
 

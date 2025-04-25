@@ -5,7 +5,10 @@
 #include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 #include "std/stdio.h"
+#include "core/proc.h"
 extern  pid_t do_waitpid(pid_t pid, int *status, int options);
+extern int64 do_exit(int exit_code) __attribute__((noreturn));
+
 
 static void sigint_handler(int sig)
 {
@@ -15,6 +18,7 @@ static void sigint_handler(int sig)
 static void sigquit_handler(int sig)
 {
     printk("sigquit_default_handler: %d\n", sig);
+    do_exit(sig);
 }
 
 static void sigtrap_handler(int sig)
@@ -64,7 +68,7 @@ static void sigterm_handler(int sig)
 
 static void sigchld_handler(int sig)
 {
-    // do_waitpid(-1, NULL, 1);
+    do_waitpid(-1, NULL, 1);
 }
 
 static void sigcont_handler(int sig)

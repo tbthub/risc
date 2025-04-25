@@ -1,12 +1,10 @@
-#include "conf.h"
 #include "core/syscall.h"
 
     .section user_entry_point
     .align   4
     .globl   user_entry
 user_entry:
-    li       ra, USER_TEXT_BASE
-    jalr     ra
+    jalr     a0 
 
 # Exit
     li       a0, 0

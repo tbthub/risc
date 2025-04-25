@@ -6,11 +6,7 @@
 #include "mm/page.h"
 
 extern char etext[];      // kernel.ld sets this to end of kernel code.
-extern char trampoline[]; // trampoline.S
 extern char end[];
 extern char user_entry[];
-
-
-
 
 #endif
