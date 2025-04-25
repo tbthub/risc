@@ -36,7 +36,7 @@ CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include -I../include
 CFLAGS += -march=rv64gc
 
 # 链接选项
-LDFLAGS = -z max-page-size=4096 -nostdlib -static
+LDFLAGS = -z max-page-size=4096 -nostdlib
 
 # 确保构建目录存在
 $(shell mkdir -p $(DIRS))

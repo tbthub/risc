@@ -235,6 +235,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     parse_elf_header(&ehdr, t, f);
 
+    // vma_list_cat(mm->mmap);
 
     sig_refault_all(&t->task->sigs);
 

@@ -21,6 +21,7 @@ extern int64 do_sleep(int64 ticks);                                             
 extern pid_t do_getpid();                                                              // proc.c
 extern int64 do_pause();                                                               // sched.c
 extern int64 do_sigaction(int sig, __sighandler_t handler);
+extern int64 do_sigret();
 extern int64 do_waitpid(pid_t pid, int *status, int options);
 
 extern int64 do_open(const char *path, flags_t flags, int mod);                                       // file.c
@@ -56,7 +57,8 @@ int64 sys_debug()
 {
     int64 args[0];
     get_args(args, 1);
-    panic("sys_debug!, pid:%d\n", args[0]);
+    // panic("sys_debug!, pid:%d\n", args[0]);
+    printk("sys_debug %p\n",args[0]);
     return 0;
 }
 
@@ -234,4 +236,9 @@ int64 sys_waitpid()
     int64 args[3];
     get_args(args, 3);
     return do_waitpid((pid_t)args[0], (int *)args[1], (int)args[2]);
+}
+
+int64 sys_sigret()
+{
+    return do_sigret();
 }

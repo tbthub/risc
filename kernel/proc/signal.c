@@ -1,20 +1,21 @@
 #include "core/signal.h"
 
-#include "core/proc.h"
 #include "core/locks/semaphore.h"
 #include "core/locks/spinlock.h"
+#include "core/proc.h"
+#include "lib/string.h"
 #include "mm/kmalloc.h"
 #include "std/stdio.h"
-#include "core/proc.h"
-extern  pid_t do_waitpid(pid_t pid, int *status, int options);
+extern pid_t do_waitpid(pid_t pid, int *status, int options);
 extern int64 do_exit(int exit_code) __attribute__((noreturn));
 
-
+//  2 ctrl + b
 static void sigint_handler(int sig)
 {
     printk("sigint_default_handler: %d\n", sig);
 }
 
+// 3 ctrl + c
 static void sigquit_handler(int sig)
 {
     printk("sigquit_default_handler: %d\n", sig);
@@ -183,6 +184,7 @@ void sig_init(struct signal *s)
     signal_struct_init(s->sig);
 }
 
+extern void sigact_call();
 // 此函数在从内核返回用户的时候调用
 // 检测并处理信号
 void signal_handler(struct signal *s)
@@ -203,14 +205,29 @@ void signal_handler(struct signal *s)
     spin_lock(&s->sig->lock);
     __sighandler_t do_sig_handler = s->sig->siga[si].sa_handler;
     spin_unlock(&s->sig->lock);
+
     if (do_sig_handler == NULL) {
         printk("do_sig_handler NULL, sig: %d\n", si);
         spin_unlock(&s->lock);
         return;
     }
     spin_unlock(&s->lock);
+    if (do_sig_handler == default_signal_handlers[si]) {
+        do_sig_handler(si);
+    }
+    else {
+        struct thread_info *t = myproc();
+        memcpy((void *)t->tf->sp - sizeof(*t->tf), (void *)t->tf, sizeof(*t->tf));
+        t->tf->sp -= sizeof(*t->tf);
+        t->tf->a0 = (uint64)do_sig_handler;
+        t->tf->epc = (uint64)sigact_call;
+    }
+}
 
-    do_sig_handler(si);
+void do_sigret()
+{
+    struct thread_info *t = myproc();
+    memcpy((void *)t->tf, (void *)t->tf->sp, sizeof(*t->tf));
 }
 
 void send_sig(int sig, pid_t pid)
