@@ -20,6 +20,7 @@ int vfs_chroot(const char *path) {
         return -1;
     }
 
+    vfs_free(proc->root_path);
     proc->root_path      = (uint8_t *)new_root;
     proc->root_path_size = len;
     vfs_process_write_done();
@@ -53,6 +54,7 @@ int vfs_chdir(const char *path) {
         return -1;
     }
 
+    vfs_free(proc->work_path);
     proc->work_path      = (uint8_t *)new_work;
     proc->work_path_size = len;
     vfs_process_write_done();

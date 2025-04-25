@@ -5,6 +5,7 @@
 #include "vfs/vfs_util.h"
 #include "vfs/vfs_io.h"
 #include "lib/string.h"
+#include "std/stdio.h"
 
 void vfs_process_init(vfs_process_t *proc, uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s) {
 
@@ -133,11 +134,17 @@ void vfs_process_write_done() {
     vfs_wlock_release(proc->rwlock);
 }
 
-int vfs_copy_filectx_to_new_proc(vfs_process_t *new_proc) {
+int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc) {
 
     uintptr_t old_ctx_ptr;
     uint8_t old_flag;
     vfs_process_t *proc = vfs_process_read();
+    uint8_t *new_root_path = (uint8_t *)vfs_malloc(proc->root_path_size);
+    uint8_t *new_work_path = (uint8_t *)vfs_malloc(proc->work_path_size);
+
+    if (!new_root_path || !new_work_path){
+        goto failed;
+    }
 
     for (int i = 0; i < VFS_FD_SIZE; i++) {
 
@@ -166,10 +173,26 @@ int vfs_copy_filectx_to_new_proc(vfs_process_t *new_proc) {
         vfs_get_fd_context_done(proc, i);
     }
 
+    vfs_free(new_proc->root_path);
+    vfs_free(new_proc->work_path);
+
+    new_proc->root_path = new_root_path;
+    new_proc->work_path = new_work_path;
+    new_proc->root_path_size = proc->root_path_size;
+    new_proc->work_path_size = proc->work_path_size;
+
     vfs_process_read_done();
     return 0;
 
 failed:
+
+    if (new_root_path){
+        vfs_free(new_root_path);
+    }
+
+    if (new_work_path){
+        vfs_free(new_work_path);
+    }
 
     for (int i = 0; i < VFS_FD_SIZE; i++) {
 
@@ -202,7 +225,6 @@ vfs_file_context_t *vfs_open_with_context(vfs_process_t *proc, const char *path,
     }
 
     size_t mountTagSize = strlen(mount_tag) + 1;
-
     vfs_io_t *mount_io = vfs_data_global_get((uint8_t *)mount_tag, mountTagSize);
 
     if (!mount_io) {
@@ -271,7 +293,7 @@ int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ct
 }
 
 int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence) {
-    if (!ctx || ctx->op->lseek == NULL){
+    if (!ctx || ctx->op->lseek == NULL) {
         return -1;
     }
 

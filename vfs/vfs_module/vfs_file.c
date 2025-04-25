@@ -5,6 +5,8 @@
 #include "vfs/vfs_process.h"
 #include "vfs/vfs_module.h"
 #include "lib/string.h"
+#include "std/stdio.h"
+
 int vfs_open(const char *path, int flag, int mode) {
 
     uintptr_t _t;
@@ -31,6 +33,7 @@ int vfs_open(const char *path, int flag, int mode) {
         goto cleanup;
     }
 
+    printk("2 OK\n");
     vfs_file_context_t *ctx = vfs_open_with_context(proc, path, flag, mode);
 
     if (ctx == NULL) {

@@ -36,47 +36,43 @@ extern int t_mem_test4();
 extern void vfs_init();
 void main()
 {
-     if (cpuid() == 0)
-     {
+    if (cpuid() == 0)
+    {
 
-          cons_init();
-          mm_init();
-          // t_mem_test4();
-          // intr_off();
-          // for (;;);
-          
-          kvm_init();
-          trap_init();
-          plic_init();
-          vfs_init();
+        cons_init();
+        mm_init();
+        // t_mem_test4();
+        // intr_off();
+        // for (;;);
+        
+        kvm_init();
+        trap_init();
+        plic_init();
+        proc_init();
+        sched_init();
+        kvm_init_hart();
+        trap_inithart();
+        plic_inithart();
+        vfs_init();
+        init_s();
 
-          proc_init();
-          sched_init();
-          
-          kvm_init_hart();
-          trap_inithart();
-          plic_inithart();
-          
-          init_s();
-          
+        printk("hart 0 init_s ok\n");
+        printk("xv6 kernel is booting\n");
 
-          printk("hart 0 init_s ok\n");
-          printk("xv6 kernel is booting\n");
+        __sync_synchronize();
+        started = 1;
+    }
+    else
+    {
+        while (started == 0)
+            ;
+        __sync_synchronize();
+        kvm_init_hart();
+        trap_inithart();
+        plic_inithart();
+    }
+    __sync_synchronize();
+    printk("hart %d starting\n", cpuid());
 
-          __sync_synchronize();
-          started = 1;
-     }
-     else
-     {
-          while (started == 0)
-               ;
-          __sync_synchronize();
-          kvm_init_hart();
-          trap_inithart();
-          plic_inithart();
-     }
-     __sync_synchronize();
-     printk("hart %d starting\n", cpuid());
-
-     scheduler();
+    scheduler();
 }

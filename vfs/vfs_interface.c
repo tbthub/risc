@@ -4,7 +4,10 @@
 #include "core/locks/rwlock.h"
 #include "core/proc.h"
 #include "vfs/vfs_interface.h"
+#include "vfs/vfs_module.h"
+#include "fs/simfs/simfs.h"
 #include "lib/string.h"
+#include "std/stdio.h"
 
 typedef struct vfs_hash_t {
     uint8_t *key;
@@ -40,6 +43,10 @@ int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size) {
 }
 
 void *vfs_malloc(size_t size) {
+
+    if (size == 0){
+        size = 1;
+    }
     return kmalloc((int)size, 0);
 }
 
@@ -235,5 +242,11 @@ void *vfs_get_process() {
 }
 
 void vfs_init(){
+    vfs_io_t simfs_table;
     hash_init(&hash_table_g, 128, "vfs_tag");
+
+    simfs_io_table_init(&simfs_table);
+    simfs_table.mountTag = "init";
+
+    assert(vfs_mount(&simfs_table) >= 0, "vfs_mount");
 }

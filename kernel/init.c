@@ -23,8 +23,8 @@ static void init_thread(void *a)
 {
     devs_init();
     work_queue_init();
-    virtio_disk_init();
-    efs_mount(&virtio_disk);
+    // virtio_disk_init();
+    // efs_mount(&virtio_disk);
 
     // rw_test();
 

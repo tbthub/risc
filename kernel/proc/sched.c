@@ -173,7 +173,9 @@ struct thread_info *kthread_create(struct thread_info*pa, void (*func)(void *), 
                cpu_affinity);
         return NULL;
     }
+
     struct thread_info *t = kthread_struct_init();
+
     if (!t) {
         printk("kthread_create\n");
         return NULL;

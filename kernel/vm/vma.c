@@ -285,6 +285,7 @@ int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, ui
     v->vm_start = v->vm_end - aligned_len + 1;
     v->vm_prot = prot;
     v->vm_ops = &vma_file_ops;
+    v->vm_pgoff = offset;
     SET_FLAG(&v->vm_flags, flags);
 
     vma_insert(mm, v);

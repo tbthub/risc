@@ -38,7 +38,7 @@ void vfs_process_read_done();
 vfs_process_t *vfs_process_write(); // 获取当前进程的vfs状态描述符与写锁
 void vfs_process_write_done();      //
 
-void vfs_process_init(vfs_process_t * proc, uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s);
+void vfs_process_init(vfs_process_t *proc, uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s);
 void vfs_process_deinit(vfs_process_t *proc);
 
 // 这类在操作时不会获取任何的锁
@@ -50,7 +50,7 @@ int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ct
 int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence);
 
 // 注意此函数不会获取目标的锁
-int vfs_copy_filectx_to_new_proc(vfs_process_t *new_proc);
+int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc);
 
 #endif
 

@@ -1,6 +1,7 @@
 
 #include "std/stdint.h"
 #include "std/stddef.h"
+#include "std/stdio.h"
 #include "lib/string.h"
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_process.h"
@@ -182,6 +183,10 @@ int parse_mount_tag(const char *full_path, char **mount_tag, char **open_path) {
     // 查找第一个目录分隔符
     const char *sep = strchr(p, '/');
 
+    if (sep == NULL){
+        sep = strchr(p, 0);
+    }
+
     // 提取mount_tag
     size_t tag_len = sep - p;
     *mount_tag     = vfs_malloc(tag_len + 1);
@@ -189,6 +194,7 @@ int parse_mount_tag(const char *full_path, char **mount_tag, char **open_path) {
         return -1;
     memcpy(*mount_tag, p, tag_len);
     (*mount_tag)[tag_len] = '\0';
+
 
     // 处理剩余路径
     size_t remain_len = strlen(sep);

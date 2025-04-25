@@ -142,6 +142,7 @@ static inline void task_struct_init(struct task_struct *task)
     spin_init(&task->lock, "task");
     mm_init(&task->mm);
     sig_init(&task->sigs);
+
     k_file_init(task);
     // th_table_init(&task->th_table);
 }
