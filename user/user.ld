@@ -12,7 +12,7 @@ PHDRS
 
 SECTIONS
 {
-  . = 0x200001000;
+  . = 0x200000000;
   .text : {
     *(.text .text.*)
   } :text
@@ -47,5 +47,5 @@ SECTIONS
        *(.eh_frame.*)
    } :eh_frame
 
-  PROVIDE(end = .);
+  PROVIDE(uend = .);
 }

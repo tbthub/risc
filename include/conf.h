@@ -27,13 +27,13 @@
 #endif
 // TODO
 #define MAX_PATH_LEN 256    // 支持最长路径长度
-#define ARG_MAX 128 * 1024  // 传入参数最长 128K
-#define ENV_MAX 128 * 1024  // 环境变量最长 128K
+#define ARG_MAX (128 * 1024)  // 传入参数最长 128K
+#define ENV_MAX (128 * 1024)  // 环境变量最长 128K
 
 
-#define USER_TEXT_BASE (0x200000000 + 0x1000)                                                   // 用户程序代码段基地址 0x200_000_000
+#define USER_TEXT_BASE 0x200000000                                                   // 用户程序代码段基地址 0x200_000_000
 #define USER_STACK_SIZE (8 * 1024 * 1024)                                                      // 8 MB 栈
-#define USER_STACK_TOP(tid) (TEXT_START - 0x1000 - (tid) * (USER_STACK_SIZE + 0x1000) - 0x8)  // 用户程序栈顶
+#define USER_STACK_TOP(tid) (USER_TEXT_BASE - 0x1000 - (tid) * (USER_STACK_SIZE + 0x1000) - 0x8)  // 用户程序栈顶
 
 
 // 用户参数页列表占用 1 页(最多 4096 / 8 = 512 个参数，显示包含最后一个 NULL)
@@ -43,7 +43,6 @@
 #define USER_ARGV_MAX_SIZE 4                         // 用户参数页大小 4 个页
 #define USER_ARGV_MAX_CNT (PGSIZE / sizeof(char *))  // 最大参数个数
 #define USER_ARGS_PAGE 0x150000000
-#define TEXT_START 0x140000000  // 注意，这个区域不能放在比如 0x200,000,000
 
 #define USER_MAP_TOP 0xFFFFFFFFF     // 用户映射区顶
 #define USER_MAP_BOTTOM 0xa00000000  // 用户映射区域底

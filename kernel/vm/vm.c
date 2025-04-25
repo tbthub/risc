@@ -1,11 +1,11 @@
 #include "core/vm.h"
 
+#include "core/locks/spinlock.h"
 #include "core/proc.h"
 #include "core/trap.h"
 #include "defs.h"
 #include "fs/file.h"
 #include "lib/atomic.h"
-#include "core/locks/spinlock.h"
 #include "lib/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
@@ -113,7 +113,7 @@ int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
             return ERR;
 
         if (*pte & PTE_V)
-            panic("vm.c mappages: remap va: %p\n",va);
+            panic("vm.c mappages: remap va: %p\n", va);
 
         // 查看该文件上面对SV39的字段解释
         // 添加页面映射和权限信息
@@ -216,7 +216,7 @@ void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
                 continue;
             if ((*pte & PTE_V) == 0)
                 continue;
-            printk("va: %p, pa: %p  %d\n", va, PTE2PA(*pte),*pte & 0b1110);
+            printk("va: %p, pa: %p  %d\n", va, PTE2PA(*pte), *pte & 0b1110);
         }
         v = v->vm_next;
         spin_unlock(&mem_map.lock);
@@ -432,7 +432,7 @@ void free_user_pgd(struct mm_struct *mm)
     }
 
     if (mm->pgd) {
-        printk("free_user_pgd, pgd: %p\n", mm->pgd);
+        // printk("free_user_pgd, pgd: %p ref:%d \n", mm->pgd,page_count(PA2PG(mm->pgd)));
         __free_page(mm->pgd);
         mm->pgd = NULL;
     }
@@ -454,13 +454,10 @@ void free_user_memory(struct mm_struct *mm)
     mm->mmap = NULL;
 }
 
-
 // 用户程序引导代码，所有程序共享
-static const uchar _start_code[] = {0xb7, 0x00, 0x20, 0x00, 0x85, 0x20, 0xb2, 0x00, 0x82, 0x90, 0x01, 0x45, 0x89, 0x48, 0x73, 0x00, 0x00, 0x00};
-void *_start = NULL;
 void user_init()
 {
-    _start = __alloc_page(0);
-    memcpy(_start, _start_code, sizeof(_start_code));
-    mappages(kernel_pagetable, PGROUNDDOWN(TEXT_START), (uint64)_start, PGSIZE, PTE_R | PTE_X | PTE_U);
+    pte_t *pte = walk(kernel_pagetable, (uint64)user_entry, 0);
+    assert(pte != NULL, "user_init\n");
+    *pte |= (PTE_R | PTE_X | PTE_U);
 }

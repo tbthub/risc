@@ -13,6 +13,7 @@
 #include "mm/page.h"
 #include "riscv.h"
 #include "std/stdio.h"
+#include "defs.h"
 extern void* _start;
 
 extern void virtio_disk_intr();
@@ -238,7 +239,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     sig_refault_all(&t->task->sigs);
 
     // t->tf->epc = ehdr.entry;
-    t->tf->epc = TEXT_START;
+    t->tf->epc = (uint64)user_entry;
     t->tf->sp = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);

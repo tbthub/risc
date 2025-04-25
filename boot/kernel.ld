@@ -23,10 +23,17 @@ SECTIONS
     KEEP(*(.text._entry))
     *(.text .text.*)
     . = ALIGN(0x1000);
-    _uservec = .; 
+    uservec = .; 
     *(uservec_space)
+
     . = ALIGN(0x1000);
-    ASSERT(. - _uservec == 0x1000, "error: trampoline larger than one page");
+    ASSERT(. - uservec == 0x1000, "error: uservec larger than one page");
+
+    user_entry = .; 
+    *(user_entry_point)
+    . = ALIGN(0x1000);
+    ASSERT(. - user_entry == 0x1000, "error: user_entry larger than one page");
+
     PROVIDE(etext = .);
   } :text
 
