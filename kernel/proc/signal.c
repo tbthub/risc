@@ -224,12 +224,6 @@ void signal_handler(struct signal *s)
     }
 }
 
-void do_sigret()
-{
-    struct thread_info *t = myproc();
-    memcpy((void *)t->tf, (void *)t->tf->sp, sizeof(*t->tf));
-}
-
 void send_sig(int sig, pid_t pid)
 {
     if (detect_sig_valid(sig) < 0) {
@@ -330,6 +324,9 @@ void sig_refault(struct signal *s, int sig)
     spin_unlock(&ss->lock);
 }
 
+// *自定义信号处理函数
+// *对于内核线程，我们认为没有必要做，或者以后有需求再说
+// *当前只针对用户程序。
 int sig_set_sigaction(struct signal *s, int sig, __sighandler_t handler)
 {
     if (detect_sig_valid(sig) < 0) {
@@ -358,6 +355,14 @@ int64 do_sigaction(int sig, __sighandler_t handler)
     struct task_struct *t = myproc()->task;
     return sig_set_sigaction(&t->sigs, sig, handler);
 }
+
+int64 do_sigret()
+{
+    struct thread_info *t = myproc();
+    memcpy((void *)t->tf, (void *)t->tf->sp, sizeof(*t->tf));
+    return 0;
+}
+
 
 // 在回收进程使用，没有并发冲突
 void sig_release_all(struct signal *s)
