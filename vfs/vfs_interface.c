@@ -48,9 +48,12 @@ void *vfs_malloc(size_t size) {
         size = 1;
     }
 
+    assert(size < 1024 * 16, "vfs_malloc too big!");
+
     if (size >= 8192){
         //TODO!!!!
     }
+    
     return kmalloc((int)size, 0);
 }
 
