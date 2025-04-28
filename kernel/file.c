@@ -26,7 +26,7 @@ static struct file *file_alloc(flags_t flags)
 static inline void file_free(struct file *f)
 {
     assert(f != NULL, "file_free\n");
-    kmem_cache_free(&file_kmem_cache, f);
+    kmem_cache_free(f);
 }
 
 struct file *file_dup(struct file *f)
@@ -71,12 +71,32 @@ int file_read(struct file *f, void *vaddr, uint32 len)
     }
 
     assert(f->f_ip != NULL, "file_read f->f_ip\n");
-    mutex_lock(&f->f_mutex);
     if ((r = efs_i_read(f->f_ip, f->f_off, len, vaddr)) >= 0)
         f->f_off += r;
     else
         panic("file_read r: %d\n", r);
-    mutex_unlock(&f->f_mutex);
+    return r;
+}
+
+int file_read_no_off(struct file *f, uint32 off,void *vaddr, uint32 len)
+{
+    uint32 tmp = f->f_off;
+    int r = 0;
+
+    if (!TEST_FLAG(&f->f_flags, FILE_READ)) {
+        printk("File is unreadable\n");
+        return -1;
+    }
+
+    assert(f->f_ip != NULL, "file_read f->f_ip\n");
+    
+    file_llseek(f,off,SEEK_SET);
+    if ((r = efs_i_read(f->f_ip, f->f_off, len, vaddr)) >= 0)
+        ;
+    else
+        panic("file_read r: %d\n", r);
+    file_llseek(f,tmp,SEEK_SET);
+
     return r;
 }
 
@@ -88,20 +108,28 @@ int file_write(struct file *f, void *vaddr, uint32 len)
         return -1;
     }
     assert(f->f_ip != NULL, "file_write f->f_ip\n");
-    mutex_lock(&f->f_mutex);
     if ((w = efs_i_write(f->f_ip, f->f_off, len, vaddr)) >= 0)
         f->f_off += w;
     else
         panic("file_write\n");
-    mutex_unlock(&f->f_mutex);
     return w;
 }
+
+inline void file_lock(struct file *f)
+{
+    mutex_lock(&f->f_mutex);  // 锁定文件操作
+}
+
+inline void file_unlock(struct file *f)
+{
+    mutex_unlock(&f->f_mutex);  // 解锁文件操作
+}
+
+
 
 int file_llseek(struct file *f, uint32 offset, int whence)
 {
     assert(f->f_ip != NULL, "file_llseek f->f_ip\n");
-
-    mutex_lock(&f->f_mutex);  // 锁定文件操作
 
     int ret = 0;
     uint32 new_offset;
@@ -141,7 +169,6 @@ int file_llseek(struct file *f, uint32 offset, int whence)
         break;
     }
 
-    mutex_unlock(&f->f_mutex);  // 解锁文件操作
     return ret;
 }
 
@@ -176,7 +203,7 @@ int64 do_close(fd_t fd)
     struct files_struct *files = &myproc()->task->files;
 
     spin_lock(&files->file_lock);
-    fd_close(files,fd);
+    fd_close(files, fd);
     spin_unlock(&files->file_lock);
 
     return 0;
@@ -205,7 +232,6 @@ struct file *fput(struct files_struct *files, struct file *f)
 
 int64 do_read(int fd, char *user_buff, int count)
 {
-
     if (count == 0)
         return 0;
 
@@ -222,7 +248,7 @@ int64 do_read(int fd, char *user_buff, int count)
         fput(files, f);
         return -ENOMEM;  // 分配失败
     }
-
+    file_lock(f);
     while (count > 0) {
         bytes_to_read = min(count, PGSIZE);
         r = file_read(f, kbuf, bytes_to_read);
@@ -238,7 +264,7 @@ int64 do_read(int fd, char *user_buff, int count)
         user_buff += r;
         count -= r;
     }
-
+    file_unlock(f);
     __free_page(kbuf);
     fput(files, f);
     return total;
@@ -246,7 +272,6 @@ int64 do_read(int fd, char *user_buff, int count)
 
 int64 do_write(int fd, char *buff, int count)
 {
-
     if (count == 0)
         return 0;
 
@@ -263,7 +288,7 @@ int64 do_write(int fd, char *buff, int count)
         fput(files, f);
         return -ENOMEM;  // 分配失败
     }
-
+    file_lock(f);
     while (count > 0) {
         bytes_to_write = min(count, PGSIZE);
 
@@ -284,7 +309,7 @@ int64 do_write(int fd, char *buff, int count)
         buff += w;
         count -= w;
     }
-
+    file_unlock(f);
     __free_page(kbuf);
     fput(files, f);
     return total;

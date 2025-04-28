@@ -352,7 +352,7 @@ int t_mem_test4()
     }
     printk("1\n");
     for (i = 0; i < SLAB_ALL / 2; i++) {
-        kmem_cache_free(slabs[i % slab_len], mem_test[i]);
+        kmem_cache_free(mem_test[i]);
         mem_test[i] = NULL;
     }
     printk("2\n");
@@ -370,7 +370,7 @@ int t_mem_test4()
     printk("3\n");
 
     for (i = SLAB_ALL / 2; i < SLAB_ALL; i++) {
-        kmem_cache_free(slabs[i % slab_len], mem_test[i]);
+        kmem_cache_free(mem_test[i]);
         mem_test[i] = NULL;
     }
     printk("4\n");

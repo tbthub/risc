@@ -14,6 +14,7 @@
 #include "riscv.h"
 #include "std/stdio.h"
 #include "defs.h"
+#include "elf.h"
 extern void* _start;
 
 extern void virtio_disk_intr();
@@ -195,6 +196,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     struct file *f = file_open(path, FILE_READ);
     assert(intr_get() == 0, "exec intr 3\n");
 
+    file_lock(f);
     if (!f)
         panic("do_exec f is NULL\n");
 
@@ -220,7 +222,8 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     alloc_user_pgd(mm);
 
     if (argv) {
-        struct vm_area_struct *v = vma_alloc_proghdr(USER_ARGS_PAGE, USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + USER_ARGV_MAX_SIZE) * PGSIZE - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_args_ops);
+        struct vm_area_struct *v = vma_alloc_proghdr(USER_ARGS_PAGE, USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + USER_ARGV_MAX_SIZE) * PGSIZE - 1,
+         ELF_PROG_FLAG_READ | ELF_PROG_FLAG_WRITE, 0, NULL, &vma_args_ops);
         vma_insert(mm, v);
 
         mappages(mm->pgd, PGROUNDDOWN(USER_ARGS_PAGE), args_list, PGSIZE, PTE_R | PTE_W | PTE_U);
@@ -235,6 +238,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     parse_elf_header(&ehdr, t, f);
 
+    file_unlock(f);
     // vma_list_cat(mm->mmap);
 
     sig_refault_all(&t->task->sigs);

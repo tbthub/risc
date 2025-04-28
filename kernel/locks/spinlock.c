@@ -9,8 +9,8 @@
 void spin_init(spinlock_t *lock, const char *name)
 {
     lock->lock = SPIN_UNLOCKED;
-    // strncpy(lock->name, name, 12);
-    strdup(lock->name, name);
+    strncpy(lock->name, name, 12);
+    // strdup(lock->name, name);
     lock->cpuid = -1;
 }
 
@@ -60,7 +60,7 @@ void spin_lock(spinlock_t *lock)
 {
     push_off();
     if (holding(lock))
-        panic("spinlock: already held when trying to lock\n - name: %s, cpu: %d, thread name: %s\n", lock->name, cpuid(), myproc()->name);
+        panic("spinlock: already held when trying to lock\n - name: %s, cpu: %d, cid: %d, thread name: %s\n", lock->name,lock->cpuid, cpuid(), myproc()->name);
 
     // 原子交换
     // On RISC-V, sync_lock_test_and_set turns into an atomic swap:
@@ -80,7 +80,7 @@ void spin_lock(spinlock_t *lock)
 void spin_unlock(spinlock_t *lock)
 {
     if (!holding(lock))
-        panic("spinlock: not held when trying to unlock, name: %s, cpu: %d\n", lock->name, cpuid());
+        panic("spinlock: not held when trying to unlock, name: %s, cpu: %d, cid: %d, thread name: %s\n", lock->name,lock->cpuid, cpuid(), myproc()->name);
 
     // Tell the C compiler and the CPU to not move loads or stores
     // past this point, to ensure that all the stores in the critical

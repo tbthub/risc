@@ -45,6 +45,7 @@ extern int64 do_mknod(const char *path, int mode, int dev);
 extern int64 do_unlink(const char *path);
 extern int64 do_link();
 extern int64 do_mkdir(const char *path);
+extern int64 do_module(const char * path,int mod);
 
 // * 请确保在 trapframe 结构体中顺序放置 a0->a6
 static void get_args(int64 *args, int n)
@@ -241,4 +242,12 @@ int64 sys_waitpid()
 int64 sys_sigret()
 {
     return do_sigret();
+}
+
+int64 sys_module()
+{
+    int64 args[2];
+    get_args(args, 2);
+    READ_ONCE(*(const char *)args[0]);
+    return do_module((const char *)args[0], (int)args[1]);
 }

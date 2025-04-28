@@ -35,8 +35,9 @@ struct slab
     void *objs;
     uint16 inuse;
     struct list_head list;
-    sstack_t free_list;
     spinlock_t lock;
+    
+    sstack_t free_list;
     // void *free_list;
 };
 
@@ -57,6 +58,6 @@ extern void kmem_cache_init();
 extern void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags);
 extern void kmem_cache_destory(struct kmem_cache *cache);
 extern void *kmem_cache_alloc(struct kmem_cache *cache);
-extern void kmem_cache_free(struct kmem_cache *cache, void *obj);
+extern void kmem_cache_free(void *obj);
 
 #endif

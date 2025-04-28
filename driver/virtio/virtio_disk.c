@@ -133,14 +133,14 @@ void virtio_disk_init(void)
         panic("virtio disk max queue too short");
 
     // allocate and zero queue memory.
-    disk.desc = kmalloc(sizeof(struct virtq_desc), 0);
-    disk.avail = kmalloc(sizeof(struct virtq_avail), 0);
-    disk.used = kmalloc(sizeof(struct virtq_used), 0);
+    disk.desc = kmalloc(sizeof(struct virtq_desc) * NUM, 0);
+    disk.avail = kmalloc(sizeof(struct virtq_avail) * NUM, 0);
+    disk.used = kmalloc(sizeof(struct virtq_used) * NUM, 0);
     if (!disk.desc || !disk.avail || !disk.used)
         panic("virtio disk kalloc");
-    memset(disk.desc, 0, sizeof(struct virtq_desc));
-    memset(disk.avail, 0, sizeof(struct virtq_avail));
-    memset(disk.used, 0, sizeof(struct virtq_used));
+    memset(disk.desc, 0, sizeof(struct virtq_desc) * NUM);
+    memset(disk.avail, 0, sizeof(struct virtq_avail) * NUM);
+    memset(disk.used, 0, sizeof(struct virtq_used) * NUM);
 
     // set queue size.
     *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;

@@ -16,7 +16,7 @@
 
 
 // ctrl + l ->12
-static int a = 0;
+static int a = 0;   // 显式初始化为0的这玩意儿在 BSS 的
 void my_add(int)
 {
     a++;

@@ -1,10 +1,15 @@
 #ifndef __CONF_H__
 #define __CONF_H__
 
-// #define CONF_MKFS
+
+#define CONF_MKMOD
+
+#define CONF_MKFS
 #ifdef CONF_MKFS
 #define DEBUG_FLUSH
 #endif
+
+
 
 #define DEBUGS
 #ifdef DEBUGS

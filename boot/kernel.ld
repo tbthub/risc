@@ -8,6 +8,7 @@ PHDRS
     rodata PT_LOAD FLAGS(0x4); /* 100 */
     data PT_LOAD FLAGS(0x6); /* 110 */
     bss PT_LOAD FLAGS(0x6); /* 110 */
+    __ksymtab PT_LOAD FLAGS(0x6); /* 110 */
 }
 
 
@@ -30,7 +31,7 @@ SECTIONS
     ASSERT(. - uservec == 0x1000, "error: uservec larger than one page");
 
     user_entry = .; 
-    *(user_entry_point)
+    *(user_entry_point)   /* 前后各有一个对齐，占一页 */
     . = ALIGN(0x1000);
     ASSERT(. - user_entry == 0x1000, "error: user_entry larger than one page");
 
@@ -57,6 +58,13 @@ SECTIONS
     . = ALIGN(16);
     *(.bss .bss.*)
   } :bss
+
+  . = ALIGN(8);
+  __ksymtab : {
+      __start___ksymtab = .;
+      KEEP(*(__ksymtab))
+      __stop___ksymtab = .;
+    }:__ksymtab
 
   PROVIDE(end = .);
 }

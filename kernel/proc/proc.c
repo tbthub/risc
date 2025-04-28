@@ -182,7 +182,7 @@ static struct thread_info *alloc_thread()
         return NULL;
     struct thread_info *thread = kmem_cache_alloc(&thread_info_kmem_cache);
     if (!thread) {
-        kmem_cache_free(&task_struct_kmem_cache, task);
+        kmem_cache_free(task);
         return NULL;
     }
     task_struct_init(task);
@@ -619,7 +619,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
         free_user_memory(&task->mm);
 
         if (t->tf) {
-            kmem_cache_free(&tf_kmem_cache, t->tf);
+            kmem_cache_free(t->tf);
             t->tf = NULL;
         }
 
@@ -656,7 +656,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     // free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
-    kmem_cache_free(&task_struct_kmem_cache, ch->task);
+    kmem_cache_free( ch->task);
 
     spin_lock(&Proc.lock);
     hash_del_node(&Proc.global_proc_table, &ch->global);
@@ -668,7 +668,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     printk("[wait]: pid: %d, thread: %s code: %d ok. by %d\n", ch->pid, ch->name, ch->exit_code, ch->parent->pid);
 #endif
     // vm2pa_show(&myproc()->task->mm);
-    kmem_cache_free(&thread_info_kmem_cache, ch);
+    kmem_cache_free(ch);
 
     return _pid;
 }

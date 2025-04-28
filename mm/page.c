@@ -28,7 +28,7 @@ static inline void init_page(struct page *pg, flags_t flags)
 	pg->slab = NULL;
 	pg->order = MAX_LEVEL;
 	spin_init(&pg->lock, "page");
-}	
+}
 
 inline int page_count(struct page *pg)
 {

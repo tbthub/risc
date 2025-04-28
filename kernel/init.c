@@ -1,4 +1,5 @@
 #include "../test/t_head.h"
+#include "core/export.h"
 #include "core/proc.h"
 #include "core/sched.h"
 #include "core/work.h"
@@ -17,6 +18,7 @@ extern __attribute__((noreturn)) int do_exec(const char *path, char *const argv[
 extern void kswapd_init();
 
 extern pid_t do_waitpid(pid_t pid, int *status, int options);
+extern int64 do_module(const char *path, int mode);
 
 // 第一个内核线程
 static void init_thread(void *a)
@@ -25,6 +27,16 @@ static void init_thread(void *a)
     work_queue_init();
     virtio_disk_init();
     efs_mount(&virtio_disk);
+
+#ifdef CONF_MKMOD
+
+    do_module("/mod", 1);
+    while (1) {
+    do_module("/mod", 1);
+
+        thread_timer_sleep(myproc(), 100);
+    }
+#endif
 
 #ifdef CONF_MKFS
     mkfs_tmp_test();
@@ -44,6 +56,7 @@ static void init_thread(void *a)
     intr_off();
     do_exec("/init", NULL);
 }
+
 extern void user_init();
 void init_s()
 {

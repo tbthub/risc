@@ -27,6 +27,7 @@
 #include "../test/t_head.h"
 volatile static int started = 0;
 extern void init_s();
+extern void kmodule_init();
 
 extern void mm_init();
 extern int t_mem_test2();
@@ -54,6 +55,7 @@ void main()
           kvm_init_hart();
           trap_inithart();
           plic_inithart();
+          kmodule_init();
           
           init_s();
           

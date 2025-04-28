@@ -8,6 +8,8 @@
 #include "mm/kmalloc.h"
 #include "riscv.h"
 
+// 需要 file_lock
+
 int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file *f)
 {
     struct vm_area_struct *v;
@@ -38,4 +40,67 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
     }
     kfree(pht);
     return 0;
+}
+
+int read_elf(struct elf64_hdr *ehdr, struct file *f)
+{
+    file_read_no_off(f, 0, ehdr, sizeof(struct elf64_hdr));
+    if (ehdr->magic != ELF_MAGIC)
+        panic("read_elf\n");
+    return 0;
+}
+
+int elf_first_segoff(struct elf64_hdr *ehdr, struct file *f)
+{
+    // struct proghdr *ph;
+    // int off = -1;
+    // void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
+    // file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
+    // ph = (struct proghdr *)pht + ehdr->phnum - 1;
+    // for (int i = 0; i < ehdr->phnum; i++, ph--) {
+    //     if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
+    //         continue;  // 只加载LOAD段（排除掉空段）
+    //     if ((ph->flags & ELF_PROG_FLAG_EXEC) != 0) {
+    //         off = ph->off;
+    //         break;
+    //     }
+    // }
+    // kfree(pht);
+    // return off;
+    return 0;
+}
+
+int elf_load_mmsz(struct elf64_hdr *ehdr, struct file *f)
+{
+    // struct proghdr *ph;
+    // uint32 memsz = 0;
+    // void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
+    // file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
+    // ph = (struct proghdr *)pht + ehdr->phnum - 1;
+    // for (int i = 0; i < ehdr->phnum; i++, ph--) {
+    //     if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
+    //         continue;  // 只加载LOAD段（排除掉空段）
+    //     memsz += ph->memsz;
+    // }
+    // kfree(pht);
+    // return memsz;
+    return 0;
+}
+
+void elf_kmod_half1(struct file *f,struct elf64_hdr *ehdr,uint32 *mem_sz,uint32 *off)
+{
+    struct proghdr *ph;
+    void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
+    file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
+    // 对与模块，我们规定代码段一定是在第一个加载段，参见 mod.ld 脚本
+    ph = (struct proghdr *)pht + ehdr->phnum - 1;
+    for (int i = 0; i < ehdr->phnum; i++, ph--) {
+        if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
+            continue;  // 只加载LOAD段（排除掉空段）
+        *mem_sz += ph->memsz;
+        if ((ph->flags & ELF_PROG_FLAG_EXEC) != 0) {
+            *off = ph->off;
+        }
+    }
+    kfree(pht);
 }

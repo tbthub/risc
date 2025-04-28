@@ -2,17 +2,18 @@
 SRC_DIR := .
 BUILD_DIR := $(SRC_DIR)/build
 OUT_KERNEL_NAME := Kernel
+TARGET := $(BUILD_DIR)/$(OUT_KERNEL_NAME)
 
 # 相关文件位置
 KERN_LD_SCRIPT := $(SRC_DIR)/boot/kernel.ld
-USER_LD_SCRIPT := $(SRC_DIR)/user/user.ld
 USER_SRC := $(SRC_DIR)/user
 EXT_TOOLS := $(SRC_DIR)/tools
+MODULE := $(SRC_DIR)/module
 
 # kernel src
 # 查找源文件，排除 EXT_TOOLS  USER_SRC 目录
-K_SRCS_C := $(shell find $(SRC_DIR) -type f -name '*.c' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*")
-K_SRCS_S := $(shell find $(SRC_DIR) -type f -name '*.S' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*")
+K_SRCS_C := $(shell find $(SRC_DIR) -type f -name '*.c' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*" -not -path "$(MODULE)/*")
+K_SRCS_S := $(shell find $(SRC_DIR) -type f -name '*.S' -not -path "$(EXT_TOOLS)/*" -not -path "$(USER_SRC)/*" -not -path "$(MODULE)/*")
 # 目标文件列表
 K_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(K_SRCS_C))
 K_OBJS += $(patsubst $(SRC_DIR)/%.S, $(BUILD_DIR)/%.o, $(K_SRCS_S))
@@ -40,6 +41,9 @@ AS = $(TOOLPREFIX)as
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
+NM = $(TOOLPREFIX)nm
+PYTHON = python3
+
 
 CFLAGS = -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -mcmodel=medany -fno-common -nostdlib
@@ -54,7 +58,7 @@ CPUS := 4
 
 QEMU = qemu-system-riscv64
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
-QEMUOPTS = -machine virt -bios none -kernel $(BUILD_DIR)/$(OUT_KERNEL_NAME) -m 128M -smp $(CPUS) -nographic
+QEMUOPTS = -machine virt -bios none -kernel $(TARGET) -m 128M -smp $(CPUS) -nographic
 QEMUOPTS += -serial mon:stdio
 QEMUOPTS += -global virtio-mmio.force-legacy=false
 QEMUOPTS += -drive file=virtio_disk.img,if=none,format=raw,id=x0
@@ -67,7 +71,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 GDBFLAGS = -q -ex "target remote :$(GDBPORT)" -ex "layout split" -ex "set confirm off"
 
 # 默认目标
-default: $(BUILD_DIR)/$(OUT_KERNEL_NAME)
+default: $(TARGET)
 
 # 创建必要目录
 $(DIRS):
@@ -81,7 +85,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S | $(DIRS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # 链接内核
-$(BUILD_DIR)/$(OUT_KERNEL_NAME): $(K_OBJS) $(KERN_LD_SCRIPT)
+$(TARGET): $(K_OBJS) $(KERN_LD_SCRIPT)
 	$(LD) $(LDFLAGS) -T $(KERN_LD_SCRIPT) -o $@ $(K_OBJS)
 	$(OBJDUMP) -j .text -S $@ > $(BUILD_DIR)/kernel.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(BUILD_DIR)/kernel.sym
@@ -96,17 +100,21 @@ clean:
 	@rm -rf $(BUILD_DIR)
 
 # 启动内核等目标保持不变
-qemu: $(BUILD_DIR)/$(OUT_KERNEL_NAME)
+qemu: $(TARGET)
 	$(QEMU) $(QEMUOPTS)
 
-qemu-gdb: $(BUILD_DIR)/$(OUT_KERNEL_NAME)
+qemu-gdb: $(TARGET)
 	$(QEMU) $(QEMUOPTS) -S $(QEMUGDB)
 
-gdb: $(BUILD_DIR)/$(OUT_KERNEL_NAME)
-	$(GDB) $(BUILD_DIR)/$(OUT_KERNEL_NAME) $(GDBFLAGS)
+gdb: $(TARGET)
+	$(GDB) $(TARGET) $(GDBFLAGS)
 
 fs: virtio_disk.img
 	hexdump -C virtio_disk.img | less
 
 mkfs:
 	cd tools && make clean && make
+
+sym:
+	$(PYTHON) $(EXT_TOOLS)/ksymtab_asm.py  $(TARGET) tools/sym.S
+	riscv64-linux-gnu-gcc -Wl,--allow-shlib-undefine -shared -fPIC -nostdlib -o tools/libkexports.so tools/sym.S

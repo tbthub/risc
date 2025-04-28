@@ -65,7 +65,9 @@
     "signal.h": "c",
     "typeinfo": "c",
     "stack.h": "c",
-    "rwlock.h": "c"
+    "rwlock.h": "c",
+    "module.h": "c",
+    "export.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

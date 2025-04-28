@@ -496,7 +496,7 @@ int efs_d_fsize(struct easy_dentry *d)
 //     list_del(&d->d_child);
 //     list_del(&d->d_sibling);
 
-//     kmem_cache_free(&efs_dentry_kmem_cache, d);
+//     kmem_cache_free(d);
 // }
 
 // int efs_d_free(struct easy_dentry *d)

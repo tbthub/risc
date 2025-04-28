@@ -55,7 +55,7 @@ struct vm_area_struct *vma_dup(struct vm_area_struct *old_vma)
 
 void free_vma(struct vm_area_struct *vma)
 {
-    kmem_cache_free(&vma_kmem_cache, vma);
+    kmem_cache_free(vma);
 }
 
 void vma_prot_copy(struct vm_area_struct *vma, pte_t *pte)

@@ -4,6 +4,7 @@
 #include "core/proc.h"
 #include "core/trap.h"
 #include "defs.h"
+#include "elf.h"
 #include "fs/file.h"
 #include "lib/atomic.h"
 #include "lib/string.h"
@@ -14,7 +15,7 @@
 #include "std/stdio.h"
 
 // 内核页表
-static pagetable_t kernel_pagetable;
+pagetable_t kernel_pagetable;
 extern struct vm_area_struct *find_vma(struct mm_struct *mm, uint64 addr);
 extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
 
@@ -386,7 +387,8 @@ int alloc_user_stack(struct mm_struct *mm, tid_t tid)
     if (!stack)
         return -1;
 
-    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_stack_ops);
+    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1,
+     ELF_PROG_FLAG_READ | ELF_PROG_FLAG_WRITE, 0, NULL, &vma_stack_ops);
 
     vma_insert(mm, v);
     mappages(mm->pgd, PGROUNDDOWN(USER_STACK_TOP(tid)), (uint64)stack, PGSIZE, PTE_R | PTE_W | PTE_U);

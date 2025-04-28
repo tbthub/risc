@@ -1,3 +1,5 @@
+#include "mm/slab.h"
+
 #include "../fs/easyfs/easyfs.h"
 #include "core/proc.h"
 #include "core/timer.h"
@@ -8,8 +10,16 @@
 #include "lib/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
-#include "mm/slab.h"
 #include "param.h"
+
+/*
+ ! 我们当前实现的 slab 很简陋
+ ! 注意在 cpu 缓存，在常见的 slab 中是可以很明显加快速度的
+ ! 也就是说从 cpu1 上获取到的缓存，不一定直接放回 cpu1
+ ! 这样就实现了避免并发而加锁
+ ! * 但是很遗憾，我们暂时就是哪里回哪去
+ ! 因此你可以看到需要对 cpu-slab 加锁，这里也是无奈之举
+ */
 
 extern struct slab *page_slab(struct page *page);
 extern void set_page_slab(struct page *page, struct slab *slab);
@@ -55,11 +65,12 @@ static struct slab *slab_create(struct kmem_cache *cache)
 
     slab->kc = cache;
     slab->inuse = 0;
-    spin_init(&slab->lock,"slab");
+    spin_init(&slab->lock, "slab");
     sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
-    for (uint i = 0; i < cache->count_per_slab; i++) {
+    for (i = 0; i < cache->count_per_slab; i++) {
         sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
     }
+    // printk("sz: %d, cnt: %d\n", cache->size,cache->count_per_slab);
 
     INIT_LIST_HEAD(&slab->list);
     return slab;
@@ -119,9 +130,14 @@ static void obj_push(struct slab *slab, void *obj)
 }
 
 // slab 是不是未满，还有空
-static int is_slab_partial(struct slab *slab, struct kmem_cache *cache)
+// static int is_slab_partial(struct slab *slab, struct kmem_cache *cache)
+// {
+//     return slab->inuse < cache->count_per_slab;
+// }
+
+static int is_slab_full(struct slab *slab, struct kmem_cache *cache)
 {
-    return slab->inuse < cache->count_per_slab;
+    return slab->inuse == cache->count_per_slab;
 }
 
 // 初始化每个 kmem_cache 缓存的 cache_cpu 部分
@@ -156,6 +172,7 @@ void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, 
     cache->size = (uint16)next_power_of_2(size);  // 对齐
     cache->order = calc_slab_order(cache->size);
     cache->count_per_slab = (1 << cache->order) * PGSIZE / cache->size;
+    assert(cache->count_per_slab <= FREE_LIST_MAX_LEN, "kmem_cache_create cps:%d\n", cache->count_per_slab);
     INIT_LIST_HEAD(&cache->part_slabs);
     INIT_LIST_HEAD(&cache->full_slabs);
     INIT_LIST_HEAD(&cache->list);
@@ -196,16 +213,12 @@ void kmem_cache_destory(struct kmem_cache *cache)
 // 申请对象
 void *kmem_cache_alloc(struct kmem_cache *cache)
 {
-    if (!cache){
-        if(myproc()){
-            printk("Aaaaaaaaa\n");
-        }
+    if (!cache) {
         panic("kmem_cache_alloc: does not exist! Due to NULL!\n");
-        
     }
 
-    if (list_empty(&cache->list))
-        panic("kmem_cache_alloc: '%s' has already been freed!\n", cache->name);
+    // if (list_empty(&cache->list))
+    // panic("kmem_cache_alloc: '%s' has already been freed!\n", cache->name);
 
     struct slab *slab;
     struct slab *cpu_slab;
@@ -216,9 +229,9 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     pop_off();
 
     // 如果当前还有可用的，直接弹出即可
-    if (is_slab_partial(cpu_slab, cache)) {
+    if (!is_slab_full(cpu_slab, cache)) {
         spin_lock(&cpu_slab->lock);
-        void * tmp = obj_pop(cpu_slab);
+        void *tmp = obj_pop(cpu_slab);
         spin_unlock(&cpu_slab->lock);
         return tmp;
     }
@@ -239,26 +252,31 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     // 当前的还有可用，这里需要看是不是分出去后就没有了
     slab = list_entry(list_first(&cache->part_slabs), struct slab, list);
     addr = obj_pop(slab);
-    if (!is_slab_partial(slab, cache)) {
-        list_del_init(&slab->list);
+    if (is_slab_full(slab, cache)) {
+        list_del(&slab->list);
         list_add_head(&slab->list, &cache->full_slabs);
     }
 
     spin_unlock(&cache->lock);
+    // printk("allo: %p, slab: %p, cache: %s\n", addr, slab, cache->name);
     return addr;
 }
 
-// !
 // 释放对象
-void kmem_cache_free(struct kmem_cache *cache, void *obj)
+void kmem_cache_free(void *obj)
 {
+    if (!obj)
+        panic("kmem_cache_free obj NULL\n");
+
+    struct slab *slab = page_slab(PA2PG(obj));
+    struct kmem_cache *cache = slab->kc;
+    // printk("free: %p, slab: %p, cache: %s\n", obj, slab, cache->name);
+
     if (!cache)
         panic("kmem_cache_free: does not exist! Due to NULL!\n");
 
-    if (list_empty(&cache->list))
-        panic("kmem_cache_free: '%s' has already been freed!\n", cache->name);
-
-    struct slab *slab = page_slab(PA2PG(obj));
+    // if (list_empty(&cache->list))
+    //     panic("kmem_cache_free: '%s' has already been freed!\n", cache->name);
 
     // 如果链表为空，说明是 cpu_cache,直接释放即可
     // 如果是 cpu_cache,则其他cpu无法访问这个slab的，是安全的，不必加锁
@@ -274,7 +292,7 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj)
     spin_lock(&cache->lock);
 
     // 如果原先全部都分配出去了，要从 full 里提取出来放到 part 上
-    if (!is_slab_partial(slab, cache)) {
+    if (is_slab_full(slab, cache)) {
         list_del(&slab->list);
         list_add_head(&slab->list, &cache->part_slabs);
     }

@@ -55,7 +55,7 @@ static void timer_wake(timer_t *t)
 // 销毁内核定时器
 static void timer_del(timer_t *t)
 {
-    kmem_cache_free(&timer_kmem_cache, t);
+    kmem_cache_free(t);
 }
 
 inline ticks_t get_cur_time()

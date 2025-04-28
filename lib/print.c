@@ -6,6 +6,7 @@
 #include "riscv.h"
 #include "std/stdarg.h"
 #include "std/stdio.h"
+#include "core/export.h"
 
 // 该文件临时用来打印一些调试信息
 
@@ -91,6 +92,7 @@ void printk(const char *fmt, ...)
     spin_unlock(&cons.lock);
     va_end(ap);
 }
+EXPORT_SYMBOL(printk);
 
 // 关中断，死循环
 void panic(const char *fmt, ...)
@@ -128,6 +130,7 @@ void assert(int condition, const char *fmt, ...)
         spin_unlock(&cons.lock);
         va_end(ap);
         putstr("[panic]: !!!\n");
+        panic("");
         for (;;)
             ;
     }

@@ -1,10 +1,10 @@
+#include "core/locks/semaphore.h"
+#include "core/locks/spinlock.h"
 #include "core/proc.h"
 #include "core/sched.h"
 #include "core/vm.h"
 #include "fs/file.h"
 #include "lib/fifo.h"
-#include "core/locks/semaphore.h"
-#include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "riscv.h"
@@ -31,9 +31,13 @@ static __attribute__((noreturn)) void kswapd(void *args)
         struct vm_area_struct *v = fas->vma;
         struct thread_info *t = fas->thread;
 
-        file_llseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET);
+        file_lock(v->vm_file);
         uint64 *new_page = __alloc_page(0);
-        file_read(v->vm_file, new_page, PGSIZE);
+        // file_llseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET);
+        // file_read(v->vm_file, new_page, PGSIZE);
+        uint32 off = v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start);
+        file_read_no_off(v->vm_file, off, new_page, PGSIZE);
+        file_unlock(v->vm_file);
         // 映射到原来线程的页表去
         mappages(mm->pgd, PGROUNDDOWN(fas->fault_addr), (uint64)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
 #ifdef DEBUG_SF_PFMAP
@@ -70,6 +74,5 @@ void kswapd_init()
     fifo_init(&kswap.queue);
     sem_init(&kswap.sem, 0, "kswap-sem");
 
-    kthread_create(get_init(),kswapd, NULL, "kswapd", NO_CPU_AFF);
+    kthread_create(get_init(), kswapd, NULL, "kswapd", NO_CPU_AFF);
 }
-
