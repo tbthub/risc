@@ -47,6 +47,10 @@ void *vfs_malloc(size_t size) {
     if (size == 0){
         size = 1;
     }
+
+    if (size >= 8192){
+        //TODO!!!!
+    }
     return kmalloc((int)size, 0);
 }
 
@@ -247,6 +251,12 @@ void vfs_init(){
 
     simfs_io_table_init(&simfs_table);
     simfs_table.mountTag = "init";
-
     assert(vfs_mount(&simfs_table) >= 0, "vfs_mount");
+
+    extern const uint8_t* init_code;
+    extern const size_t init_code_size;
+
+    printk("entry vfs_mkfs_add_file\n");
+    assert(vfs_mkfs_add_file(&simfs_table, "/init.elf", init_code, init_code_size) >= 0, "vfs_mkfs_add_file failed!");
+    printk("entry vfs_mkfs_add_file done!\n");
 }

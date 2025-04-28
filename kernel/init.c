@@ -48,7 +48,9 @@ static void init_thread(void *a)
     spin_unlock(&p->lock);
 
     intr_off();
-    do_exec("/init", NULL);
+
+    printk("entry do_exec /init/init.elf\n");
+    do_exec("/init/init.elf", NULL);
 }
 
 void init_s()

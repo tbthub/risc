@@ -1,14 +1,14 @@
-#include "core/proc.h"
-#include "mm/mm.h"
-#include "dev/blk/blk_dev.h"
-#include "core/timer.h"
-#include "lib/string.h"
+// #include "core/proc.h"
+// #include "mm/mm.h"
+// #include "dev/blk/blk_dev.h"
+// #include "core/timer.h"
+// #include "lib/string.h"
 
-extern struct block_device my_dev;
-extern struct block_device mvirt_blk_dev;
-extern struct block_device virtio_disk;
-static void blk_test()
-{
+// extern struct block_device my_dev;
+// extern struct block_device mvirt_blk_dev;
+// extern struct block_device virtio_disk;
+// static void blk_test()
+// {
     // printk("blk_test\n");
     // char *addr = __alloc_page(0);
     // blk_read(&virtio_disk, 100, 0, 4096, addr);
@@ -50,9 +50,9 @@ static void blk_test()
 
     // printk("%s\n", vaddr);
     // printk("virtio_disk disk_size: %p\n",virtio_disk.gd.ops.disk_size(&virtio_disk.gd));
-}
+// }
 
-void block_func_test()
-{
-    kthread_create(get_init(),blk_test, NULL, "blk_test",NO_CPU_AFF);
-}
+// void block_func_test()
+// {
+//     kthread_create(get_init(),blk_test, NULL, "blk_test",NO_CPU_AFF);
+// }

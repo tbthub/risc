@@ -299,3 +299,28 @@ int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence
 
     return (int)ctx->op->lseek(ctx, offset, whence);
 }
+
+int vfs_mkfs_add_file(vfs_io_t *table, const char *path, const void* buffer, size_t size) {
+    vfs_file_context_t file_context;
+
+    vfs_file_context_t* ctx = &file_context;
+    ctx->mount_ptr          = table->mount_ptr;
+    ctx->op                 = table;
+    ctx->file_ptr          = NULL;
+    ctx->flag               = VFS_O_CREAT | VFS_O_WRONLY;
+
+    printk("table->open\n");
+    if (table->open(ctx, (uint8_t *)path, ctx->flag, 0) < 0) {
+        return -1;
+    }
+
+    printk("table->write %d\n", size);
+    int res = (int)table->write(ctx, (uint8_t *)buffer, size);
+
+    printk("table->close\n");
+    if (table->close(ctx) < 0){
+        vfs_raise_err(4);
+    }
+
+    return res;
+}

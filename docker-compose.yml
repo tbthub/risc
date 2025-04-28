@@ -8,6 +8,5 @@ services:
     working_dir: /risc
     command: bash
     cpus: '1'  # 限制最多使用 1 个 CPU 的算力
-    restart: unless-stopped
     stdin_open: true
     tty: true

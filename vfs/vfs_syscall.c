@@ -33,7 +33,7 @@ int k_copy_file(struct task_struct *ch) {
 int k_file_init(struct task_struct *task) {
 
     vfs_process_t *proc = &task->vfs_proc;
-    vfs_process_init(proc, (uint8_t *)"/simfs", NULL, 1, 0);
+    vfs_process_init(proc, (uint8_t *)"/", NULL, 1, 0);
     return 0;
 }
 
