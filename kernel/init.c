@@ -29,11 +29,9 @@ static void init_thread(void *a)
     efs_mount(&virtio_disk);
 
 #ifdef CONF_MKMOD
-
-    do_module("/mod", 1);
     while (1) {
-    do_module("/mod", 1);
-
+        do_module("/mod", 1);
+        do_module("/mod", 0);
         thread_timer_sleep(myproc(), 100);
     }
 #endif

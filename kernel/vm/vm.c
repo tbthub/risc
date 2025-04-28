@@ -411,14 +411,13 @@ int alloc_kern_pgd(struct mm_struct *mm)
 {
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
-    // printk("alloc_kern_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
     if (!mm->pgd) {
         panic("alloc_kern_pgd mm->pgd\n");
         return -1;
     }
 
-    // 把内核也映射到用户地址空间
     memcpy(mm->pgd, kernel_pagetable, PGSIZE);
+    // mm->pgd = kernel_pagetable;
     return 0;
 }
 

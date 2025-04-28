@@ -1,6 +1,7 @@
 #include "elf.h"
 
 #include "conf.h"
+#include "core/module.h"
 #include "core/proc.h"
 #include "core/vm.h"
 #include "fs/file.h"
@@ -9,6 +10,11 @@
 #include "riscv.h"
 
 // 需要 file_lock
+
+static int is_valid_elf(struct elf64_hdr *ehdr)
+{
+    return ehdr->magic == ELF_MAGIC && ehdr->machine == RISCV_MACHINE;
+}
 
 int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file *f)
 {
@@ -42,65 +48,101 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
     return 0;
 }
 
-int read_elf(struct elf64_hdr *ehdr, struct file *f)
+// 初始化ELF解析器
+int elf_parser_init(ElfParser *parser, const char *path)
 {
-    file_read_no_off(f, 0, ehdr, sizeof(struct elf64_hdr));
-    if (ehdr->magic != ELF_MAGIC)
-        panic("read_elf\n");
+    parser->file = file_open(path, FILE_READ);
+    if (!parser->file)
+        return -1;
+
+    // 读取ELF头
+    file_read_no_off(parser->file, 0, &parser->ehdr, sizeof(struct elf64_hdr));
+    if (!is_valid_elf(&parser->ehdr)) {
+        file_close(parser->file);
+        return -1;
+    }
+
+    // 读取程序段表
+    parser->phdrs = kmalloc(sizeof(struct proghdr) * parser->ehdr.phnum, 0);
+    file_read_no_off(parser->file, parser->ehdr.phoff, parser->phdrs, sizeof(struct proghdr) * parser->ehdr.phnum);
+
+    // 读取节头表
+    parser->shdrs = kmalloc(sizeof(Elf64_Shdr) * parser->ehdr.shnum, 0);
+    file_read_no_off(parser->file, parser->ehdr.shoff, parser->shdrs, sizeof(Elf64_Shdr) * parser->ehdr.shnum);
+
+    // 读取节名字符串表
+    Elf64_Shdr *shstrtab_shdr = &parser->shdrs[parser->ehdr.shstrndx];
+    parser->shstrtab = kmalloc(shstrtab_shdr->sh_size, 0);
+    file_read_no_off(parser->file, shstrtab_shdr->sh_offset, parser->shstrtab, shstrtab_shdr->sh_size);
+
     return 0;
 }
 
-int elf_first_segoff(struct elf64_hdr *ehdr, struct file *f)
+// 解析动态链接相关节
+int elf_parse_dynamic_sections(ElfParser *parser)
 {
-    // struct proghdr *ph;
-    // int off = -1;
-    // void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
-    // file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
-    // ph = (struct proghdr *)pht + ehdr->phnum - 1;
-    // for (int i = 0; i < ehdr->phnum; i++, ph--) {
-    //     if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
-    //         continue;  // 只加载LOAD段（排除掉空段）
-    //     if ((ph->flags & ELF_PROG_FLAG_EXEC) != 0) {
-    //         off = ph->off;
-    //         break;
-    //     }
-    // }
-    // kfree(pht);
-    // return off;
-    return 0;
-}
+    for (int i = 0; i < parser->ehdr.shnum; i++) {
+        const char *name = parser->shstrtab + parser->shdrs[i].sh_name;
+        Elf64_Shdr *shdr = &parser->shdrs[i];
 
-int elf_load_mmsz(struct elf64_hdr *ehdr, struct file *f)
-{
-    // struct proghdr *ph;
-    // uint32 memsz = 0;
-    // void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
-    // file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
-    // ph = (struct proghdr *)pht + ehdr->phnum - 1;
-    // for (int i = 0; i < ehdr->phnum; i++, ph--) {
-    //     if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
-    //         continue;  // 只加载LOAD段（排除掉空段）
-    //     memsz += ph->memsz;
-    // }
-    // kfree(pht);
-    // return memsz;
-    return 0;
-}
-
-void elf_kmod_half1(struct file *f,struct elf64_hdr *ehdr,uint32 *mem_sz,uint32 *off)
-{
-    struct proghdr *ph;
-    void *pht = kmalloc(ehdr->phnum * ehdr->phentsize, 0);
-    file_read_no_off(f, ehdr->phoff, pht, ehdr->phnum * ehdr->phentsize);
-    // 对与模块，我们规定代码段一定是在第一个加载段，参见 mod.ld 脚本
-    ph = (struct proghdr *)pht + ehdr->phnum - 1;
-    for (int i = 0; i < ehdr->phnum; i++, ph--) {
-        if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
-            continue;  // 只加载LOAD段（排除掉空段）
-        *mem_sz += ph->memsz;
-        if ((ph->flags & ELF_PROG_FLAG_EXEC) != 0) {
-            *off = ph->off;
+        if (strcmp(name, ".dynsym") == 0) {
+            // printk("find dynsym\n");
+            parser->dynsym = kmalloc(shdr->sh_size, 0);
+            file_read_no_off(parser->file, shdr->sh_offset, parser->dynsym, shdr->sh_size);
+        }
+        else if (strcmp(name, ".dynstr") == 0) {
+            // printk("find dynstr\n");
+            parser->dynstr = kmalloc(shdr->sh_size, 0);
+            file_read_no_off(parser->file, shdr->sh_offset, parser->dynstr, shdr->sh_size);
+        }
+        else if (strcmp(name, ".rela.dyn") == 0) {
+            // printk("find rela.dyn\n");
+            parser->rela_dyn = kmalloc(shdr->sh_size, 0);
+            file_read_no_off(parser->file, shdr->sh_offset, parser->rela_dyn, shdr->sh_size);
+            parser->rela_count = shdr->sh_size / sizeof(Elf64_Rela);
+        }
+        else if (strcmp(name, INIT_SECTION) == 0) {
+            // printk("find mod_init\n");
+            parser->mod_init_offset = shdr->sh_addr;
+        }
+        else if (strcmp(name, EXIT_SECTION) == 0) {
+            // printk("find mod_exit\n");
+            parser->mod_exit_offset = shdr->sh_addr;
         }
     }
-    kfree(pht);
+    return 0;
+}
+
+// 释放ELF解析器资源
+void elf_parser_destroy(ElfParser *parser)
+{
+    kfree(parser->phdrs);
+    kfree(parser->shdrs);
+    kfree(parser->shstrtab);
+    kfree(parser->dynsym);
+    kfree(parser->dynstr);
+    kfree(parser->rela_dyn);
+    file_close(parser->file);
+}
+
+uint32 elf_ptload_size(ElfParser *parser)
+{
+    uint32 mem_sz = 0;
+    struct proghdr *ph = parser->phdrs;
+    for (int i = 0; i < parser->ehdr.phnum; i++, ph++) {
+        if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
+            continue;  // 只加载LOAD段（排除掉空段）
+        mem_sz += ph->memsz;
+    }
+    return mem_sz;
+}
+
+Elf64_Shdr *elf_find_section(ElfParser *parser, const char *name) {
+    for (int i = 0; i < parser->ehdr.shnum; i++) {
+        const char *sec_name = parser->shstrtab + parser->shdrs[i].sh_name;
+        if (strcmp(sec_name, name) == 0) {
+            return &parser->shdrs[i];
+        }
+    }
+    return NULL;
 }

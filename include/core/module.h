@@ -4,6 +4,9 @@
 #define INIT_SECTION ".mod_init"
 #define EXIT_SECTION ".mod_exit"
 
+extern char kmod_init_start[];
+extern char kmod_init_end[];
+
 typedef int (*initcall_t)(void);
 typedef void (*exitcall_t)(void);
 

@@ -6,6 +6,7 @@ struct file;
 // Format of an ELF executable file
 
 #define ELF_MAGIC 0x464C457FU // "\x7FELF" in little endian
+#define RISCV_MACHINE 0xF3
 
 // File header
 struct elf64_hdr
@@ -110,8 +111,24 @@ typedef struct {
 } Elf64_Sym;
 
 
-extern int read_elf(struct elf64_hdr *ehdr, struct file *f);
-extern int elf_first_segoff(struct elf64_hdr *ehdr, struct file *f);
-extern int elf_load_mmsz(struct elf64_hdr *ehdr, struct file *f);
+typedef struct ElfParser {
+    struct elf64_hdr ehdr;          // ELF头
+    struct proghdr *phdrs;          // 程序表数组
+    Elf64_Shdr *shdrs;              // 节头表数组
+    char *shstrtab;                 // 节名字符串表
+    Elf64_Sym *dynsym;              // 动态符号表
+    char *dynstr;                   // 动态符号字符串表
+    Elf64_Rela *rela_dyn;           // 动态重定位表
+    uint32 rela_count;            // 重定位条目数
+    uint64 mod_init_offset;       // init函数偏移
+    uint64 mod_exit_offset;       // exit函数偏移
+    struct file *file;              // 关联的文件对象
+} ElfParser;
+
+extern void elf_parser_destroy(ElfParser *parser);
+extern int elf_parse_dynamic_sections(ElfParser *parser);
+extern int elf_parser_init(ElfParser *parser, const char *path);
+extern uint32 elf_ptload_size(ElfParser *parser);
+extern Elf64_Shdr *elf_find_section(ElfParser *parser, const char *section_name);
 
 #endif

@@ -5,6 +5,8 @@ ENTRY( _entry )
 PHDRS
 {
     text PT_LOAD FLAGS(0x5); /* 101 */
+    mod_init PT_LOAD FLAGS(0x5);
+    mod_exit PT_LOAD FLAGS(5);
     rodata PT_LOAD FLAGS(0x4); /* 100 */
     data PT_LOAD FLAGS(0x6); /* 110 */
     bss PT_LOAD FLAGS(0x6); /* 110 */
@@ -37,6 +39,16 @@ SECTIONS
 
     PROVIDE(etext = .);
   } :text
+
+  .mod_init : {
+    PROVIDE(kmod_init_start = .);
+    KEEP(*(.mod_init .mod_init.*))
+    PROVIDE(kmod_init_end = .);
+  } :mod_init
+
+  .mod_exit : {
+    KEEP(*(.mod_exit .mod_exit.*))
+  } :mod_exit
 
   .rodata : {
     . = ALIGN(16);

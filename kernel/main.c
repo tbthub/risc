@@ -27,7 +27,7 @@
 #include "../test/t_head.h"
 volatile static int started = 0;
 extern void init_s();
-extern void kmodule_init();
+extern void kmods_init();
 
 extern void mm_init();
 extern int t_mem_test2();
@@ -38,12 +38,8 @@ void main()
 {
      if (cpuid() == 0)
      {
-
           cons_init();
           mm_init();
-          // t_mem_test4();
-          // intr_off();
-          // for (;;);
           
           kvm_init();
           trap_init();
@@ -55,10 +51,9 @@ void main()
           kvm_init_hart();
           trap_inithart();
           plic_inithart();
-          kmodule_init();
           
           init_s();
-          
+          kmods_init();
 
           printk("hart 0 init_s ok\n");
           printk("xv6 kernel is booting\n");

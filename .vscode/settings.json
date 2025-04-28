@@ -67,7 +67,8 @@
     "stack.h": "c",
     "rwlock.h": "c",
     "module.h": "c",
-    "export.h": "c"
+    "export.h": "c",
+    "*.bak": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true
