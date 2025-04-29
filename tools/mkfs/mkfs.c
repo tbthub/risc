@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
-#include "../fs/easyfs/easyfs.h"
+#include "../../fs/easyfs/easyfs.h"
 
 static void write_block(int fd, uint32_t block_no, const void *data, size_t size)
 {

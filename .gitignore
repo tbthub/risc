@@ -2,9 +2,12 @@
 build/
 tools/out/
 user/out/
+user/build/
 # Ignore other common generated files and directories (optional)
 *.o
 *.asm
 *.sym
 *.d
+*.dump
+*.bin
 virtio_disk.img

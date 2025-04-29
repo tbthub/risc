@@ -5,7 +5,7 @@
 
 void haha()
 {
-    int a = 0;
+    // int a = 0;
 }
 
 extern struct thread_info test_pro;
