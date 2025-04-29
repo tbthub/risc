@@ -22,12 +22,13 @@ typedef struct vfs_file_context_t {
 
 typedef struct vfs_io_t {
     const char *mountTag;
+    void* io_args;
     int8_t (*open)(vfs_file_context_t *, uint8_t *, int, int);
     int32_t (*read)(vfs_file_context_t *, uint8_t *, size_t);
     int32_t (*write)(vfs_file_context_t *, uint8_t *, size_t);
     int8_t (*close)(vfs_file_context_t *);
     int32_t (*lseek)(vfs_file_context_t *, int32_t, int);
-    uint8_t *(*mount)();
+    uint8_t *(*mount)(struct vfs_io_t *);
     int8_t (*umount)(uint8_t *);
     int8_t (*dup2)(vfs_file_context_t *, vfs_file_context_t *);
 

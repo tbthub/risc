@@ -7,6 +7,7 @@
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_module.h"
 #include "fs/simfs/simfs.h"
+#include "fs/efs/efs.h"
 #include "lib/string.h"
 #include "lib/math.h"
 #include "std/stdio.h"
@@ -276,16 +277,27 @@ void *vfs_get_process() {
     return &myproc()->task->vfs_proc;
 }
 
+// 根文件设备，需要初始化设备后才能
+extern struct block_device virtio_disk;
 void vfs_init() {
     vfs_io_t simfs_table;
     hash_init(&hash_table_g, 128, "vfs_tag");
 
     simfs_io_table_init(&simfs_table);
     simfs_table.mountTag = "init";
-    assert(vfs_mount(&simfs_table) >= 0, "vfs_mount");
+    assert(vfs_mount(&simfs_table) >= 0, "simfs_mount");
 
-    extern const uint8_t init_code;
-    extern const size_t init_code_size;
+    vfs_io_t efs_table;
+    efs_io_table_init(&efs_table);
+    efs_table.io_args = &virtio_disk;
+    assert(vfs_mount(&efs_table) >= 0, "efs_mount");
+    efs_table.mount(&efs_table);
 
-    assert(vfs_mkfs_add_file(&simfs_table, "/init.elf", &init_code, init_code_size) >= 0, "vfs_mkfs_add_file failed!");
+
+    // extern const uint8_t init_code;
+    // extern const size_t init_code_size;
+
+    // assert(vfs_mkfs_add_file(&simfs_table, "/init.elf", &init_code, init_code_size) >= 0, "vfs_mkfs_add_file failed!");
+
+
 }

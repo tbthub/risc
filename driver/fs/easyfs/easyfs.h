@@ -146,10 +146,6 @@ struct easy_dentry
     atomic_t refcnt;
 };
 
-// 1. fs
-int efs_mount(struct block_device *bd);
-int efs_unmount();
-
 // 2. super block
 extern void efs_sb_init();
 
@@ -187,6 +183,7 @@ extern int efs_i_size(struct easy_m_inode *inode);
 extern __attribute__((unused)) void efs_i_info(const struct easy_m_inode *inode);
 
 extern void efs_i_root_init();
+extern void efs_i_dup(struct easy_m_inode *inode);
 
 // 4. dentry
 extern void efs_d_lookup(struct easy_dentry *pd);

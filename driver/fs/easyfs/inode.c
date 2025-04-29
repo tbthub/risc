@@ -174,7 +174,9 @@ static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc)
 void efs_i_put(struct easy_m_inode *m_inode)
 {
     assert(atomic_read(&m_inode->i_refcnt) > 0, "efs_i_put");
-    atomic_dec(&m_inode->i_refcnt);
+    if(atomic_dec_and_test(&m_inode->i_refcnt)){
+        // efs_i_free(m_inode);
+    }
 }
 
 void efs_i_dup(struct easy_m_inode *inode)

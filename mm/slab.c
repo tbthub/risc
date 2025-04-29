@@ -195,11 +195,7 @@ void kmem_cache_destory(struct kmem_cache *cache)
 void *kmem_cache_alloc(struct kmem_cache *cache)
 {
     if (!cache){
-        if(myproc()){
-            printk("Aaaaaaaaa\n");
-        }
-        panic("kmem_cache_alloc: does not exist! Due to NULL!\n");
-        
+        panic("kmem_cache_alloc: does not exist! Due to NULL!\n");    
     }
 
     if (list_empty(&cache->list))

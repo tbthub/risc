@@ -26,7 +26,7 @@ typedef struct simfs_t {
 } simfs_t;
 
 // 文件上下文结构体
-typedef struct simfs_file_t {
+typedef struct simfs_file_t {   
     simfs_file_node_t *node; // 指向链表中的文件节点
     size_t pos;              // 当前读写位置
 } simfs_file_t;
