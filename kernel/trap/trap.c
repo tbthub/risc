@@ -199,18 +199,12 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     struct elf64_hdr ehdr;
 
-    printk("1 OK\n");
-
     int f = do_open(path, O_RDONLY, 0);
-
-    printk("2 OK\n");
 
     assert(intr_get() == 0, "exec intr 3\n");
 
     if (f < 0)
         panic("do_exec f is NULL\n");
-
-    printk("3 OK\n");
 
     do_read(f, (void *)&ehdr, sizeof(ehdr));
 

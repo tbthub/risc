@@ -1,12 +1,14 @@
 #include "lib/hash.h"
 #include "lib/string.h"
 #include "mm/kmalloc.h"
+#include "mm/mm.h"
 #include "core/locks/rwlock.h"
 #include "core/proc.h"
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_module.h"
 #include "fs/simfs/simfs.h"
 #include "lib/string.h"
+#include "lib/math.h"
 #include "std/stdio.h"
 
 typedef struct vfs_hash_t {
@@ -18,6 +20,11 @@ typedef struct vfs_hash_t {
     int key_hash;
     int ref;
 } vfs_hash_t;
+
+typedef struct vfs_alloc_t {
+    uint32_t malloc_size;
+    uint32_t order;
+} vfs_alloc_t;
 
 static struct hash_table hash_table_g;
 
@@ -44,21 +51,43 @@ int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size) {
 
 void *vfs_malloc(size_t size) {
 
-    if (size == 0){
-        size = 1;
+    size = size + sizeof(vfs_alloc_t);
+
+    assert(size <= 1024 * 32, "vfs_malloc too big! %d\n", size);
+    uint8_t *ptr = NULL;
+    size_t order = 0;
+    if (size >= 8192) {
+        size_t page_size = (size + 4095) / 4096;
+        order            = math_log(page_size, 2);
+        ptr              = (uint8_t *)__alloc_pages(0, order);
     }
 
-    assert(size < 1024 * 16, "vfs_malloc too big!");
-
-    if (size >= 8192){
-        //TODO!!!!
+    else {
+        ptr = (uint8_t *)kmalloc((int)size, 0);
     }
-    
-    return kmalloc((int)size, 0);
+
+    assert(ptr != NULL, "vfs_malloc NULL!\n");
+
+    vfs_alloc_t *ptr_head = (vfs_alloc_t *)ptr;
+    ptr_head->malloc_size = (uint32_t)size;
+    ptr_head->order       = (uint32_t)order;
+
+    return ptr + sizeof(vfs_alloc_t);
 }
 
 void vfs_free(void *ptr) {
-    kfree(ptr);
+    uint8_t *data         = (uint8_t *)ptr;
+    vfs_alloc_t *ptr_head = (vfs_alloc_t *)(data - sizeof(vfs_alloc_t));
+
+
+    if (ptr_head->malloc_size >= 8192) {
+        __free_pages((void *)ptr_head, ptr_head->order);
+    }
+
+    else{
+        kfree((void *)ptr_head);
+    }
+
 }
 
 void vfs_raise_err(uint16_t error) {
@@ -133,7 +162,7 @@ void *vfs_data_global_get(uint8_t *key, size_t key_size) {
 
     tmp->ref++;
 
-    return tmp;
+    return tmp->value;
 }
 
 void vfs_data_global_get_done(uint8_t *key, size_t key_size) {
@@ -196,7 +225,6 @@ void vfs_data_global_del_rollback(uint8_t *key, size_t key_size) {
     }
 
     tmp->ref++;
-
 }
 
 void vfs_data_global_del_end(uint8_t *key, size_t key_size) {
@@ -248,7 +276,7 @@ void *vfs_get_process() {
     return &myproc()->task->vfs_proc;
 }
 
-void vfs_init(){
+void vfs_init() {
     vfs_io_t simfs_table;
     hash_init(&hash_table_g, 128, "vfs_tag");
 
@@ -256,10 +284,8 @@ void vfs_init(){
     simfs_table.mountTag = "init";
     assert(vfs_mount(&simfs_table) >= 0, "vfs_mount");
 
-    extern const uint8_t* init_code;
+    extern const uint8_t init_code;
     extern const size_t init_code_size;
 
-    printk("entry vfs_mkfs_add_file\n");
-    assert(vfs_mkfs_add_file(&simfs_table, "/init.elf", init_code, init_code_size) >= 0, "vfs_mkfs_add_file failed!");
-    printk("entry vfs_mkfs_add_file done!\n");
+    assert(vfs_mkfs_add_file(&simfs_table, "/init.elf", &init_code, init_code_size) >= 0, "vfs_mkfs_add_file failed!");
 }

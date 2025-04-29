@@ -49,7 +49,6 @@ static void init_thread(void *a)
 
     intr_off();
 
-    printk("entry do_exec /init/init.elf\n");
     do_exec("/init/init.elf", NULL);
 }
 

@@ -2,6 +2,7 @@
 #include "vfs/vfs_interface.h"
 #include "fs/simfs/simfs.h"
 #include "lib/string.h"
+#include "std/stdio.h"
 
 //--------------------------------------------------
 // 内部工具函数：通过路径查找文件节点（假设调用者已持有适当的锁）
@@ -29,6 +30,7 @@ static simfs_file_node_t *find_file_node(simfs_t *fs, const char *path) {
 int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode) {
     simfs_t *fs          = (simfs_t *)context->mount_ptr;
     const char *path_str = (const char *)path;
+
 
     // 查找现有文件
     simfs_file_node_t *node = find_file_node(fs, path_str);
@@ -60,9 +62,9 @@ int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mod
             }
 
             strcpy(node->path, path_str);
-            node->data     = NULL;
+            node->data     = vfs_malloc(16);
             node->size     = 0;
-            node->capacity = 0;
+            node->capacity = 16;
 
             // 插入链表头部
             node->next    = fs->file_list;
@@ -132,21 +134,21 @@ int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
             vfs_wlock_release(node->lock);
             return -1;
         }
+
         memset(new_data + node->size, 0, new_capacity - node->size);
         memcpy(new_data, node->data, node->size);
         vfs_free(node->data);
         node->data     = new_data;
         node->capacity = new_capacity;
     }
+
     // 更新size到实际数据长度
     if (file_ctx->pos + size > node->size) {
         node->size = file_ctx->pos + size;
     }
     memcpy(node->data + file_ctx->pos, buffer, size);
     file_ctx->pos += size;
-
     vfs_wlock_release(node->lock);
-
     return size;
 }
 
