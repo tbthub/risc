@@ -6,9 +6,9 @@ extern "C" {
 #ifndef _VFS_INTERFACE_H
 #define _VFS_INTERFACE_H
 
-#include "std/stdint.h"
-#include "std/stdbool.h"
-#include "std/stddef.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 void *vfs_malloc(size_t size);
 void vfs_free(void *ptr);

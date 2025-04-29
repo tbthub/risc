@@ -6,35 +6,36 @@ extern "C" {
 #define _VFS_IO_H
 
 #include "vfs/vfs_interface.h"
-#include "std/stdint.h"
-#include "std/stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 
 struct vfs_io_t;
 
 typedef struct vfs_file_context_t {
-    uint8_t *file_ptr;
-    uint8_t *mount_ptr;
+    void *file_ptr;
+    void *mount_ptr;
 
     // private
     struct vfs_io_t *op;
     int flag;
+    int ref;
+    void *lock;
 } vfs_file_context_t;
 
 typedef struct vfs_io_t {
     const char *mountTag;
-    void* io_args;
     int8_t (*open)(vfs_file_context_t *, uint8_t *, int, int);
     int32_t (*read)(vfs_file_context_t *, uint8_t *, size_t);
     int32_t (*write)(vfs_file_context_t *, uint8_t *, size_t);
     int8_t (*close)(vfs_file_context_t *);
     int32_t (*lseek)(vfs_file_context_t *, int32_t, int);
-    uint8_t *(*mount)(struct vfs_io_t *);
-    int8_t (*umount)(uint8_t *);
-    int8_t (*dup2)(vfs_file_context_t *, vfs_file_context_t *);
+    void *(*mount)(void *);
+    int8_t (*umount)(void *);
 
     // private
-    uint8_t *mount_ptr;
+    void *mount_ptr;
     size_t mountTagSize;
+
 } vfs_io_t;
 
 typedef int vfs_off_t;

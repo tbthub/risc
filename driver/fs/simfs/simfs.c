@@ -1,8 +1,8 @@
 #include "vfs/vfs_io.h"
 #include "vfs/vfs_interface.h"
 #include "fs/simfs/simfs.h"
-#include "lib/string.h"
-#include "std/stdio.h"
+#include <string.h>
+#include <stdio.h>
 
 //--------------------------------------------------
 // 内部工具函数：通过路径查找文件节点（假设调用者已持有适当的锁）
@@ -30,7 +30,6 @@ static simfs_file_node_t *find_file_node(simfs_t *fs, const char *path) {
 int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode) {
     simfs_t *fs          = (simfs_t *)context->mount_ptr;
     const char *path_str = (const char *)path;
-
 
     // 查找现有文件
     simfs_file_node_t *node = find_file_node(fs, path_str);
@@ -163,7 +162,7 @@ int8_t simfs_close(vfs_file_context_t *context) {
 
 //--------------------------------------------------
 // 挂载文件系统
-uint8_t *simfs_mount() {
+void* simfs_mount(void* arg) {
     simfs_t *fs = (simfs_t *)vfs_malloc(sizeof(simfs_t));
 
     if (fs) {
@@ -174,13 +173,14 @@ uint8_t *simfs_mount() {
             fs = NULL;
         }
     }
-    return (uint8_t *)fs;
+
+    return (void *)fs;
 }
 
 //--------------------------------------------------
 // 卸载文件系统（清理所有资源）
-int8_t simfs_umount(uint8_t *sim_fs_ptr) {
-    simfs_t *fs                = (simfs_t *)sim_fs_ptr;
+int8_t simfs_umount(void *mount_ptr) {
+    simfs_t *fs                = (simfs_t *)mount_ptr;
     simfs_file_node_t *current = fs->file_list;
 
     // 遍历释放所有文件节点
@@ -242,16 +242,6 @@ int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
     return (int32_t)new_pos;
 }
 
-int8_t simfs_dup2(vfs_file_context_t *old_file, vfs_file_context_t *new_file) {
-    simfs_file_t *file_ctx = (simfs_file_t *)old_file->file_ptr;
-    new_file->file_ptr     = vfs_malloc(sizeof(simfs_file_t));
-    if (new_file->file_ptr == NULL) {
-        return -1;
-    }
-
-    memcpy(new_file->file_ptr, file_ctx, sizeof(simfs_file_t));
-    return 0;
-}
 
 //--------------------------------------------------
 // 文件系统表初始化
@@ -263,5 +253,4 @@ void simfs_io_table_init(vfs_io_t *table) {
     table->mount  = simfs_mount;
     table->umount = simfs_umount;
     table->lseek  = simfs_lseek;
-    table->dup2   = simfs_dup2;
 }

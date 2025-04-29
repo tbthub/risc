@@ -7,7 +7,7 @@
 #include "dev/uart.h"
 #include "elf.h"
 #include "core/locks/semaphore.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/memlayout.h"
 #include "mm/page.h"
 #include "riscv.h"
@@ -28,9 +28,7 @@ extern uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_p
 extern void signal_handler(struct signal *s);
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
 
-
-void trap_init()
-{
+void trap_init() {
     time_init();
 }
 
@@ -39,14 +37,12 @@ void trap_init()
 // 设置异常和中断的处理程序入口，具体是将 kernelvec 函数的地址写入到 stvec
 // 寄存器中。 stvec 是用于在 RISC-V 中存储异常/中断向量表的寄存器。 在 RISC-V
 // 中，当发生异常或中断时，CPU 会自动将控制权转交给 stvec 中存储的地址
-void trap_inithart(void)
-{
+void trap_inithart(void) {
     w_stvec((uint64)kernelvec);
 }
 
 // 时钟中断，由 intr_handler 调用
-static void timer_intr()
-{
+static void timer_intr() {
     time_update();
 
     struct thread_info *cur = myproc();
@@ -68,8 +64,7 @@ static void timer_intr()
 }
 
 // 外部中断，由 intr_handler 调用
-static inline void external_intr()
-{
+static inline void external_intr() {
     int irq = plic_claim();
     switch (irq) {
     case UART0_IRQ:
@@ -90,14 +85,13 @@ static inline void external_intr()
 }
 
 // 中断
-static inline void intr_handler(uint64 scause)
-{
+static inline void intr_handler(uint64 scause) {
     switch (scause) {
-    case EXTERNAL_SCAUSE:  // 外设
+    case EXTERNAL_SCAUSE: // 外设
         external_intr();
         break;
 
-    case TIMER_SCAUSE:  // 时钟
+    case TIMER_SCAUSE: // 时钟
         timer_intr();
         break;
 
@@ -109,8 +103,7 @@ extern void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 
 extern void show_all_args(struct thread_info *t);
 // 异常
-static void excep_handler(uint64 scause)
-{
+static void excep_handler(uint64 scause) {
     switch (scause) {
     case E_SYSCALL:
         syscall();
@@ -121,7 +114,7 @@ static void excep_handler(uint64 scause)
     case E_STORE_AMO_PF:
         page_fault_handler(r_stval(), scause);
         break;
-        
+
     default:
         struct thread_info *t = myproc();
         printk("pid: %d, unknown scause\n", t->pid);
@@ -141,8 +134,7 @@ static void excep_handler(uint64 scause)
     }
 }
 
-__attribute__((noreturn)) void usertrapret()
-{
+__attribute__((noreturn)) void usertrapret() {
     intr_off();
     struct thread_info *p = myproc();
     signal_handler(&p->task->sigs);
@@ -167,8 +159,8 @@ __attribute__((noreturn)) void usertrapret()
 
     // set S Previous Privilege mode to User.
     unsigned long x = r_sstatus();
-    x &= ~SSTATUS_SPP;  // clear SPP to 0 for user mode
-    x |= SSTATUS_SPIE;  // enable interrupts in user mode
+    x &= ~SSTATUS_SPP; // clear SPP to 0 for user mode
+    x |= SSTATUS_SPIE; // enable interrupts in user mode
     w_sstatus(x);
     // printk("b, pid: %d\n",p->pid);
     // vm2pa_show(&myproc()->task->mm);
@@ -176,8 +168,7 @@ __attribute__((noreturn)) void usertrapret()
 }
 
 // exec 会使用原来的内核栈
-__attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
-{
+__attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
     int res = -1;
 
     char *args_page[USER_ARGV_MAX_SIZE];
@@ -187,7 +178,6 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 
     if (!(argv && READ_ONCE(*argv)))
         ;
-
 
     // assert(intr_get() == 0,"exec intr 1\n");
     struct thread_info *t = myproc();
@@ -246,7 +236,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
     sig_refault_all(&t->task->sigs);
 
     t->tf->epc = ehdr.entry;
-    t->tf->sp = USER_STACK_TOP(t->tid);
+    t->tf->sp  = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);
 #ifdef DEBUG_SYSCALL
@@ -256,16 +246,15 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 }
 
 // 内核 trap 处理函数 kernel_trap
-void kerneltrap()
-{
-    uint64 sepc = r_sepc();        // sepc: 保存异常发生时的 sepc 寄存器的值，sepc
-                                   // 存储了引发异常或中断时的程序计数器（PC）的值
-    uint64 sstatus = r_sstatus();  // sstatus: 保存当前的 sstatus 寄存器的值，sstatus
-                                   // 包含状态标志，例如当前的运行模式
-    uint64 scause = r_scause();    // scause: 保存 scause 寄存器的值，scause
+void kerneltrap() {
+    uint64 sepc = r_sepc();       // sepc: 保存异常发生时的 sepc 寄存器的值，sepc
+                                  // 存储了引发异常或中断时的程序计数器（PC）的值
+    uint64 sstatus = r_sstatus(); // sstatus: 保存当前的 sstatus 寄存器的值，sstatus
+                                  // 包含状态标志，例如当前的运行模式
+    uint64 scause = r_scause();   // scause: 保存 scause 寄存器的值，scause
     assert((sstatus & SSTATUS_SPP) != 0, "kerneltrap: not from supervisor mode %d", sstatus & SSTATUS_SPP);
     assert(intr_get() == 0,
-           "kerneltrap: interrupts enabled");  // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
+           "kerneltrap: interrupts enabled"); // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
 
     if (scause & (1ULL << 63))
         intr_handler(scause);
@@ -273,22 +262,21 @@ void kerneltrap()
         excep_handler(scause);
     }
 
-    w_sepc(sepc);        // 将原来的 sepc
-                         // 值写回寄存器，以便异常返回时能够继续原来的代码执行。
-    w_sstatus(sstatus);  //  恢复 sstatus 的状态，以确保内核的状态和之前一致。
+    w_sepc(sepc);       // 将原来的 sepc
+                        // 值写回寄存器，以便异常返回时能够继续原来的代码执行。
+    w_sstatus(sstatus); //  恢复 sstatus 的状态，以确保内核的状态和之前一致。
 }
 
 // 用户 trap 处理函数 user_trap
-void usertrap()
-{
-    uint64 scause = r_scause();
+void usertrap() {
+    uint64 scause  = r_scause();
     uint64 sstatus = r_sstatus();
-    uint64 sepc = r_sepc();
+    uint64 sepc    = r_sepc();
     // printk("[u-trap] pid: %d, scause: %p\n",myproc()->pid,scause);
     // 检查是否来自用户模式下的中断，也就是不是内核中断,确保中断来自用户态
     assert((sstatus & SSTATUS_SPP) == 0, "usertrap: not from user mode\n");
     assert(intr_get() == 0,
-           "usertrap: interrupts enabled");  // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
+           "usertrap: interrupts enabled"); // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
 
     // 现在位于内核，要设置 stvec 为 kernelvec
     w_stvec((uint64)kernelvec);

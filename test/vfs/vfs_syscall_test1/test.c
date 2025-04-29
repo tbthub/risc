@@ -1,6 +1,6 @@
 // #include <unistd.h>
 // #include <assert.h>
-// #include "lib/string.h"
+// #include "std/string.h"
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <sys/types.h>

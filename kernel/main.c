@@ -11,7 +11,7 @@
 #include "lib/math.h"
 #include "lib/fifo.h"
 #include "lib/atomic.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "core/locks/semaphore.h"
 
 #include "core/vm.h"
@@ -34,17 +34,15 @@ extern int t_mem_test1();
 extern int t_mem_test3();
 extern int t_mem_test4();
 extern void vfs_init();
-void main()
-{
-    if (cpuid() == 0)
-    {
+void main() {
+    if (cpuid() == 0) {
 
         cons_init();
         mm_init();
         // t_mem_test4();
         // intr_off();
         // for (;;);
-        
+
         kvm_init();
         trap_init();
         plic_init();
@@ -61,9 +59,7 @@ void main()
 
         __sync_synchronize();
         started = 1;
-    }
-    else
-    {
+    } else {
         while (started == 0)
             ;
         __sync_synchronize();

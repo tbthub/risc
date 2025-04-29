@@ -12,11 +12,10 @@ extern int32_t efs_write(vfs_file_context_t *context, uint8_t *buffer, size_t si
 extern int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence);
 extern int8_t efs_dup2(vfs_file_context_t *old_file, vfs_file_context_t *new_file);
 
-
-int efs_mount(struct vfs_io_t * vio)
-{
+void *efs_mount(void *arg) {
     printk("easy fs init start...\n");
-    efs_bd = (struct block_device *)vio->io_args;
+    assert(efs_bd == NULL, "efs_mount");
+    efs_bd = (struct block_device *)arg;
 
     // 1. sb
     efs_sb_init();
@@ -48,11 +47,12 @@ int efs_mount(struct vfs_io_t * vio)
     // 3. 挂载
 
     printk("easy fs init done.\n");
-    return 0;
+    return (void*)1;
 }
 
-int efs_unmount()
+int8_t efs_unmount()
 {
+    efs_bd = NULL;
     printk("efs_unmount\n");
     return 0;
 }
@@ -65,6 +65,4 @@ void efs_io_table_init(vfs_io_t *table) {
     table->mount  = efs_mount;
     table->umount = efs_unmount;
     table->lseek  = efs_lseek;
-    table->dup2   = efs_dup2;
-    table->mountTag = "efs";
 }

@@ -3,7 +3,7 @@
 #include "dev/blk/bio.h"
 #include "dev/blk/buf.h"
 #include "lib/math.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
 #include "mm/slab.h"
@@ -29,8 +29,7 @@ struct kmem_cache vma_kmem_cache;
 
 // 由 kmem_cache 信息创建一个 slab 节点（未插入 kmem_cache.slabs 链表）
 // 注：kmem_cache.size 需要已经对齐
-static struct slab *slab_create(struct kmem_cache *cache)
-{
+static struct slab *slab_create(struct kmem_cache *cache) {
     int i, page_count;
     struct slab *slab;
     struct page *page;
@@ -46,14 +45,14 @@ static struct slab *slab_create(struct kmem_cache *cache)
     }
 
     // 修改页面标志
-    page = PA2PG(slab->objs);
+    page       = PA2PG(slab->objs);
     page_count = 1 << cache->order;
     for (i = 0; i < page_count; i++)
         set_page_slab(page + i, slab);
 
-    slab->kc = cache;
+    slab->kc    = cache;
     slab->inuse = 0;
-    spin_init(&slab->lock,"slab");
+    spin_init(&slab->lock, "slab");
     sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
     for (uint i = 0; i < cache->count_per_slab; i++) {
         sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
@@ -63,13 +62,12 @@ static struct slab *slab_create(struct kmem_cache *cache)
     return slab;
 }
 
-static void slab_destory(struct slab *slab)
-{
+static void slab_destory(struct slab *slab) {
     int i, page_count;
     struct page *page;
 
     // 恢复页面
-    page = PA2PG(slab->objs);
+    page       = PA2PG(slab->objs);
     page_count = 1 << slab->kc->order;
     for (i = 0; i < page_count; i++)
         clear_page_slab(page + i);
@@ -80,12 +78,11 @@ static void slab_destory(struct slab *slab)
 }
 
 // 计算满足最少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象的order
-static uint8 calc_slab_order(uint16 obj_size)
-{
+static uint8 calc_slab_order(uint16 obj_size) {
     // 确保每个 slab 至少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象
     uint32 require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
 
-    uint8 order = 0;
+    uint8 order      = 0;
     uint32 slab_size = PGSIZE;
 
     while (require_size > slab_size) {
@@ -97,8 +94,7 @@ static uint8 calc_slab_order(uint16 obj_size)
 }
 
 // 弹出一个空闲的地址（申请地址）
-static void *obj_pop(struct slab *slab)
-{
+static void *obj_pop(struct slab *slab) {
     void *tmp = (void *)sstack_pop(&slab->free_list);
     if (tmp == NULL)
         panic("obj_pop empty\n");
@@ -108,8 +104,7 @@ static void *obj_pop(struct slab *slab)
 }
 
 // 插入一个空闲的地址（释放地址）
-static void obj_push(struct slab *slab, void *obj)
-{
+static void obj_push(struct slab *slab, void *obj) {
     if (sstack_push(&slab->free_list, (uint64)obj) != -1)
         slab->inuse--;
     else
@@ -117,15 +112,13 @@ static void obj_push(struct slab *slab, void *obj)
 }
 
 // slab 是不是未满，还有空
-static int is_slab_partial(struct slab *slab, struct kmem_cache *cache)
-{
+static int is_slab_partial(struct slab *slab, struct kmem_cache *cache) {
     return slab->inuse < cache->count_per_slab;
 }
 
 // 初始化每个 kmem_cache 缓存的 cache_cpu 部分
 // 注：kmem_cache.size 需要已经对齐
-static void cache_cpu_init(struct kmem_cache *cache)
-{
+static void cache_cpu_init(struct kmem_cache *cache) {
     uint16 i;
     struct slab *cpu_slab;
     for (i = 0; i < NCPU; i++) {
@@ -137,22 +130,20 @@ static void cache_cpu_init(struct kmem_cache *cache)
 }
 
 // 增加 slab
-static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
-{
+static struct slab *kmem_cache_add_slab(struct kmem_cache *cache) {
     struct slab *new_slab = slab_create(cache);
     list_add_head(&new_slab->list, &cache->part_slabs);
     return new_slab;
 }
 
 // 初始化缓存池
-void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags)
-{
+void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags) {
     spin_init(&cache->lock, "slab");
 
     strncpy(cache->name, name, CACHE_MAX_NAME_LEN);
-    cache->flags = flags;
-    cache->size = (uint16)next_power_of_2(size);  // 对齐
-    cache->order = calc_slab_order(cache->size);
+    cache->flags          = flags;
+    cache->size           = (uint16)next_power_of_2(size); // 对齐
+    cache->order          = calc_slab_order(cache->size);
     cache->count_per_slab = (1 << cache->order) * PGSIZE / cache->size;
     INIT_LIST_HEAD(&cache->part_slabs);
     INIT_LIST_HEAD(&cache->full_slabs);
@@ -164,8 +155,7 @@ void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, 
 
 // 这里暂时还有一点问题
 // 考虑到直接静态分配，因此感觉这里只释放了资源，并没有释放结构本身
-void kmem_cache_destory(struct kmem_cache *cache)
-{
+void kmem_cache_destory(struct kmem_cache *cache) {
     if (!cache)
         panic("kmem_cache_destory: does not exist! Due to NULL!\n");
 
@@ -178,12 +168,10 @@ void kmem_cache_destory(struct kmem_cache *cache)
         slab_destory(cache->cache_cpu[i]);
 
     // 销毁slabs
-    list_for_each_entry_safe(slab, tmp, &cache->part_slabs, list)
-    {
+    list_for_each_entry_safe(slab, tmp, &cache->part_slabs, list) {
         slab_destory(slab);
     }
-    list_for_each_entry_safe(slab, tmp, &cache->full_slabs, list)
-    {
+    list_for_each_entry_safe(slab, tmp, &cache->full_slabs, list) {
         slab_destory(slab);
     }
     list_del_init(&cache->list);
@@ -192,10 +180,9 @@ void kmem_cache_destory(struct kmem_cache *cache)
 }
 
 // 申请对象
-void *kmem_cache_alloc(struct kmem_cache *cache)
-{
-    if (!cache){
-        panic("kmem_cache_alloc: does not exist! Due to NULL!\n");    
+void *kmem_cache_alloc(struct kmem_cache *cache) {
+    if (!cache) {
+        panic("kmem_cache_alloc: does not exist! Due to NULL!\n");
     }
 
     if (list_empty(&cache->list))
@@ -212,7 +199,7 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     // 如果当前还有可用的，直接弹出即可
     if (is_slab_partial(cpu_slab, cache)) {
         spin_lock(&cpu_slab->lock);
-        void * tmp = obj_pop(cpu_slab);
+        void *tmp = obj_pop(cpu_slab);
         spin_unlock(&cpu_slab->lock);
         return tmp;
     }
@@ -244,8 +231,7 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
 
 // !
 // 释放对象
-void kmem_cache_free(struct kmem_cache *cache, void *obj)
-{
+void kmem_cache_free(struct kmem_cache *cache, void *obj) {
     if (!cache)
         panic("kmem_cache_free: does not exist! Due to NULL!\n");
 
@@ -278,8 +264,7 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj)
 }
 
 // 初始化 Slab 分配器
-void kmem_cache_init()
-{
+void kmem_cache_init() {
     INIT_LIST_HEAD(&kmem_cache_list);
 
     // 初始化专用缓存

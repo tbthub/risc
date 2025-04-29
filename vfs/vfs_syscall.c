@@ -57,48 +57,31 @@ void *k_file_mmap_init(int fd) {
         return NULL;
     }
 
-    vfs_file_context_t *old_ctx = (vfs_file_context_t *)ctx_ptr;
-    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
-
-    if (new_ctx == NULL) {
-        vfs_get_fd_context_done(proc, fd);
-        vfs_process_read_done();
-        return NULL;
-    }
-
-    if (vfs_dup_with_context(old_ctx, new_ctx) < 0) {
-        vfs_free(new_ctx);
-        vfs_get_fd_context_done(proc, fd);
-        vfs_process_read_done();
-        return NULL;
-    }
+    int res = vfs_dup_with_context((vfs_file_context_t *)ctx_ptr);
 
     vfs_get_fd_context_done(proc, fd);
-    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize); // 增加引用计数
     vfs_process_read_done();
 
-    return (void *)new_ctx;
+    if (res < 0){
+        return NULL;
+    }
+    else{
+        return (void *)ctx_ptr;
+    }
 }
 
 void k_file_mmap_close(void *ctx) {
     vfs_file_context_t *ctx_ptr = (vfs_file_context_t *)ctx;
-    vfs_data_global_get_done((uint8_t *)ctx_ptr->op->mountTag, ctx_ptr->op->mountTagSize);
     vfs_close_with_context(ctx_ptr);
     vfs_free(ctx);
 }
 
 void *k_file_mmap_dup(void *ctx) {
-
-    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
-
-    if (new_ctx == NULL) {
-        vfs_process_read_done();
-        return NULL;
-    }
-
-    vfs_dup_with_context((vfs_file_context_t *)ctx, new_ctx);
-    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize);
-    return (void *)new_ctx;
+    vfs_file_context_t *vfs_ctx = (vfs_file_context_t *)ctx;
+    vfs_wlock_acquire(vfs_ctx->lock);
+    vfs_ctx->ref++;
+    vfs_wlock_release(vfs_ctx->lock);
+    return ctx;
 }
 
 int k_file_mmap_read(void *ctx, const void *buf, size_t size) {
@@ -107,4 +90,22 @@ int k_file_mmap_read(void *ctx, const void *buf, size_t size) {
 
 int k_file_mmap_lseek(void *ctx, off_t offset, int whence) {
     return vfs_lseek_with_context((vfs_file_context_t *)ctx, offset, whence);
+}
+
+int k_file_read_no_off(int fd, vfs_off_t off, void *buf, size_t size) {
+    int res;
+    int cur_offset = vfs_lseek(fd, 0, VFS_SEEK_CUR);
+    assert(cur_offset >= 0, "k_file_read_no_off 1");
+
+    res = vfs_lseek(fd, off, VFS_SEEK_SET);
+    if (res < 0){
+        goto end;
+    }
+
+    res = vfs_read(fd, buf, size);
+
+end:
+    assert(vfs_lseek(fd, cur_offset, VFS_SEEK_SET) >= 0, "k_file_read_no_off 2");
+
+    return res;
 }

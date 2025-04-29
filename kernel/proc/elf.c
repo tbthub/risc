@@ -3,14 +3,12 @@
 #include "core/vm.h"
 #include "conf.h"
 #include "riscv.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "fs/fcntl.h"
 #include "sys.h"
 
-
-int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f)
-{
+int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f) {
     struct vm_area_struct *v;
     struct proghdr *ph;
     struct mm_struct *mm = &t->task->mm;
@@ -27,16 +25,15 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f)
     // 3. 遍历Program Header，加载各个段
     ph = (struct proghdr *)pht + ehdr->phnum - 1;
 
-    for (int i = 0; i < ehdr->phnum; i++, ph--)
-    {
+    for (int i = 0; i < ehdr->phnum; i++, ph--) {
         if (ph->type != ELF_PROG_LOAD || ph->filesz == 0)
             continue; // 只加载LOAD段（排除掉空段）
 
         uint64 va_start = PGROUNDDOWN(ph->vaddr);
-        uint64 va_end = PGROUNDUP(ph->vaddr + ph->memsz) - 1;
+        uint64 va_end   = PGROUNDUP(ph->vaddr + ph->memsz) - 1;
 
         // 不太好，但目前只能这样写
-        void* file_ctx = k_file_mmap_init(f);
+        void *file_ctx = k_file_mmap_init(f);
         assert(file_ctx != NULL, "parse_elf_header");
 
         v = vma_alloc_proghdr(va_start, va_end, ph->flags, ph->off >> PGSHIFT, file_ctx, &vma_file_ops);
@@ -45,4 +42,3 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f)
     kfree(pht);
     return 0;
 }
-

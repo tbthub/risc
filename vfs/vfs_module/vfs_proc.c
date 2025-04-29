@@ -3,7 +3,7 @@
 #include "vfs/vfs_util.h"
 #include "vfs/vfs_process.h"
 #include "vfs/vfs_module.h"
-#include "lib/string.h"
+#include <string.h>
 
 int vfs_chroot(const char *path) {
     vfs_process_t *proc = vfs_process_write();

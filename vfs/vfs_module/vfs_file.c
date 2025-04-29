@@ -4,8 +4,8 @@
 #include "vfs/vfs_util.h"
 #include "vfs/vfs_process.h"
 #include "vfs/vfs_module.h"
-#include "lib/string.h"
-#include "std/stdio.h"
+#include <string.h>
+#include <stdio.h>
 
 int vfs_open(const char *path, int flag, int mode) {
 
@@ -70,9 +70,6 @@ int vfs_close(int fd) {
         vfs_process_read_done();
         return -1;
     }
-
-    vfs_data_global_get_done((uint8_t *)ctx->op->mountTag, ctx->op->mountTagSize);
-    vfs_free(ctx);
 
     vfs_set_fd_context_done(proc, fd, 0, 0); // 清除并释放写锁
     vfs_process_read_done();
@@ -166,6 +163,17 @@ int vfs_dup(int oldfd) {
 
     vfs_process_t *proc = vfs_process_write();
 
+    uintptr_t old_ctx_ptr;
+    uint8_t old_flag;
+
+    vfs_get_fd_context(proc, oldfd, &old_ctx_ptr, &old_flag);
+
+    if (!old_ctx_ptr) {
+        vfs_get_fd_context_done(proc, oldfd);
+        vfs_process_write_done();
+        return -1;
+    }
+
     // 分配新FD
     int newfd;
     uintptr_t _t;
@@ -175,6 +183,7 @@ int vfs_dup(int oldfd) {
         newfd = vfs_alloc_fd(proc);
 
         if (newfd < 0) {
+            vfs_get_fd_context_done(proc, oldfd);
             vfs_process_write_done();
             return -1;
         }
@@ -187,41 +196,19 @@ int vfs_dup(int oldfd) {
         vfs_set_fd_context_done(proc, newfd, _t, _f);
     }
 
-    uintptr_t old_ctx_ptr;
-    uint8_t old_flag;
 
-    vfs_get_fd_context(proc, oldfd, &old_ctx_ptr, &old_flag);
-
-    if (!old_ctx_ptr) {
-        vfs_get_fd_context_done(proc, oldfd);
-        vfs_set_fd_context_done(proc, newfd, _t, _f);
-        vfs_process_write_done();
-        return -1;
-    }
-
-    vfs_file_context_t *old_ctx = (vfs_file_context_t *)old_ctx_ptr;
-    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
-
-    if (new_ctx == NULL) {
-        vfs_get_fd_context_done(proc, oldfd);
-        vfs_set_fd_context_done(proc, newfd, _t, _f);
-        vfs_process_write_done();
-        return -1;
-    }
-
-    if (vfs_dup_with_context(old_ctx, new_ctx) < 0) {
-        vfs_free(new_ctx);
-        vfs_get_fd_context_done(proc, oldfd);
-        vfs_set_fd_context_done(proc, newfd, _t, _f);
-        vfs_process_write_done();
-        return -1;
-    }
-
+    int res = vfs_dup_with_context((vfs_file_context_t *)old_ctx_ptr);
+    
+    vfs_set_fd_context_done(proc, newfd, old_ctx_ptr, old_flag);
     vfs_get_fd_context_done(proc, oldfd);
-    vfs_set_fd_context_done(proc, newfd, (uintptr_t)new_ctx, old_flag);
-    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize); // 增加引用计数
     vfs_process_write_done();
-    return newfd;
+
+    if (res < 0){
+        return -1;
+    }
+    else{
+        return newfd;
+    }
 }
 
 int vfs_dup2(int oldfd, int newfd) {
@@ -234,52 +221,40 @@ int vfs_dup2(int oldfd, int newfd) {
         return newfd;
 
     vfs_process_t *proc = vfs_process_write();
-    uintptr_t target_ctx;
-    uint8_t target_flag;
 
-    // 获取目标FD写锁
-    vfs_set_fd_context(proc, newfd, &target_ctx, &target_flag);
-
-    // 关闭原有文件
-    if (target_ctx) {
-        vfs_file_context_t *ctx = (vfs_file_context_t *)target_ctx;
-        ctx->op->close(ctx);
-        vfs_free(ctx);
-    }
-
-    // 获取原FD读锁
     uintptr_t old_ctx_ptr;
     uint8_t old_flag;
+
     vfs_get_fd_context(proc, oldfd, &old_ctx_ptr, &old_flag);
+
     if (!old_ctx_ptr) {
-        vfs_set_fd_context_done(proc, newfd, 0, 0);
         vfs_get_fd_context_done(proc, oldfd);
         vfs_process_write_done();
         return -1;
     }
 
-    // 复制上下文
-    vfs_file_context_t *old_ctx = (vfs_file_context_t *)old_ctx_ptr;
-    vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
-    if (new_ctx == NULL) {
-        vfs_set_fd_context_done(proc, newfd, 0, 0);
+
+    uintptr_t _t;
+    uint8_t _f;
+
+    vfs_set_fd_context(proc, newfd, &_t, &_f); // 获取写锁
+
+    if (_t != 0) {
         vfs_get_fd_context_done(proc, oldfd);
         vfs_process_write_done();
         return -1;
     }
 
-    if (vfs_dup_with_context(old_ctx, new_ctx) < 0) {
-        vfs_free(new_ctx);
-        vfs_set_fd_context_done(proc, newfd, 0, 0);
-        vfs_get_fd_context_done(proc, oldfd);
-        vfs_process_write_done();
-        return -1;
-    }
+    int res = vfs_dup_with_context((vfs_file_context_t *)old_ctx_ptr);
 
-    // 更新目标FD
-    vfs_set_fd_context_done(proc, newfd, (uintptr_t)new_ctx, old_flag);
+    vfs_set_fd_context_done(proc, newfd, old_ctx_ptr, old_flag);
     vfs_get_fd_context_done(proc, oldfd);
-    vfs_data_global_get((uint8_t *)new_ctx->op->mountTag, new_ctx->op->mountTagSize); // 增加引用计数
     vfs_process_write_done();
-    return newfd;
+    
+    if (res < 0) {
+        return -1;
+    } 
+    else {
+        return newfd;
+    }
 }

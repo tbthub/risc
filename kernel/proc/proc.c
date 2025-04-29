@@ -6,7 +6,7 @@
 #include "error.h"
 #include "lib/hash.h"
 #include "lib/list.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "mm/slab.h"
@@ -33,15 +33,13 @@ extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, in
 extern void sig_release_all(struct signal *s);
 __attribute__((noreturn)) int64 do_exit(int exit_code);
 
-struct thread_info *get_init()
-{
+struct thread_info *get_init() {
     return init_t;
 }
 
 // 退出（ZOMBIE）后重新调度
-static void quit()
-{
-    struct cpu *cpu = mycpu();
+static void quit() {
+    struct cpu *cpu            = mycpu();
     struct thread_info *thread = cpu->thread;
 
     spin_lock(&cpu->sched_list.lock);
@@ -56,26 +54,23 @@ static void quit()
 }
 
 // 线程出口函数，由 thread_entry 执行完 func 后调用
-static void thread_exit()
-{
+static void thread_exit() {
     quit();
 }
 
 // 线程入口函数，用于执行传入的线程函数
-static void thread_entry()
-{
+static void thread_entry() {
     struct thread_info *thread = myproc();
     // 第一次需要释放锁
     // printk("Thread %s release lock on cpu %d in thread_entry  --only
     // once\n", thread->name, cpuid());
     spin_unlock(&thread->lock);
-    intr_on();  // 需要开中断。由时钟中断->调度器切换->是关了中断的，要重新打开
+    intr_on(); // 需要开中断。由时钟中断->调度器切换->是关了中断的，要重新打开
     thread->func(thread->args);
     thread_exit();
 }
 
-static inline void mm_init(struct mm_struct *mm)
-{
+static inline void mm_init(struct mm_struct *mm) {
     memset(mm, 0, sizeof(struct mm_struct));
     spin_init(&mm->lock, "mm_struct");
     mm->next_map = USER_MAP_TOP;
@@ -137,8 +132,7 @@ static inline void mm_init(struct mm_struct *mm)
 // }
 
 // 初始化 task_struct
-static inline void task_struct_init(struct task_struct *task)
-{
+static inline void task_struct_init(struct task_struct *task) {
     spin_init(&task->lock, "task");
     mm_init(&task->mm);
     sig_init(&task->sigs);
@@ -147,8 +141,7 @@ static inline void task_struct_init(struct task_struct *task)
     // th_table_init(&task->th_table);
 }
 
-static inline void thread_info_init(struct thread_info *thread)
-{
+static inline void thread_info_init(struct thread_info *thread) {
     // thread->tid = 0;
     thread->task = NULL;
     spin_init(&thread->lock, "thread");
@@ -164,10 +157,10 @@ static inline void thread_info_init(struct thread_info *thread)
 
     sem_init(&thread->child_exit_sem, 0, "child_exit");
 
-    thread->tf = NULL;
-    thread->ticks = 10;
-    thread->args = NULL;
-    thread->func = NULL;
+    thread->tf           = NULL;
+    thread->ticks        = 10;
+    thread->args         = NULL;
+    thread->func         = NULL;
     thread->cpu_affinity = NO_CPU_AFF;
 
     memset(&thread->context, 0, sizeof(thread->context));
@@ -176,8 +169,7 @@ static inline void thread_info_init(struct thread_info *thread)
 }
 
 // 申请一个空白的PCB，包括 thread_info + task_struct
-static struct thread_info *alloc_thread()
-{
+static struct thread_info *alloc_thread() {
     struct task_struct *task = kmem_cache_alloc(&task_struct_kmem_cache);
     if (!task)
         return NULL;
@@ -193,7 +185,7 @@ static struct thread_info *alloc_thread()
 
     // 不会并发冲突
     thread->task = task;
-    thread->tid = 0;
+    thread->tid  = 0;
     // task->th_table.array[0] = thread;
     // task->th_table.alloc = 1;
 
@@ -207,15 +199,13 @@ static struct thread_info *alloc_thread()
 
 // 这里应该是从 scheduler 的 swtch 进入
 // 在 scheduler 中获取了锁，这里需要释放
-static void forkret()
-{
+static void forkret() {
     // printk("forkret, pid: %d",myproc()->pid);
     spin_unlock(&myproc()->lock);
     usertrapret();
 }
 
-struct thread_info *kthread_struct_init()
-{
+struct thread_info *kthread_struct_init() {
     struct thread_info *t = alloc_thread();
     if (!t) {
         printk("kthread_struct_init error!\n");
@@ -226,8 +216,7 @@ struct thread_info *kthread_struct_init()
     return t;
 }
 
-struct thread_info *uthread_struct_init()
-{
+struct thread_info *uthread_struct_init() {
     struct thread_info *t = alloc_thread();
     if (!t) {
         printk("uthread_struct_init error!\n");
@@ -245,51 +234,45 @@ struct thread_info *uthread_struct_init()
 
 // 获取 cpuid
 // * 必须在关中断环境下,防止与进程移动发生竞争，到不同的CPU。
-inline int cpuid()
-{
+inline int cpuid() {
     return r_tp();
 }
 
 // 返回该 CPU 的 cpu 结构体。
 // * 必须在关中断环境下。
-inline struct cpu *mycpu()
-{
-    int id = cpuid();
+inline struct cpu *mycpu() {
+    int id        = cpuid();
     struct cpu *c = &cpus[id];
     return c;
 }
 
-struct thread_info *myproc()
-{
+struct thread_info *myproc() {
     push_off();
     struct thread_info *thread = mycpu()->thread;
     pop_off();
     return thread;
 }
 
-void proc_init()
-{
+void proc_init() {
     spin_init(&Proc.lock, "Proc");
     Proc.pids = 0;
     hash_init(&Proc.global_proc_table, 41, "Proc hash");
 }
 
-struct thread_info *find_proc(int _pid)
-{
+struct thread_info *find_proc(int _pid) {
     struct thread_info *t;
     hash_find(t, &Proc.global_proc_table, pid, _pid, global);
     return t;
 }
 
 // 以后我们添加环境变量参数，这个应该是共享映射
-uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
-{
+uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) {
     assert(USER_ARGV_MAX_SIZE > 0, "parse_argv USER_ARGV_MAX_SIZE");
     // 申请页面，我们将第一个页面用于参数的 char *
     // 指针，大概最多可支持 4096/8 = 512个参数
     // 其后面的页面用于容纳参数的内容。
     char **args_list = NULL;
-    args_list = __alloc_page(0);
+    args_list        = __alloc_page(0);
     if (!(args_list))
         goto bad;
 
@@ -299,10 +282,10 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
             goto bad;
     }
 
-    int page_index = 0;
-    char *args = args_page[page_index];
-    int argc = 0;
-    int args_len = 0;
+    int page_index  = 0;
+    char *args      = args_page[page_index];
+    int argc        = 0;
+    int args_len    = 0;
     int arg_max_len = USER_ARGV_MAX_SIZE * PGSIZE;
 
     for (char *const *arg = argv; *arg != NULL; arg++) {
@@ -325,8 +308,7 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
             args = args_page[++page_index];
             memcpy(args, *arg + part_len, len - part_len);
             args += len - part_len;
-        }
-        else {
+        } else {
             memcpy(args, *arg, len);
             args += len;
         }
@@ -401,16 +383,14 @@ bad:
  *      - 信号
  */
 
-static void copy_tf(struct thread_info *ch, struct thread_info *pa)
-{
+static void copy_tf(struct thread_info *ch, struct thread_info *pa) {
     *ch->tf = *pa->tf;
 
     ch->tf->kernel_sp = KERNEL_STACK_TOP(ch);
-    ch->tf->a0 = 0;
+    ch->tf->a0        = 0;
 }
 
-static void copy_vm(struct task_struct *ch, struct task_struct *pa)
-{
+static void copy_vm(struct task_struct *ch, struct task_struct *pa) {
     // TODO 这里其实。。。有一点小问题，子进程的 vma 变成倒序了
     struct mm_struct *pa_mm = &pa->mm;
     struct mm_struct *ch_mm = &ch->mm;
@@ -424,28 +404,25 @@ static void copy_vm(struct task_struct *ch, struct task_struct *pa)
     }
 }
 
-static void copy_files(struct task_struct *ch, struct task_struct *pa)
-{
+static void copy_files(struct task_struct *ch, struct task_struct *pa) {
     assert(pa == myproc()->task, "pa == myproc()");
     assert(k_copy_file(ch) >= 0, "k_copy_file(ch) >= 0");
 }
 
-static void copy_sigs(struct task_struct *ch, struct task_struct *pa)
-{
+static void copy_sigs(struct task_struct *ch, struct task_struct *pa) {
     struct signal *ch_sigs = &ch->sigs;
     struct signal *pa_sigs = &pa->sigs;
 
     spin_lock(&pa_sigs->lock);
     ch_sigs->sigpend = pa_sigs->sigpend;
-    *ch_sigs->sig = *pa_sigs->sig;
+    *ch_sigs->sig    = *pa_sigs->sig;
 
     ch_sigs->sping.blocked = pa_sigs->sping.blocked;
-    ch_sigs->sping.signal = 0;
+    ch_sigs->sping.signal  = 0;
     spin_unlock(&pa_sigs->lock);
 }
 
-static void copy_proc(struct thread_info *ch, struct thread_info *pa)
-{
+static void copy_proc(struct thread_info *ch, struct thread_info *pa) {
     struct task_struct *ch_task = ch->task;
     struct task_struct *pa_task = pa->task;
 
@@ -457,8 +434,7 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 extern void mm_debug2();
-int do_fork()
-{
+int do_fork() {
     mm_debug2();
     struct thread_info *pa = myproc();
 
@@ -485,35 +461,31 @@ int do_fork()
     return ch->pid;
 }
 
-pid_t do_getpid()
-{
+pid_t do_getpid() {
     struct thread_info *t = myproc();
     printk("get pid: %d\n", t->pid);
     return t->pid;
 }
 
-#define WNOHANG 0x00000001  // 立即返回，不阻塞
+#define WNOHANG 0x00000001 // 立即返回，不阻塞
 
 // 找到一个子进程僵尸，返回 pcb 指针
-static struct thread_info *__waitpid(pid_t pid, int *status, int options)
-{
+static struct thread_info *__waitpid(pid_t pid, int *status, int options) {
     struct thread_info *cur = myproc();
     struct thread_info *t;
     struct thread_info *tmp;
 
     while (1) {
         spin_lock(&cur->lock);
-        list_for_each_entry_safe(t, tmp, &cur->child, sibling)
-        {
+        list_for_each_entry_safe(t, tmp, &cur->child, sibling) {
             spin_lock(&t->lock);
             if (t->state == ZOMBIE) {
-                if (pid == -1) {  // 寻找任意子线程
+                if (pid == -1) { // 寻找任意子线程
                     list_del_init(&t->sibling);
                     spin_unlock(&t->lock);
                     spin_unlock(&cur->lock);
                     return t;
-                }
-                else if (pid > 0 && t->pid == pid) {  // 等待进程 ID 为 pid 的特定子进程。
+                } else if (pid > 0 && t->pid == pid) { // 等待进程 ID 为 pid 的特定子进程。
                     list_del_init(&t->sibling);
                     spin_unlock(&t->lock);
                     spin_unlock(&cur->lock);
@@ -525,19 +497,18 @@ static struct thread_info *__waitpid(pid_t pid, int *status, int options)
 
         spin_unlock(&cur->lock);
         // 没有找到
-        if (options == WNOHANG)  // 不阻塞
+        if (options == WNOHANG) // 不阻塞
             return NULL;
-        else  // 堵塞,继续while循环获取锁
+        else // 堵塞,继续while循环获取锁
             sem_wait(&cur->child_exit_sem);
     }
 }
 
 // 把所有孩子移交给 init_t
 // TODO 子线程退出，主线程负责回收，要将其孩子放给 init
-static void reparent(struct thread_info *t)
-{
+static void reparent(struct thread_info *t) {
     struct thread_info *cur = myproc();
-    if(cur == init_t)
+    if (cur == init_t)
         return;
 
     spin_lock(&init_t->lock);
@@ -546,14 +517,14 @@ static void reparent(struct thread_info *t)
     struct thread_info *ch;
     struct thread_info *tmp;
     // printk("reparent\n");
-   
-    list_for_each_entry_safe(ch,tmp,&cur->child,sibling){
+
+    list_for_each_entry_safe(ch, tmp, &cur->child, sibling) {
         // 只有父进程才会修改子进程的 parent 指针，不会造成并发冲突
         // ! 假如父子一起死，这里貌似有问题。。
         spin_lock(&ch->lock);
         ch->parent = init_t;
         list_del(&ch->sibling);
-        list_add_head(&ch->sibling,&init_t->child);
+        list_add_head(&ch->sibling, &init_t->child);
         spin_unlock(&ch->lock);
     }
 
@@ -561,8 +532,7 @@ static void reparent(struct thread_info *t)
     spin_unlock(&init_t->lock);
 }
 
-__attribute__((noreturn)) int64 do_exit(int exit_code)
-{
+__attribute__((noreturn)) int64 do_exit(int exit_code) {
     // (exit) 向所有线程发送 SIGKILL，置 th_table 位
     // (exit) 主线程回收子线程的所有资源（主要是kmalloc这些）
     // -- (所有子线程已死) --
@@ -589,7 +559,6 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
     if (t->tid == 0) {
         // th_table_free(&task->th_table);
 
-
         k_file_deinit(task);
 
         reparent(t);
@@ -602,30 +571,28 @@ __attribute__((noreturn)) int64 do_exit(int exit_code)
             kmem_cache_free(&tf_kmem_cache, t->tf);
             t->tf = NULL;
         }
-    
+
         spin_lock(&t->lock);
         send_sig(SIGCHLD, t->parent->pid);
         sem_signal(&t->parent->child_exit_sem);
-      
-        t->state = ZOMBIE;
+
+        t->state     = ZOMBIE;
         t->exit_code = exit_code;
 #ifdef DEBUG_SYSCALL
-        printk("[exit] end pid: %d, thread: %s exit pa:%d\n", t->pid, t->name,t->parent->pid);
+        printk("[exit] end pid: %d, thread: %s exit pa:%d\n", t->pid, t->name, t->parent->pid);
 #endif
 
         sched();
         // 不会在回来了
         panic("exit ret\n");
         __builtin_unreachable();
-    }
-    else {
+    } else {
         panic("exit ret2\n");
         __builtin_unreachable();
     }
 }
 
-pid_t do_waitpid(pid_t pid, int *status, int options)
-{
+pid_t do_waitpid(pid_t pid, int *status, int options) {
     pid_t _pid;
     struct thread_info *ch = __waitpid(pid, status, options);
     if (ch == NULL)
@@ -651,10 +618,9 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     return _pid;
 }
 
-void show_all_args(struct thread_info *t)
-{
-    struct trapframe *tf = t->tf;
-    struct context *ctx = &t->context;
+void show_all_args(struct thread_info *t) {
+    struct trapframe *tf     = t->tf;
+    struct context *ctx      = &t->context;
     struct task_struct *task = t->task;
 
     printk("pid: %d, name: %s, pcb:%p\n", t->pid, t->name, t);

@@ -2,7 +2,7 @@
 // #include "std/stdbool.h"
 // #include "std/stdint.h"
 // #include <stdlib.h>
-// #include "lib/string.h"
+// #include "std/string.h"
 // #include "vfs/vfs_interface.h"
 // #include "vfs/vfs_io.h"
 // #include "vfs/vfs_process.h"

@@ -2,15 +2,15 @@
 #include "vfs/vfs_io.h"
 #include "vfs/vfs_interface.h"
 #include "vfs/vfs_module.h"
-#include "lib/string.h"
+#include <string.h>
 
-int vfs_mount(vfs_io_t *mountIo) {
+int vfs_mount(vfs_io_t *mountIo, void* arg) {
 
     size_t mountTagSize   = strlen(mountIo->mountTag) + 1;
     mountIo->mountTagSize = mountTagSize;
 
     // 调用驱动的mount函数
-    uint8_t *mount_ptr = mountIo->mount();
+    void *mount_ptr = mountIo->mount(arg);
     if (mount_ptr == NULL) {
         return -1;
     }

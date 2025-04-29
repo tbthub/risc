@@ -53,7 +53,7 @@ OBJDUMP = $(TOOLPREFIX)objdump
 
 CFLAGS = -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -mcmodel=medany -fno-common -nostdlib
-CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include
+CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include -I./include/std
 # CFLAGS += -MMD -MP
 LDFLAGS = -z max-page-size=4096  
 

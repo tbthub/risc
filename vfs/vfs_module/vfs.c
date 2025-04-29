@@ -4,8 +4,8 @@
 #include "vfs/vfs_module.h"
 #include "vfs/vfs_util.h"
 #include "vfs/vfs_io.h"
-#include "lib/string.h"
-#include "std/stdio.h"
+#include <string.h>
+#include <stdio.h>
 
 void vfs_process_init(vfs_process_t *proc, uint8_t *root_path_s, uint8_t *work_path_s, uint16_t root_path_size_s, uint16_t work_path_size_s) {
 
@@ -138,11 +138,11 @@ int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc) {
 
     uintptr_t old_ctx_ptr;
     uint8_t old_flag;
-    vfs_process_t *proc = vfs_process_read();
+    vfs_process_t *proc    = vfs_process_read();
     uint8_t *new_root_path = (uint8_t *)vfs_malloc(proc->root_path_size);
     uint8_t *new_work_path = (uint8_t *)vfs_malloc(proc->work_path_size);
 
-    if (!new_root_path || !new_work_path){
+    if (!new_root_path || !new_work_path) {
         goto failed;
     }
 
@@ -155,20 +155,11 @@ int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc) {
             continue;
         }
 
-        vfs_file_context_t *new_ctx = vfs_malloc(sizeof(vfs_file_context_t));
-
-        if (new_ctx == NULL) {
-            vfs_get_fd_context_done(proc, i);
-            goto failed;
-        }
-
-        if (vfs_dup_with_context((vfs_file_context_t *)old_ctx_ptr, new_ctx) < 0) {
-            vfs_get_fd_context_done(proc, i);
-            vfs_free(new_ctx);
-            goto failed;
-        }
-
-        new_proc->fd_list[i].ptr  = (uintptr_t)new_ctx;
+        vfs_file_context_t* ctx = (vfs_file_context_t *)old_ctx_ptr;
+        vfs_wlock_acquire(ctx->lock);
+        ctx->ref++;
+        vfs_wlock_release(ctx->lock);
+        new_proc->fd_list[i].ptr  = old_ctx_ptr;
         new_proc->fd_list[i].flag = old_flag;
         vfs_get_fd_context_done(proc, i);
     }
@@ -176,8 +167,8 @@ int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc) {
     vfs_free(new_proc->root_path);
     vfs_free(new_proc->work_path);
 
-    new_proc->root_path = new_root_path;
-    new_proc->work_path = new_work_path;
+    new_proc->root_path      = new_root_path;
+    new_proc->work_path      = new_work_path;
     new_proc->root_path_size = proc->root_path_size;
     new_proc->work_path_size = proc->work_path_size;
 
@@ -186,11 +177,11 @@ int vfs_copy_proc_to_new_proc(vfs_process_t *new_proc) {
 
 failed:
 
-    if (new_root_path){
+    if (new_root_path) {
         vfs_free(new_root_path);
     }
 
-    if (new_work_path){
+    if (new_work_path) {
         vfs_free(new_work_path);
     }
 
@@ -224,45 +215,79 @@ vfs_file_context_t *vfs_open_with_context(vfs_process_t *proc, const char *path,
         return NULL;
     }
 
-    size_t mountTagSize = strlen(mount_tag) + 1;
-    vfs_io_t *mount_io = vfs_data_global_get((uint8_t *)mount_tag, mountTagSize);
+    size_t mountTagSize     = strlen(mount_tag) + 1;
+    vfs_io_t *mount_io      = vfs_data_global_get((uint8_t *)mount_tag, mountTagSize);
+    vfs_file_context_t *ctx = vfs_malloc(sizeof(vfs_file_context_t));
+    void *ctx_lock          = vfs_rwlock_init();
 
-    if (!mount_io) {
-        vfs_free(mount_tag);
-        vfs_free(open_path);
-        vfs_free(full_path);
-        return NULL;
+    if (!mount_io || !ctx || !ctx_lock) {
+        goto cleanup;
     }
 
-    vfs_file_context_t *ctx = vfs_malloc(sizeof(vfs_file_context_t));
-    ctx->mount_ptr          = mount_io->mount_ptr;
-    ctx->op                 = mount_io;
-    ctx->file_ptr           = NULL;
-    ctx->flag               = flag;
+    ctx->mount_ptr = mount_io->mount_ptr;
+    ctx->op        = mount_io;
+    ctx->file_ptr  = NULL;
+    ctx->flag      = flag;
+    ctx->ref       = 1;
+    ctx->lock      = ctx_lock;
 
     // 文件操作使用驱动内部锁
     if (mount_io->open(ctx, (uint8_t *)open_path, flag, mode) < 0) {
-        vfs_free(ctx);
-        vfs_data_global_get_done((uint8_t *)ctx->op->mountTag, ctx->op->mountTagSize);
-        vfs_free(mount_tag);
-        vfs_free(open_path);
-        vfs_free(full_path);
-        return NULL;
+        goto cleanup;
     }
 
     vfs_free(mount_tag);
     vfs_free(open_path);
     vfs_free(full_path);
     return ctx;
+cleanup:
+
+    vfs_free(mount_tag);
+    vfs_free(open_path);
+    vfs_free(full_path);
+
+    if (ctx_lock){
+        vfs_rwlock_deinit(ctx_lock);
+    }
+
+    if (ctx){
+        vfs_free(ctx);
+    }
+
+    if (mount_io){
+        vfs_data_global_get_done((uint8_t *)mount_io->mount_ptr, mount_io->mountTagSize);
+    }
+
+    return NULL;
 }
 
 int vfs_close_with_context(vfs_file_context_t *ctx) {
+
+    int res = 0;
 
     if (!ctx) {
         return -1;
     }
 
-    return (int)ctx->op->close(ctx);
+    void* ctx_lock = ctx->lock;
+    vfs_wlock_acquire(ctx_lock);
+    ctx->ref--;
+
+    if (ctx->ref < 0) {
+        vfs_raise_err(5);
+    }
+
+    if (ctx->ref == 0) {
+        res = (int)ctx->op->close(ctx);
+        vfs_data_global_get_done((uint8_t *)ctx->op->mountTag, ctx->op->mountTagSize);
+        vfs_free(ctx);
+        vfs_wlock_release(ctx_lock);
+        vfs_rwlock_deinit(ctx_lock);
+        return res;
+    }
+
+    vfs_wlock_release(ctx_lock);
+    return res;
 }
 
 int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size) {
@@ -270,7 +295,11 @@ int vfs_read_with_context(vfs_file_context_t *ctx, const void *buf, size_t size)
         return -1;
     }
 
-    return (int)ctx->op->read(ctx, (uint8_t *)buf, size);
+
+    vfs_rlock_acquire(ctx->lock);
+    int res = (int)ctx->op->read(ctx, (uint8_t *)buf, size);
+    vfs_rlock_release(ctx->lock);
+    return res;
 }
 
 int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size) {
@@ -278,18 +307,10 @@ int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size) {
         return -1;
     }
 
-    return (int)ctx->op->write(ctx, (uint8_t *)buf, size);
-}
-
-int vfs_dup_with_context(vfs_file_context_t *old_ctx, vfs_file_context_t *new_ctx) {
-    memcpy(new_ctx, old_ctx, sizeof(vfs_file_context_t));
-    new_ctx->file_ptr = NULL;
-
-    if (old_ctx->op->dup2 == NULL || old_ctx->op->dup2(old_ctx, new_ctx) < 0) {
-        return -1;
-    }
-
-    return 0;
+    vfs_wlock_acquire(ctx->lock);
+    int res = (int)ctx->op->write(ctx, (uint8_t *)buf, size);
+    vfs_wlock_release(ctx->lock);
+    return res;
 }
 
 int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence) {
@@ -297,16 +318,26 @@ int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence
         return -1;
     }
 
-    return (int)ctx->op->lseek(ctx, offset, whence);
+    vfs_rlock_acquire(ctx->lock);
+    int res = (int)ctx->op->lseek(ctx, offset, whence);
+    vfs_rlock_release(ctx->lock);
+    return res;
 }
 
-int vfs_mkfs_add_file(vfs_io_t *table, const char *path, const void* buffer, size_t size) {
+int vfs_dup_with_context(vfs_file_context_t *ctx){
+    vfs_wlock_acquire(ctx->lock);
+    ctx->ref++;
+    vfs_wlock_release(ctx->lock);
+    return 0;
+}
+
+int vfs_mkfs_add_file(vfs_io_t *table, const char *path, const void *buffer, size_t size) {
     vfs_file_context_t file_context;
 
-    vfs_file_context_t* ctx = &file_context;
+    vfs_file_context_t *ctx = &file_context;
     ctx->mount_ptr          = table->mount_ptr;
     ctx->op                 = table;
-    ctx->file_ptr          = NULL;
+    ctx->file_ptr           = NULL;
     ctx->flag               = VFS_O_CREAT | VFS_O_WRONLY;
 
     if (table->open(ctx, (uint8_t *)path, ctx->flag, 0) < 0) {
@@ -315,7 +346,7 @@ int vfs_mkfs_add_file(vfs_io_t *table, const char *path, const void* buffer, siz
 
     int res = (int)table->write(ctx, (uint8_t *)buffer, size);
 
-    if (table->close(ctx) < 0){
+    if (table->close(ctx) < 0) {
         vfs_raise_err(4);
     }
 

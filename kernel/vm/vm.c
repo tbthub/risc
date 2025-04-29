@@ -5,7 +5,7 @@
 #include "defs.h"
 #include "lib/atomic.h"
 #include "core/locks/spinlock.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
 #include "riscv.h"
@@ -41,8 +41,7 @@ extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 f
 //  0       -- V    (Valid)     仅当位 V 为 1 时，页表项才是有效的；
 
 // 返回最下面的那个页表项的地址,并根据 alloc 的值看是否决定分配
-pte_t *walk(pagetable_t pagetable, uint64 va, int alloc)
-{
+pte_t *walk(pagetable_t pagetable, uint64 va, int alloc) {
     if (va >= MAXVA) {
         printk("vm.c walk: Virtual address out of bounds!");
         // (杀死当前进程?)
@@ -87,8 +86,7 @@ pte_t *walk(pagetable_t pagetable, uint64 va, int alloc)
 // 0，若 walk() 无法分配所需的页表页，则返回 -1。 从 va 到 va + sz
 // 的虚拟地址范围映射到从 pa 到 pa + sz 的物理地址范围。 再次强调下，va
 // 区域连续，pa 区域也连续的！！！。
-int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
-{
+int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm) {
     uint64 a, last;
     pte_t *pte;
     if ((va % PGSIZE) != 0)
@@ -131,15 +129,13 @@ int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
  * 内核页表映射
  */
 
-static void kvm_map(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
-{
+static void kvm_map(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm) {
     if (mappages(kpgtbl, va, pa, sz, perm) != 0)
         panic("vm.c kvm_map: Error!");
 }
 
 // 内核虚存初始化
-void kvm_init()
-{
+void kvm_init() {
     pagetable_t kpgtbl;
 
     kpgtbl = __alloc_page(0);
@@ -184,8 +180,7 @@ void kvm_init()
 
 // 将硬件页表寄存器 satp 切换到内核的页表（stap寄存器保存页表地址），
 // 并启用分页功能。
-void kvm_init_hart()
-{
+void kvm_init_hart() {
     w_sstatus(SSTATUS_SUM);
     // 等待之前对页表内存的任何写操作完成。
     sfence_vma();
@@ -203,8 +198,7 @@ void kvm_init_hart()
  */
 
 // debug，打印已经映射的页表
-void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
-{
+void __attribute__((unused)) vm2pa_show(struct mm_struct *mm) {
     struct vm_area_struct *v = mm->mmap;
     pte_t *pte;
     while (v) {
@@ -215,48 +209,41 @@ void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
                 continue;
             if ((*pte & PTE_V) == 0)
                 continue;
-            printk("va: %p, pa: %p  %d\n", va, PTE2PA(*pte),*pte & 0b1110);
+            printk("va: %p, pa: %p  %d\n", va, PTE2PA(*pte), *pte & 0b1110);
         }
         v = v->vm_next;
         spin_unlock(&mem_map.lock);
     }
 }
 
-inline void set_cow_pte(pte_t *pte)
-{
-    *pte &= ~PTE_W;   // 清除写权限，设置为只读
-    *pte |= PTE_COW;  // 设置为 COW 页面
+inline void set_cow_pte(pte_t *pte) {
+    *pte &= ~PTE_W;  // 清除写权限，设置为只读
+    *pte |= PTE_COW; // 设置为 COW 页面
 }
 
-inline void clear_cow_pte(pte_t *pte)
-{
+inline void clear_cow_pte(pte_t *pte) {
     *pte |= PTE_W;
     *pte &= ~PTE_COW;
 }
 
-inline int is_cow_pte(pte_t *pte)
-{
+inline int is_cow_pte(pte_t *pte) {
     return (*pte & PTE_COW);
 }
 
 // 设置页面正在处理缺页(需互斥情况下)
-static inline void set_pf_pte(pte_t *pte)
-{
+static inline void set_pf_pte(pte_t *pte) {
     *pte |= PTE_PF;
 }
 
-static inline int is_pf_pte(pte_t *pte)
-{
+static inline int is_pf_pte(pte_t *pte) {
     return (*pte & PTE_PF);
 }
 
-static inline void clear_pf_pte(pte_t *pte)
-{
+static inline void clear_pf_pte(pte_t *pte) {
     *pte &= ~PTE_PF;
 }
 
-static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
-{
+static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr) {
 #ifdef DEBUG_COW
     struct thread_info *th = myproc();
     printk("pid %d: cow page: %p\n", th->pid, PGROUNDDOWN(fault_addr));
@@ -274,9 +261,8 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
 #endif
         // 先保留原PTE的权限位(0 - 9,即低10位)
         uint64 old_flags = *pte & 0x3FF;
-        *pte = PA2PTE(new_page) | old_flags;
-    }
-    else {
+        *pte             = PA2PTE(new_page) | old_flags;
+    } else {
         get_page(pg);
 #ifdef DEBUG_COW
         printk("pid %d: cow OLD page. addr is %p\n", th->pid, PGROUNDDOWN(fault_addr));
@@ -286,8 +272,7 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr)
     clear_cow_pte(pte);
 }
 
-void page_fault_handler(uint64 fault_addr, uint64 scause)
-{
+void page_fault_handler(uint64 fault_addr, uint64 scause) {
     assert(intr_get() == 0, "page_fault_handler intr on!\n");
     struct thread_info *th = myproc();
 
@@ -306,7 +291,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
 #endif
     v = find_vma(mm, fault_addr);
     if (!v) {
-        panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause);  // TODO 杀死进程，不过我们暂时先报错
+        panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause); // TODO 杀死进程，不过我们暂时先报错
         // return;
     }
 
@@ -343,7 +328,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
 
     // 无效、未在处理->（第一个线程）
     if (!(*pte & PTE_V) || !is_pf_pte(pte)) {
-        set_pf_pte(pte);  // 标记这个页面正在被处理
+        set_pf_pte(pte); // 标记这个页面正在被处理
         spin_unlock(&mm->lock);
         v->vm_ops->fault(th, v, fault_addr);
 
@@ -351,12 +336,11 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
         spin_lock(&mm->lock);
         clear_pf_pte(pte);
         spin_unlock(&mm->lock);
-    }
-    else {
+    } else {
         // 页面正在被其他线程缺页处理中
         while (is_pf_pte(pte)) {
             spin_unlock(&mm->lock);
-            yield();  // (就绪态)让出 CPU，等待缺页处理完成
+            yield(); // (就绪态)让出 CPU，等待缺页处理完成
             spin_lock(&mm->lock);
         }
         spin_unlock(&mm->lock);
@@ -381,10 +365,9 @@ void page_fault_handler(uint64 fault_addr, uint64 scause)
  * 用户虚存管理(部分)
  */
 
-int alloc_user_stack(struct mm_struct *mm, tid_t tid)
-{
+int alloc_user_stack(struct mm_struct *mm, tid_t tid) {
     // 理论上。。。栈第一个页面也可以通过缺页中断实现，不过我们为了效率，预分配栈
-    uint64 *stack = NULL;
+    uint64 *stack            = NULL;
     struct vm_area_struct *v = NULL;
 
     stack = __alloc_page(0);
@@ -398,8 +381,7 @@ int alloc_user_stack(struct mm_struct *mm, tid_t tid)
     return 0;
 }
 
-int alloc_user_pgd(struct mm_struct *mm)
-{
+int alloc_user_pgd(struct mm_struct *mm) {
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
     if (!mm->pgd)
@@ -410,8 +392,7 @@ int alloc_user_pgd(struct mm_struct *mm)
     return 0;
 }
 
-int alloc_kern_pgd(struct mm_struct *mm)
-{
+int alloc_kern_pgd(struct mm_struct *mm) {
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
     // printk("alloc_kern_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
@@ -425,8 +406,7 @@ int alloc_kern_pgd(struct mm_struct *mm)
     return 0;
 }
 
-void free_user_pgd(struct mm_struct *mm)
-{
+void free_user_pgd(struct mm_struct *mm) {
     if (!mm) {
         panic("mm\n");
     }
@@ -439,8 +419,7 @@ void free_user_pgd(struct mm_struct *mm)
 }
 
 // ! 我们暂时没有实现页表本身的释放，后面补充
-void free_user_memory(struct mm_struct *mm)
-{
+void free_user_memory(struct mm_struct *mm) {
     // 根据 mm->map 指导释放内存，尽管页表可能没有映射
     struct vm_area_struct *vma = mm->mmap;
     struct vm_area_struct *tmp = NULL;

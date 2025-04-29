@@ -1,13 +1,13 @@
 #include "easyfs.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "dev/blk/blk_dev.h"
 #include "mm/kmalloc.h"
 
 extern void efs_i_dup(struct easy_m_inode *inode);
 
-static const char t[] = "\0-db"; // t[1] = '-', t[2] = 'd', t[3] = 'b'
+static const char t[]          = "\0-db"; // t[1] = '-', t[2] = 'd', t[3] = 'b'
 struct easy_dentry root_dentry = {
-    .d_dd.d_ino = 1,
+    .d_dd.d_ino  = 1,
     .d_dd.d_name = "/",
     .d_dd.d_type = F_DIR,
 };
@@ -32,45 +32,39 @@ extern void efs_i_trunc(struct easy_m_inode *inode);
  */
 
 // 将文件类型转换为便于理解的字符 - d b
-static const char efs_d_type_tostr(enum easy_file_type type)
-{
+static const char efs_d_type_tostr(enum easy_file_type type) {
     return t[type]; // 直接返回 t 数组的地址
 }
 
-static inline int efs_d_namecmp(const char *s, const char *t)
-{
+static inline int efs_d_namecmp(const char *s, const char *t) {
     return strncmp(s, t, DIR_MAXLEN);
 }
 
 // 修改 name、type、增、删时标记为脏
 // 需要超级块的锁
-static void efs_d_sdirty(struct easy_dentry *d)
-{
+static void efs_d_sdirty(struct easy_dentry *d) {
     SET_FLAG(&d->d_flags, D_DIRTY);
     if (list_empty(&d->d_dirty))
         list_add_head(&d->d_dirty, &m_esb.s_ddirty_list);
 }
 
 // 需要超级块的锁
-void efs_d_cdirty(struct easy_dentry *d)
-{
+void efs_d_cdirty(struct easy_dentry *d) {
     CLEAR_FLAG(&d->d_flags, D_DIRTY);
     list_del_init(&d->d_dirty);
 }
 
 // 把 dentry 加到超级块链表中,需要加锁
-static inline void efs_d_addsb(struct easy_dentry *d)
-{
+static inline void efs_d_addsb(struct easy_dentry *d) {
     hash_add_head(&m_esb.s_dhash, strhash(d->d_dd.d_name), &d->d_hnode);
     list_add_head(&d->d_list, &m_esb.s_dlist);
 }
 
-static struct easy_dentry *efs_d_alloc()
-{
+static struct easy_dentry *efs_d_alloc() {
     struct easy_dentry *d = kmem_cache_alloc(&efs_dentry_kmem_cache);
     assert(d != NULL, "efs_d_alloc");
 
-    d->d_inode = NULL;
+    d->d_inode  = NULL;
     d->d_parent = NULL;
     INIT_LIST_HEAD(&d->d_child);
     INIT_LIST_HEAD(&d->d_sibling);
@@ -88,8 +82,7 @@ static struct easy_dentry *efs_d_alloc()
 }
 
 // 关联父子目录项
-static inline void efs_d_conn(struct easy_dentry *d, struct easy_dentry *pd)
-{
+static inline void efs_d_conn(struct easy_dentry *d, struct easy_dentry *pd) {
     d->d_parent = pd;
     list_add_tail(&d->d_sibling, &pd->d_child);
 }
@@ -97,14 +90,12 @@ static inline void efs_d_conn(struct easy_dentry *d, struct easy_dentry *pd)
 // * 从磁盘中将目录的信息读出，填充内存中的目录项
 // 需要睡眠锁
 // @param pd: 父目录项
-static void efs_d_fill(struct easy_dentry *pd)
-{
+static void efs_d_fill(struct easy_dentry *pd) {
     // 先获取到对应的 inode
     struct easy_m_inode *pi = efs_i_get(pd->d_dd.d_ino);
-    pd->d_inode = pi;
-    int d_cnt = pi->i_di.i_size / sizeof(struct easy_dirent);
-    for (int i = 0; i < d_cnt; i++)
-    {
+    pd->d_inode             = pi;
+    int d_cnt               = pi->i_di.i_size / sizeof(struct easy_dirent);
+    for (int i = 0; i < d_cnt; i++) {
         struct easy_dentry *d = efs_d_alloc();
         efs_i_read(pi, i * sizeof(struct easy_dirent), sizeof(struct easy_dirent), &d->d_dd);
         efs_d_conn(d, pd);
@@ -118,19 +109,16 @@ static void efs_d_fill(struct easy_dentry *pd)
 
 // TODO 结合 inode 描述的性能问题
 // 将目录文件内容写回磁盘
-void efs_d_update(struct easy_dentry *pd)
-{
+void efs_d_update(struct easy_dentry *pd) {
     struct easy_dentry *d;
     int offset = 0;
 
-    if (!pd->d_inode)
-    {
+    if (!pd->d_inode) {
         pd->d_inode = efs_i_get(pd->d_dd.d_ino);
         efs_i_put(pd->d_inode);
     }
 
-    list_for_each_entry(d, &pd->d_child, d_sibling)
-    {
+    list_for_each_entry(d, &pd->d_child, d_sibling) {
         efs_i_write(pd->d_inode, offset, sizeof(struct easy_dirent), &d->d_dd);
         offset += sizeof(struct easy_dirent);
     }
@@ -138,8 +126,7 @@ void efs_d_update(struct easy_dentry *pd)
 
 // * 查重 需要加锁
 // 返回值 重复对象的目录项指针。 NULL：通过  else：未通过（含有同名）
-static struct easy_dentry *efs_d_name_check(struct easy_dentry *pd, const char *name)
-{
+static struct easy_dentry *efs_d_name_check(struct easy_dentry *pd, const char *name) {
     struct easy_dentry *d = NULL;
     if (!TEST_FLAG(&pd->d_flags, D_CHILD)) // 如果没有填充子目录
     {
@@ -147,8 +134,7 @@ static struct easy_dentry *efs_d_name_check(struct easy_dentry *pd, const char *
         SET_FLAG(&pd->d_flags, D_CHILD);
     }
 
-    list_for_each_entry(d, &pd->d_child, d_sibling)
-    {
+    list_for_each_entry(d, &pd->d_child, d_sibling) {
         if (efs_d_namecmp(d->d_dd.d_name, name) == 0)
             return d;
     }
@@ -156,39 +142,34 @@ static struct easy_dentry *efs_d_name_check(struct easy_dentry *pd, const char *
 }
 
 // 返回子目录里面 name 的目录项 需要加锁
-static inline struct easy_dentry *efs_d_namex(struct easy_dentry *pd, const char *name)
-{
+static inline struct easy_dentry *efs_d_namex(struct easy_dentry *pd, const char *name) {
     return efs_d_name_check(pd, name);
 }
 
 // path 没有映射，会从磁盘读取
-struct easy_dentry *efs_d_named(const char *path)
-{
+struct easy_dentry *efs_d_named(const char *path) {
     struct easy_dentry *d;
     struct easy_dentry *dtmp;
     char *p, *tmp, *name;
 
     // 首先查找 dentry 缓存
     spin_lock(&m_esb.s_lock);
-    hash_for_each_entry(d, &m_esb.s_dhash, strhash(path), d_hnode)
-    {
+    hash_for_each_entry(d, &m_esb.s_dhash, strhash(path), d_hnode) {
         // 如果找到了这个 dentry
-        if (!efs_d_namecmp(d->d_dd.d_name, path))
-        {
+        if (!efs_d_namecmp(d->d_dd.d_name, path)) {
             spin_unlock(&m_esb.s_lock);
             return d;
         }
     }
     spin_unlock(&m_esb.s_lock);
 
-    tmp = p = kmalloc(MAX_PATH_LEN + 1, 0);
+    tmp = p         = kmalloc(MAX_PATH_LEN + 1, 0);
     p[MAX_PATH_LEN] = '\0';
     strncpy(p, path, MAX_PATH_LEN);
 
     // 如果是绝对路径
     // TODO 暂时只支持绝对路径，以后改
-    if (p[0] == '/')
-    {
+    if (p[0] == '/') {
         d = &root_dentry;
         p++;
     }
@@ -199,25 +180,22 @@ struct easy_dentry *efs_d_named(const char *path)
     }
     name = p;
 
-    while (*p)
-    {
-        if (*p == '/')
-        {
+    while (*p) {
+        if (*p == '/') {
             *p = '\0'; // 截断
             sleep_on(&d->d_slock);
             dtmp = efs_d_namex(d, name);
             wake_up(&d->d_slock);
             if (!dtmp)
                 return NULL;
-            d = dtmp;
+            d    = dtmp;
             name = p + 1; // 移动到下一个目录名
         }
         p++;
     }
 
     // 解析最后一级目录
-    if (*name)
-    {
+    if (*name) {
         sleep_on(&d->d_slock);
         dtmp = efs_d_namex(d, name);
         wake_up(&d->d_slock);
@@ -230,14 +208,12 @@ struct easy_dentry *efs_d_named(const char *path)
 
 // 根据 path 返回 inode,可能会睡眠。
 // 已增加引用计数
-struct easy_m_inode *efs_d_namei(const char *path)
-{
+struct easy_m_inode *efs_d_namei(const char *path) {
     struct easy_m_inode *i;
     struct easy_dentry *d;
 
     d = efs_d_named(path);
-    if (!d)
-    {
+    if (!d) {
         printk("efs_d_namei: file not found: %s\n", path);
         return NULL;
     }
@@ -252,8 +228,7 @@ struct easy_m_inode *efs_d_namei(const char *path)
 }
 
 // * (这个函数可能会陷入睡眠)
-void efs_d_lookup(struct easy_dentry *pd)
-{
+void efs_d_lookup(struct easy_dentry *pd) {
     struct easy_dentry *d = NULL;
     sleep_on(&pd->d_slock);
     if (!TEST_FLAG(&pd->d_flags, D_CHILD)) // 如果没有填充子目录
@@ -268,31 +243,27 @@ void efs_d_lookup(struct easy_dentry *pd)
     wake_up(&pd->d_slock);
 }
 
-struct easy_dentry *efs_d_creat(struct easy_dentry *pd, const char *name, enum easy_file_type type)
-{
-    if (!pd)
-    {
+struct easy_dentry *efs_d_creat(struct easy_dentry *pd, const char *name, enum easy_file_type type) {
+    if (!pd) {
         printk("efs_d_creat: pd is NULL\n");
         return NULL;
     }
-    if (pd->d_dd.d_type != F_DIR)
-    {
+    if (pd->d_dd.d_type != F_DIR) {
         printk("efs_d_creat: %s is not a dir!\n", pd->d_dd.d_name);
         return NULL;
     }
 
     sleep_on(&pd->d_slock);
-    if (efs_d_name_check(pd, name))
-    {
+    if (efs_d_name_check(pd, name)) {
         printk("efs_d_creat: cannot create directory '%s': File exists\n", name);
         wake_up(&pd->d_slock);
         return NULL;
     }
 
     struct easy_m_inode *new_i = efs_i_new();
-    struct easy_dentry *new_d = efs_d_alloc();
+    struct easy_dentry *new_d  = efs_d_alloc();
 
-    new_d->d_dd.d_ino = new_i->i_di.i_no;
+    new_d->d_dd.d_ino  = new_i->i_di.i_no;
     new_d->d_dd.d_type = type;
     strncpy(new_d->d_dd.d_name, name, DIR_MAXLEN);
     efs_i_type(new_i, type);
@@ -313,30 +284,25 @@ struct easy_dentry *efs_d_creat(struct easy_dentry *pd, const char *name, enum e
     return new_d;
 }
 
-void efs_d_unlink(struct easy_dentry *d)
-{
-    if (!d)
-    {
+void efs_d_unlink(struct easy_dentry *d) {
+    if (!d) {
         printk("efs_d_unlink: The file to be deleted does not exist\n");
         return;
     }
 
-    if (d->d_dd.d_type == F_DIR)
-    {
+    if (d->d_dd.d_type == F_DIR) {
         if (!TEST_FLAG(&d->d_flags, D_CHILD)) // 如果没有填充子目录
         {
             efs_d_fill(d);
             SET_FLAG(&d->d_flags, D_CHILD);
         }
-        if (!list_empty(&d->d_child))
-        {
+        if (!list_empty(&d->d_child)) {
             printk("efs_d_unlink: failed to remove '%s': Directory not empty\n", d->d_dd.d_name);
             return;
         }
     }
 
-    if (d->d_dd.d_ino == 1)
-    {
+    if (d->d_dd.d_ino == 1) {
         printk("efs_d_unlink: The root directory cannot be deleted\n");
         return;
     }
@@ -347,8 +313,7 @@ void efs_d_unlink(struct easy_dentry *d)
         d->d_inode = efs_i_get(d->d_dd.d_ino);
     efs_i_put(d->d_inode);
 
-    if (efs_i_unlink(d->d_inode) == 0)
-    {
+    if (efs_i_unlink(d->d_inode) == 0) {
         list_del_init(&d->d_sibling);
 
         spin_lock(&m_esb.s_lock);
@@ -362,10 +327,8 @@ void efs_d_unlink(struct easy_dentry *d)
     }
 }
 
-void efs_d_rename(struct easy_dentry *d, const char *rename)
-{
-    if (efs_d_name_check(d->d_parent, rename))
-    {
+void efs_d_rename(struct easy_dentry *d, const char *rename) {
+    if (efs_d_name_check(d->d_parent, rename)) {
         printk("efs_d_rename: cannot create directory '%s': File exists\n", rename);
         return;
     }
@@ -386,16 +349,13 @@ void efs_d_rename(struct easy_dentry *d, const char *rename)
 // dup，namei 会增加引用计数，put 释放。
 // 在中间对 inode 内容读写操作，可以避免读写时有其他线程删除文件，从而导致未知错误
 // 我们允许目录项目被删除，这个 inode 暂存。之后这个 inode 也会被回收
-int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr)
-{
-    if (!d)
-    {
+int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
+    if (!d) {
         printk("efs_d_read: file not found\n");
         return -1;
     }
     sleep_on(&d->d_slock);
-    if (!d->d_inode)
-    {
+    if (!d->d_inode) {
         d->d_inode = efs_i_get(d->d_dd.d_ino);
         efs_i_put(d->d_inode);
     }
@@ -407,33 +367,27 @@ int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr)
     return res;
 }
 
-int efs_d_read_name(const char *path, uint32 offset, uint32 len, void *vaddr)
-{
+int efs_d_read_name(const char *path, uint32 offset, uint32 len, void *vaddr) {
     struct easy_dentry *d;
     d = efs_d_named(path);
-    if (!d)
-    {
+    if (!d) {
         printk("efs_d_read_name: file '%s' not found\n", path);
         return -1;
     }
     return efs_d_read(d, offset, len, vaddr);
 }
 
-int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr)
-{
-    if (!d)
-    {
+int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
+    if (!d) {
         printk("efs_d_write: file not found\n");
         return -1;
     }
-    if (d->d_dd.d_type == F_DIR)
-    {
+    if (d->d_dd.d_type == F_DIR) {
         printk("efs_d_write: %s is a dir\n", d->d_dd.d_name);
         return -1;
     }
     sleep_on(&d->d_slock);
-    if (!d->d_inode)
-    {
+    if (!d->d_inode) {
         d->d_inode = efs_i_get(d->d_dd.d_ino);
         efs_i_put(d->d_inode);
     }
@@ -446,20 +400,17 @@ int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr)
     return res;
 }
 
-int efs_d_write_name(const char *path, uint32 offset, uint32 len, void *vaddr)
-{
+int efs_d_write_name(const char *path, uint32 offset, uint32 len, void *vaddr) {
     struct easy_dentry *d;
     d = efs_d_named(path);
-    if (!d)
-    {
+    if (!d) {
         printk("efs_d_write_name: file '%s' not found\n", path);
         return -1;
     }
     return efs_d_write(d, offset, len, vaddr);
 }
 
-int efs_d_fsize(struct easy_dentry *d)
-{
+int efs_d_fsize(struct easy_dentry *d) {
     if (d->d_inode)
         efs_i_dup(d->d_inode);
     else
@@ -524,11 +475,10 @@ int efs_d_fsize(struct easy_dentry *d)
 
 // * 必须在 efs_i_root_init 之后
 // 这个不存在竞争
-void efs_d_root_init()
-{
+void efs_d_root_init() {
     assert(root_m_inode.i_sb != NULL, "efs_d_root_init\n");
 
-    root_dentry.d_inode = NULL;
+    root_dentry.d_inode  = NULL;
     root_dentry.d_parent = NULL;
     INIT_LIST_HEAD(&root_dentry.d_child);
     INIT_LIST_HEAD(&root_dentry.d_sibling);
@@ -547,18 +497,15 @@ void efs_d_root_init()
     efs_d_addsb(&root_dentry);
 }
 
-static void __efs_d_infos(struct easy_dentry *d, int indent)
-{
+static void __efs_d_infos(struct easy_dentry *d, int indent) {
 
     // 打印当前目录项
     for (int i = 0; i < indent; i++)
         printk(" ");
     printk("%s\n", d->d_dd.d_name); // 目录后面加 "/" 以区分
     // 确保目录已填充子项
-    if (d->d_dd.d_type == F_DIR)
-    {
-        if (!TEST_FLAG(&d->d_flags, D_CHILD))
-        {
+    if (d->d_dd.d_type == F_DIR) {
+        if (!TEST_FLAG(&d->d_flags, D_CHILD)) {
             efs_d_fill(d);
             SET_FLAG(&d->d_flags, D_CHILD);
         }
@@ -566,15 +513,11 @@ static void __efs_d_infos(struct easy_dentry *d, int indent)
 
     // 遍历子目录项
     struct easy_dentry *d1;
-    list_for_each_entry(d1, &d->d_child, d_sibling)
-    {
-        if (d1->d_dd.d_type == F_DIR)
-        {
+    list_for_each_entry(d1, &d->d_child, d_sibling) {
+        if (d1->d_dd.d_type == F_DIR) {
             // 递归打印子目录
             __efs_d_infos(d1, indent + 3);
-        }
-        else
-        {
+        } else {
             // 打印普通文件
             for (int i = 0; i < indent + 3; i++)
                 printk(" ");
@@ -584,18 +527,15 @@ static void __efs_d_infos(struct easy_dentry *d, int indent)
 }
 
 // * 用于调试
-void efs_d_infos(struct easy_dentry *d)
-{
-    if (!d)
-    {
+void efs_d_infos(struct easy_dentry *d) {
+    if (!d) {
         printk("efs_d_infos The given dentry is NULL\n");
         return;
     }
     __efs_d_infos(d, 0);
 }
 
-void efs_d_info(struct easy_dentry *d)
-{
+void efs_d_info(struct easy_dentry *d) {
     if (!d)
         return;
     printk("%c\t%s\n", efs_d_type_tostr(d->d_dd.d_type), d->d_dd.d_name);

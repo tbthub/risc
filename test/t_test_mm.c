@@ -1,4 +1,4 @@
-// #include "lib/string.h"
+// #include "std/string.h"
 // #include "mm/kmalloc.h"
 // #include "mm/mm.h"
 // #include "mm/slab.h"

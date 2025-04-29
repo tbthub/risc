@@ -3,7 +3,7 @@
 // #include "dev/blk/gendisk.h"
 // #include "dev/blk/blk_dev.h"
 // #include "core/timer.h"
-// #include "lib/string.h"
+// #include "std/string.h"
 // #include "../fs/easyfs/easyfs.h"
 // // 必须等到文件系统初始化完成后才可以测试
 // static void __easy_fs_test()
@@ -87,7 +87,6 @@
 //     // // * 1. 创建嵌套目录
 //     efs_d_creat(root, "var", F_DIR);
 //     efs_d_creat(root, "etc", F_DIR);
-
 
 //     struct easy_dentry *var_dir = efs_d_named("/var");
 //     // struct easy_dentry *etc_dir = efs_d_named("/etc");
