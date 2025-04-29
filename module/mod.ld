@@ -1,8 +1,8 @@
 OUTPUT_ARCH("riscv")
 
 PHDRS {
-    mod_init PT_LOAD FLAGS(5);
-    mod_exit PT_LOAD FLAGS(5);
+    kmod_init PT_LOAD FLAGS(5);
+    kmod_exit PT_LOAD FLAGS(5);
     text PT_LOAD FLAGS(5);
     rodata PT_LOAD FLAGS(4);
     data PT_LOAD FLAGS(6);
@@ -12,13 +12,23 @@ PHDRS {
 SECTIONS {
   . = ALIGN(0x1000);
 
-  .mod_init : {
-    KEEP(*(.mod_init .mod_init.*))
-  } :mod_init
+  .kmod_init : {
+    KEEP(*(.kmod_init0 .kmod_init0.*))
+    KEEP(*(.kmod_init1 .kmod_init1.*))
+    KEEP(*(.kmod_init2 .kmod_init2.*))
+    KEEP(*(.kmod_init3 .kmod_init3.*))
+    KEEP(*(.kmod_init4 .kmod_init4.*))
+    KEEP(*(.kmod_init5 .kmod_init5.*))
+  } :kmod_init
 
-  .mod_exit : {
-    KEEP(*(.mod_exit .mod_exit.*))
-  } :mod_exit
+  .kmod_exit : {
+    KEEP(*(.kmod_exit5 .kmod_exit5.*))
+    KEEP(*(.kmod_exit4 .kmod_exit4.*))
+    KEEP(*(.kmod_exit3 .kmod_exit3.*))
+    KEEP(*(.kmod_exit2 .kmod_exit2.*))
+    KEEP(*(.kmod_exit1 .kmod_exit1.*))
+    KEEP(*(.kmod_exit0 .kmod_exit0.*))
+  } :kmod_exit
 
   .text : {
     *(.text .text.*)

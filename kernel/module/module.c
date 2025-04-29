@@ -6,6 +6,7 @@
 #include "core/vm.h"
 #include "elf.h"
 #include "fs/file.h"
+#include "lib/hash.h"
 #include "lib/list.h"
 #include "lib/string.h"
 #include "mm/kmalloc.h"
@@ -15,6 +16,8 @@
 #define MOD_MAX_TOP 0x80000000
 #define MOD_BASE 0x70000000
 
+#define KMODS_HASN_SIZE 250
+
 // 内核模块管理器
 static struct
 {
@@ -22,6 +25,8 @@ static struct
     uint32 cnt;
     struct list_head list;
     uint64 next_base;
+
+    struct hash_table ht;
 } Kmods;
 
 // 内核模块
@@ -40,6 +45,24 @@ struct kmod
 
 extern pagetable_t kernel_pagetable;
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern struct ksym *alloc_ksym(struct kernel_symbol *sym);
+extern uint32 ksym_hash(struct ksym *ks);
+
+static const struct kernel_symbol *lookup_symbol(const char *name)
+{
+    uint32 key = strhash(name);
+    struct ksym *ks = NULL;
+    spin_lock(&Kmods.lock);
+    hash_for_each_entry(ks, &Kmods.ht, key, node)
+    {
+        if (strcmp(name, ks->ksp->name) == 0) {
+            spin_unlock(&Kmods.lock);
+            return ks->ksp;
+        }
+    }
+    spin_unlock(&Kmods.lock);
+    return NULL;
+}
 
 static void kmod_add_global(struct kmod *kmod)
 {
@@ -114,9 +137,9 @@ static int kmod_alloc_memory(struct kmod *km)
 // 加载模块代码到内存
 static int kmod_load_code(struct kmod *km)
 {
-    Elf64_Shdr *code_shdr = elf_find_section(km->km_parser, INIT_SECTION);
+    Elf64_Shdr *code_shdr = elf_find_section(km->km_parser, KINIT_SECTION);
     if (!code_shdr) {
-        printk("Module %s section not found\n", INIT_SECTION);
+        printk("Module %s section not found\n", KINIT_SECTION);
         return -1;
     }
     uint64 code_offset = code_shdr->sh_offset;
@@ -154,8 +177,11 @@ static int kmod_apply_relocations(struct kmod *km)
             const char *symname = p->dynstr + sym->st_name;
 
             const struct kernel_symbol *ksym = lookup_symbol(symname);
-            if (!ksym)
+            // printk("find sym: %s,ok -> %p\n",ksym->name,ksym->addr);
+            if (!ksym) {
+                panic("sym not find");
                 return -1;
+            }
 
             *(uint64 *)(km->km_base + rela->r_offset) = (uint64)ksym->addr + rela->r_addend;
             break;
@@ -163,7 +189,32 @@ static int kmod_apply_relocations(struct kmod *km)
         case R_RISCV_RELATIVE:
             *(uint64 *)(km->km_base + rela->r_offset) = km->km_base + rela->r_addend;
             break;
+        case R_RISCV_64:
+            // 处理 64 位绝对地址重定位
+            uint32 sym_idx = ELF64_R_SYM(rela->r_info);
+            Elf64_Sym *sym = &p->dynsym[sym_idx];
+            uint64 value;
+
+            if (sym->st_shndx == SHN_UNDEF) {
+                // 外部符号：查找内核符号表
+                const char *symname = p->dynstr + sym->st_name;
+                const struct kernel_symbol *ksym = lookup_symbol(symname);
+                if (!ksym) {
+                    panic("Undefined symbol: %s\n", symname);
+                    return -1;
+                }
+                value = (uint64)ksym->addr;
+            }
+            else {
+                // 内部符号：计算模块内地址
+                value = km->km_base + sym->st_value;
+            }
+
+            // 写入重定位地址 = 符号地址 + addend
+            *(uint64 *)(km->km_base + rela->r_offset) = value + rela->r_addend;
+            break;
         default:
+            panic("undeal type: %d\n", type);
             return -1;
         }
     }
@@ -214,7 +265,7 @@ error:
 static int rmmod(const char *path)
 {
     struct kmod *k = find_module(path);
-    if(!k)
+    if (!k)
         return 0;
     kmod_rm_global(k);
     k->km_exit();
@@ -223,6 +274,27 @@ static int rmmod(const char *path)
     // 3. 回收虚存映射
     return 0;
 }
+
+static void kmods_hash_init()
+{
+    struct ksym *ks = NULL;
+    hash_init(&Kmods.ht, KMODS_HASN_SIZE, "Kmods");
+    for (struct kernel_symbol *sym = __start___ksymtab; sym < __stop___ksymtab; sym++) {
+        ks = alloc_ksym(sym);
+        hash_add_head(&Kmods.ht, ksym_hash(ks), &ks->node);
+    }
+}
+
+// const struct kernel_symbol *lookup_symbol(const char *name) {
+//     for (struct kernel_symbol *sym = __start___ksymtab;
+//          sym < __stop___ksymtab;
+//          sym++) {
+//         if (strcmp(sym->name, name) == 0) {
+//             return sym;
+//         }
+//     }
+//     return NULL;
+// }
 
 void kmods_init()
 {
@@ -234,6 +306,7 @@ void kmods_init()
     mappages(kernel_pagetable, MOD_BASE, (uint64)no_use_page, PGSIZE, 0);
     Kmods.next_base = MOD_BASE + 2 * PGSIZE;
 
+    kmods_hash_init();
     // 执行所有的初始化函数
     initcall_t *k_inits;
     for (k_inits = (initcall_t *)kmod_init_start; k_inits < (initcall_t *)kmod_init_end; k_inits++)

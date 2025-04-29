@@ -39,9 +39,9 @@ $(FULL_DUMP): $(TARGET)
 	@echo "\n[4] 反汇编代码 (.text段)" >> $@
 	$(OBJDUMP) -d -j .text $< >> $@
 	@echo "\n[5] 模块初始化段反汇编 (.mod_init)" >> $@
-	$(OBJDUMP) -d -j .mod_init $< >> $@  
+	$(OBJDUMP) -d -j .kmod_init $< >> $@  
 	@echo "\n[6] 模块退出段反汇编 (.mod_exit)" >> $@   
-	$(OBJDUMP) -d -j .mod_exit $< >> $@          
+	$(OBJDUMP) -d -j .kmod_exit $< >> $@          
 	@echo "\n[7] 动态段信息（如适用）" >> $@         
 	$(READELF) -d $< >> $@
 	@echo "\n======= 分析结束 =======" >> $@

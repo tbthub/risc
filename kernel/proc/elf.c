@@ -101,12 +101,12 @@ int elf_parse_dynamic_sections(ElfParser *parser)
             file_read_no_off(parser->file, shdr->sh_offset, parser->rela_dyn, shdr->sh_size);
             parser->rela_count = shdr->sh_size / sizeof(Elf64_Rela);
         }
-        else if (strcmp(name, INIT_SECTION) == 0) {
-            // printk("find mod_init\n");
+        else if (strcmp(name, KINIT_SECTION) == 0) {
+            // printk("find kmod_init\n");
             parser->mod_init_offset = shdr->sh_addr;
         }
-        else if (strcmp(name, EXIT_SECTION) == 0) {
-            // printk("find mod_exit\n");
+        else if (strcmp(name, KEXIT_SECTION) == 0) {
+            // printk("find kmod_exit\n");
             parser->mod_exit_offset = shdr->sh_addr;
         }
     }

@@ -1,13 +1,12 @@
 #include "mm/slab.h"
 #include "mm/page.h"
-
+#include "mm/kmalloc.h"
 #include "lib/string.h"
 #include "lib/math.h"
 #include "core/export.h"
 
 extern struct slab *page_slab(struct page *page);
 
-#define MAX_KMALLOC 8192
 
 static struct kmem_cache kmalloc16;
 static struct kmem_cache kmalloc32;

@@ -1,5 +1,5 @@
 #include "core/proc.h"
-
+#include "core/export.h"
 #include "core/sched.h"
 #include "core/signal.h"
 #include "core/vm.h"
@@ -656,7 +656,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options)
     // free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
-    kmem_cache_free( ch->task);
+    kmem_cache_free(ch->task);
 
     spin_lock(&Proc.lock);
     hash_del_node(&Proc.global_proc_table, &ch->global);
@@ -698,4 +698,9 @@ void show_all_args(struct thread_info *t)
     printk("----------\n");
     panic("");
 }
+
+struct thread_info test_pro = {
+        .pid = 10086,
+};
+EXPORT_SYMBOL(test_pro);
 
