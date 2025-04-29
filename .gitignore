@@ -10,4 +10,5 @@ user/build/
 *.d
 *.dump
 *.bin
+*.so
 virtio_disk.img

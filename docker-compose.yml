@@ -1,6 +1,6 @@
 services:
   riscv:
-    image: bwtang/xv6-env
+    image: ghcr.io/tbthub/riscv:latest
     container_name: risc
     volumes:
       - ./:/risc
