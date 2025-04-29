@@ -22,7 +22,7 @@
 static struct
 {
     spinlock_t lock;
-    uint32 cnt;
+    int32 cnt;
     struct list_head list;
     uint64 next_base;
 
@@ -68,6 +68,7 @@ static void kmod_add_global(struct kmod *kmod)
 {
     spin_lock(&Kmods.lock);
     list_add_head(&kmod->km_list, &Kmods.list);
+    Kmods.cnt++;
     spin_unlock(&Kmods.lock);
 }
 
@@ -90,6 +91,7 @@ static void kmod_rm_global(struct kmod *k)
 {
     spin_lock(&Kmods.lock);
     list_del(&k->km_list);
+    Kmods.cnt--;
     spin_unlock(&Kmods.lock);
 }
 
