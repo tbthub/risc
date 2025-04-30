@@ -88,7 +88,7 @@ retry:
     // 读者优先的话，直接操作运行就好
     // 写者优先，如果有等待写者，需要堵塞读者
     if (get_rw_prior(rw) != 0 && !fifo_empty(&rw->writers_fifo)) {
-        printk("read_lock write prior, reader %d sleep\n", myproc()->pid);
+        // printk("read_lock write prior, reader %d sleep\n", myproc()->pid);
         sleep_reader(t, rw); // 在锁上睡眠
         goto retry;
     }
@@ -127,10 +127,10 @@ void write_unlock(rwlock_t *rw) {
     // 写者优先，则优先唤醒写者；没有写者，唤醒读者
     int res = (get_rw_prior(rw) == 0 && !fifo_empty(&rw->readers_fifo)) || // 读者优先且有读者等待 ->唤醒读者
               (get_rw_prior(rw) != 0 && fifo_empty(&rw->writers_fifo));    // 写者优先但无写者等待 ->唤醒读者（可能，但是队列为空没问题）
-    printk("write_unlock rw: %d, r_len: %d, w_len: %d\n",
-           get_rw_prior(rw),
-           fifo_size(&rw->readers_fifo),
-           fifo_size(&rw->writers_fifo));
+    // printk("write_unlock rw: %d, r_len: %d, w_len: %d\n",
+    //        get_rw_prior(rw),
+    //        fifo_size(&rw->readers_fifo),
+    //        fifo_size(&rw->writers_fifo));
 
     if (res) {
         // printk("write_unlock wakeup_reader\n");

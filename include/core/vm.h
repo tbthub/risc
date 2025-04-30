@@ -66,6 +66,7 @@ struct vm_operations_struct
 extern struct vm_operations_struct vma_file_ops;
 extern struct vm_operations_struct vma_stack_ops;
 extern struct vm_operations_struct vma_args_ops;
+extern struct vm_operations_struct vma_gen_ops;
 
 extern int vma_is_r(struct vm_area_struct *vma);
 extern int vma_is_w(struct vm_area_struct *vma);

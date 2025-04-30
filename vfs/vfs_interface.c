@@ -1,16 +1,18 @@
-#include "lib/hash.h"
-#include "std/string.h"
-#include "mm/kmalloc.h"
-#include "mm/mm.h"
+#include "vfs/vfs_interface.h"
+
 #include "core/locks/rwlock.h"
 #include "core/proc.h"
-#include "vfs/vfs_interface.h"
-#include "vfs/vfs_module.h"
-#include "std/string.h"
+#include "lib/hash.h"
 #include "lib/math.h"
+#include "mm/kmalloc.h"
+#include "mm/mm.h"
 #include "std/stdio.h"
+#include "std/string.h"
+#include "vfs/vfs_module.h"
 
-typedef struct vfs_hash_t {
+
+typedef struct vfs_hash_t
+{
     uint8_t *key;
     size_t key_size;
     uint8_t *value;
@@ -20,25 +22,27 @@ typedef struct vfs_hash_t {
     int ref;
 } vfs_hash_t;
 
-typedef struct vfs_alloc_t {
+typedef struct vfs_alloc_t
+{
     uint32_t malloc_size;
     uint32_t order;
 } vfs_alloc_t;
 
 static struct hash_table hash_table_g;
 
-int vfshash(uint8_t *key, size_t size) {
+int vfshash(uint8_t *key, size_t size)
+{
     unsigned long hash = 5381;
 
     for (size_t i = 0; i < size; i++) {
-        hash = ((hash << 5) + hash) + key[i]; // hash * 33 + c
+        hash = ((hash << 5) + hash) + key[i];  // hash * 33 + c
     }
 
     return (int)(hash & 0x7FFFFFFF);
 }
 
-int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size) {
-
+int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size)
+{
     if (buf1_size != buf2_size) {
         return 1;
     }
@@ -48,8 +52,8 @@ int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size) {
     return memcmp(buf1, buf2, min_size);
 }
 
-void *vfs_malloc(size_t size) {
-
+void *vfs_malloc(size_t size)
+{
     size = size + sizeof(vfs_alloc_t);
 
     assert(size <= 1024 * 32, "vfs_malloc too big! %d\n", size);
@@ -57,8 +61,8 @@ void *vfs_malloc(size_t size) {
     size_t order = 0;
     if (size >= 8192) {
         size_t page_size = (size + 4095) / 4096;
-        order            = math_log(page_size, 2);
-        ptr              = (uint8_t *)__alloc_pages(0, order);
+        order = math_log(page_size, 2);
+        ptr = (uint8_t *)__alloc_pages(0, order);
     }
 
     else {
@@ -69,13 +73,14 @@ void *vfs_malloc(size_t size) {
 
     vfs_alloc_t *ptr_head = (vfs_alloc_t *)ptr;
     ptr_head->malloc_size = (uint32_t)size;
-    ptr_head->order       = (uint32_t)order;
+    ptr_head->order = (uint32_t)order;
 
     return ptr + sizeof(vfs_alloc_t);
 }
 
-void vfs_free(void *ptr) {
-    uint8_t *data         = (uint8_t *)ptr;
+void vfs_free(void *ptr)
+{
+    uint8_t *data = (uint8_t *)ptr;
     vfs_alloc_t *ptr_head = (vfs_alloc_t *)(data - sizeof(vfs_alloc_t));
 
     if (ptr_head->malloc_size >= 8192) {
@@ -87,18 +92,19 @@ void vfs_free(void *ptr) {
     }
 }
 
-void vfs_raise_err(uint16_t error) {
+void vfs_raise_err(uint16_t error)
+{
     panic("vfs_error: %d", error);
 }
 
-int8_t vfs_data_global_put(uint8_t *key, size_t key_size, void *value, size_t value_size) {
-
+int8_t vfs_data_global_put(uint8_t *key, size_t key_size, void *value, size_t value_size)
+{
     int _key_hash = vfshash(key, key_size);
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, _key_hash, node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -114,12 +120,12 @@ int8_t vfs_data_global_put(uint8_t *key, size_t key_size, void *value, size_t va
         goto cleanup;
     }
 
-    item->key        = vfs_malloc(key_size);
-    item->value      = vfs_malloc(value_size);
-    item->key_size   = key_size;
+    item->key = vfs_malloc(key_size);
+    item->value = vfs_malloc(value_size);
+    item->key_size = key_size;
     item->value_size = value_size;
-    item->key_hash   = vfshash(key, key_size);
-    item->ref        = 1;
+    item->key_hash = vfshash(key, key_size);
+    item->ref = 1;
 
     if (item->key == NULL || item->value == NULL) {
         goto cleanup;
@@ -136,13 +142,13 @@ cleanup:
     return -1;
 }
 
-void *vfs_data_global_get(uint8_t *key, size_t key_size) {
-
+void *vfs_data_global_get(uint8_t *key, size_t key_size)
+{
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -162,13 +168,13 @@ void *vfs_data_global_get(uint8_t *key, size_t key_size) {
     return tmp->value;
 }
 
-void vfs_data_global_get_done(uint8_t *key, size_t key_size) {
-
+void vfs_data_global_get_done(uint8_t *key, size_t key_size)
+{
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -182,13 +188,13 @@ void vfs_data_global_get_done(uint8_t *key, size_t key_size) {
     tmp->ref--;
 }
 
-void *vfs_data_global_del_start(uint8_t *key, size_t key_size) {
-
+void *vfs_data_global_del_start(uint8_t *key, size_t key_size)
+{
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -204,13 +210,13 @@ void *vfs_data_global_del_start(uint8_t *key, size_t key_size) {
     return tmp;
 }
 
-void vfs_data_global_del_rollback(uint8_t *key, size_t key_size) {
-
+void vfs_data_global_del_rollback(uint8_t *key, size_t key_size)
+{
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -224,13 +230,13 @@ void vfs_data_global_del_rollback(uint8_t *key, size_t key_size) {
     tmp->ref++;
 }
 
-void vfs_data_global_del_end(uint8_t *key, size_t key_size) {
-
+void vfs_data_global_del_end(uint8_t *key, size_t key_size)
+{
     vfs_hash_t *tmp;
     int find_it = -1;
 
-    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node) {
-
+    hash_for_each_entry(tmp, &hash_table_g, vfshash(key, key_size), node)
+    {
         if (vfs_memcmp_n(tmp->key, tmp->key_size, key, key_size) == 0) {
             find_it = 1;
             break;
@@ -248,34 +254,49 @@ void vfs_data_global_del_end(uint8_t *key, size_t key_size) {
     vfs_free(tmp);
 }
 
-void *vfs_rwlock_init() {
+void *vfs_rwlock_init()
+{
     rwlock_t *lock = vfs_malloc(sizeof(rwlock_t));
     rwlock_init(lock, 1, "vfs");
     return lock;
 }
-void vfs_wlock_acquire(void *lock) {
+void vfs_wlock_acquire(void *lock)
+{
+    rwlock_t *alock = (rwlock_t *)lock;
+    if (alock->writers_fifo.f_size < 0 || alock->readers_fifo.f_size > 50)
+        panic("xxx %p\n",alock);
+    printk("wa: %p, pid: %d, lock: %d %d\n ", lock, myproc()->pid, alock->readers_fifo.f_size, alock->writers_fifo.f_size);
     write_lock((rwlock_t *)lock);
 }
-void vfs_wlock_release(void *lock) {
+void vfs_wlock_release(void *lock)
+{
+    // printk("wr: %p, pid: %d\n ",lock, myproc()->pid);
     write_unlock((rwlock_t *)lock);
 }
-void vfs_rlock_acquire(void *lock) {
+void vfs_rlock_acquire(void *lock)
+{
+    // printk("ra: %p, pid: %d\n ",lock, myproc()->pid);
     read_lock((rwlock_t *)lock);
 }
-void vfs_rlock_release(void *lock) {
+void vfs_rlock_release(void *lock)
+{
+    // printk("rr: %p, pid: %d\n ",lock, myproc()->pid);
     read_unlock((rwlock_t *)lock);
 }
-void vfs_rwlock_deinit(void *lock) {
+void vfs_rwlock_deinit(void *lock)
+{
     vfs_free(lock);
 }
 
-void *vfs_get_process() {
+void *vfs_get_process()
+{
     return &myproc()->task->vfs_proc;
 }
 
 // 根文件设备，需要初始化设备后才能
 
-void vfs_init() {
+void vfs_init()
+{
     hash_init(&hash_table_g, 128, "vfs_tag");
 
     // extern const uint8_t init_code;

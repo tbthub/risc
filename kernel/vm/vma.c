@@ -181,7 +181,9 @@ static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, 
 static void vma_gen_file_dup(struct mm_struct *mm, struct vm_area_struct *v, struct mm_struct *new_mm) {
     assert(v->vm_file != NULL, "vma_gen_file_dup");
     vma_gen_dup(mm, v, new_mm);
+    // printk("vma_gen_file_dup 1\n");
     new_mm->mmap->vm_file = k_file_mmap_dup(v->vm_file);
+    // printk("vma_gen_file_dup 2\n");
     assert(v->vm_file != NULL, "v->vm_file != NULL vma_gen_file_dup");
 }
 
@@ -229,6 +231,26 @@ struct vm_operations_struct vma_args_ops = {
     .dup   = vma_gen_dup,
     .fault = vma_gen_args_fault,
 };
+
+
+static void vma_gen_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
+{
+    uint64 *new_page = __alloc_page(0);
+    if (!new_page)
+        panic("vma_bss_fault\n");
+    mappages(t->task->mm.pgd, PGROUNDDOWN(fault_addr), (uint64)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
+#ifdef DEBUG_SF_PFMAP
+    printk("pid: %d, g-maps: %p - %p\n", t->pid, PGROUNDDOWN(fault_addr), (uint64)new_page);
+#endif
+}
+
+struct vm_operations_struct vma_gen_ops = {
+    .close = vma_gen_close,
+    .dup = vma_gen_dup,
+    .fault = vma_gen_fault
+};
+
+
 
 // addr：
 // 用户期望的起始虚拟地址。

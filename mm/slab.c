@@ -9,6 +9,7 @@
 #include "mm/slab.h"
 #include "param.h"
 
+
 extern struct slab *page_slab(struct page *page);
 extern void set_page_slab(struct page *page, struct slab *slab);
 extern void clear_page_slab(struct page *page);
@@ -263,6 +264,7 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj) {
     spin_unlock(&cache->lock);
 }
 
+
 // 初始化 Slab 分配器
 void kmem_cache_init() {
     INIT_LIST_HEAD(&kmem_cache_list);
@@ -273,9 +275,7 @@ void kmem_cache_init() {
     kmem_cache_create(&buf_kmem_cache, "buf_kmem_cache", sizeof(struct buf_head), 0);
     kmem_cache_create(&bio_kmem_cache, "bio_kmem_cache", sizeof(struct bio), 0);
     kmem_cache_create(&timer_kmem_cache, "timer_kmem_cache", sizeof(struct timer), 0);
-    // kmem_cache_create(&efs_inode_kmem_cache, "inode_kmem_cache", sizeof(struct easy_m_inode), 0);
-    // kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
-    // kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
+
     kmem_cache_create(&tf_kmem_cache, "tf_kmem_cache", sizeof(struct trapframe), 0);
     kmem_cache_create(&vma_kmem_cache, "vma_kmem_cache", sizeof(struct vm_area_struct), 0);
 }

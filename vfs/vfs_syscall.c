@@ -39,7 +39,7 @@ int do_setup(){
     efs_table.mountTag = "efs";
     efs_io_table_init(&efs_table);
     assert(vfs_mount(&efs_table, &virtio_disk) >= 0, "efs_mount");
-    efs_table.mount(&efs_table);
+    printk("do_setup\n");
     return 0;
 }
 
@@ -95,10 +95,8 @@ void k_file_mmap_close(void *ctx) {
 }
 
 void *k_file_mmap_dup(void *ctx) {
-    vfs_file_context_t *vfs_ctx = (vfs_file_context_t *)ctx;
-    vfs_wlock_acquire(vfs_ctx->lock);
-    vfs_ctx->ref++;
-    vfs_wlock_release(vfs_ctx->lock);
+    vfs_file_context_t *ctx_ptr = (vfs_file_context_t *)ctx;
+    vfs_dup_with_context(ctx_ptr);
     return ctx;
 }
 

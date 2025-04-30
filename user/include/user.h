@@ -1,8 +1,11 @@
 #ifndef __USER_H__
 #define __USER_H__
 #include "std/stddef.h"
+#include "fs/fcntl.h"
 
 typedef void (*__sighandler_t)(int);
+
+
 
 // 系统调用
 extern int64 fork(void);

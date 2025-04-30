@@ -73,5 +73,5 @@ struct bio *bio_list_make(uint32 blockno, uint32 offset, uint32 len)
 
 inline void bio_del(struct bio *bio)
 {
-    kmem_cache_free(&bio_kmem_cache,bio);
+    kmem_cache_free(&bio_kmem_cache, bio);
 }

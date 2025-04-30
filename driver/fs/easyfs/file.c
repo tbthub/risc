@@ -7,12 +7,7 @@
 #include "mm/mm.h"
 #include "mm/slab.h"
 
-struct file {
-    atomic_t f_ref;
-    struct easy_m_inode *f_ip;
-    uint32 f_off;
-    mutex_t f_mutex; // 读写互斥操作
-};
+
 
 static struct file *file_alloc(flags_t flags) {
     struct file *f = kmem_cache_alloc(&file_kmem_cache);

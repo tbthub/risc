@@ -1,6 +1,7 @@
 #include "easyfs.h"
 #include "dev/blk/blk_dev.h"
 #include "fs/fcntl.h"
+#include "file.h"
 
 
 struct block_device *efs_bd;
@@ -16,6 +17,10 @@ void *efs_mount(void *arg) {
     printk("easy fs init start...\n");
     assert(efs_bd == NULL, "efs_mount");
     efs_bd = (struct block_device *)arg;
+
+    kmem_cache_create(&efs_inode_kmem_cache, "inode_kmem_cache", sizeof(struct easy_m_inode), 0);
+    kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
+    kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
 
     // 1. sb
     efs_sb_init();
@@ -46,7 +51,6 @@ void *efs_mount(void *arg) {
     // 2. 注册 VFS
     // 3. 挂载
 
-    printk("easy fs init done.\n");
     return (void*)1;
 }
 

@@ -239,6 +239,7 @@ vfs_file_context_t *vfs_open_with_context(vfs_process_t *proc, const char *path,
     vfs_free(mount_tag);
     vfs_free(open_path);
     vfs_free(full_path);
+
     return ctx;
 cleanup:
 

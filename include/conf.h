@@ -22,7 +22,7 @@
 // #define DEBUG_COW          // 显示 COW
 // #define DEBUG_PF           // 显示缺页
 // #define DEBUG_SF_PFMAP  // 显示栈、文件页面映射（因缺页）
-// #define DEBUG_SYSCALL      // 显示来自用户空间的系统调用
+#define DEBUG_SYSCALL      // 显示来自用户空间的系统调用
 
 #endif
 // TODO

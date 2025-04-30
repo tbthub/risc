@@ -11,6 +11,7 @@
 #include "riscv.h"
 #include "std/stddef.h"
 #include "std/stdio.h"
+#include "elf.h"
 
 // 内核页表
 static pagetable_t kernel_pagetable;
@@ -374,7 +375,7 @@ int alloc_user_stack(struct mm_struct *mm, tid_t tid) {
     if (!stack)
         return -1;
 
-    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, VM_PROT_READ | VM_PROT_WRITE, 0, NULL, &vma_stack_ops);
+    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, ELF_PROG_FLAG_READ | ELF_PROG_FLAG_WRITE, 0, NULL, &vma_stack_ops);
 
     vma_insert(mm, v);
     mappages(mm->pgd, PGROUNDDOWN(USER_STACK_TOP(tid)), (uint64)stack, PGSIZE, PTE_R | PTE_W | PTE_U);

@@ -1,13 +1,13 @@
+#include "core/locks/semaphore.h"
+#include "core/locks/spinlock.h"
 #include "core/proc.h"
 #include "core/sched.h"
 #include "core/vm.h"
+#include "fs/fcntl.h"
 #include "lib/fifo.h"
-#include "core/locks/semaphore.h"
-#include "core/locks/spinlock.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "riscv.h"
-#include "fs/fcntl.h"
 #include "sys.h"
 
 extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
@@ -23,17 +23,17 @@ static __attribute__((noreturn)) void kswapd(void *args)
 {
     for (;;) {
         sem_wait(&kswap.sem);
-
+        printk("1\n");
         spin_lock(&kswap.lock);
         struct fault_args_struct *fas = list_entry(fifo_pop(&kswap.queue), struct fault_args_struct, list);
         spin_unlock(&kswap.lock);
-
+        printk("2\n");
         struct mm_struct *mm = fas->mm;
         struct vm_area_struct *v = fas->vma;
         struct thread_info *t = fas->thread;
 
         assert(k_file_mmap_lseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET) >= 0, "kswapd k_file_mmap_lseek");
-
+        printk("3\n");
         uint64 *new_page = __alloc_page(0);
 
         assert(k_file_mmap_read(v->vm_file, new_page, PGSIZE) == PGSIZE, "kswapd k_file_mmap_read");
@@ -42,7 +42,7 @@ static __attribute__((noreturn)) void kswapd(void *args)
 #ifdef DEBUG_SF_PFMAP
         printk("pid: %d, f-maps: %p - %p\n", t->pid, PGROUNDDOWN(fas->fault_addr), (uint64)new_page);
 #endif
-
+        printk("4\n");
         kfree(fas);
         // 这里已经映射完了，需要唤醒原来的线程继续执行,并释放资源
         wakeup_process(t);
@@ -73,5 +73,5 @@ void kswapd_init()
     fifo_init(&kswap.queue);
     sem_init(&kswap.sem, 0, "kswap-sem");
 
-    kthread_create(get_init(),kswapd, NULL, "kswapd", NO_CPU_AFF);
+    kthread_create(get_init(), kswapd, NULL, "kswapd", NO_CPU_AFF);
 }

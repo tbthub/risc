@@ -36,7 +36,7 @@ inline void buf_unfixed(struct buf_head *b)
 
 static inline void buf_struct_free(struct buf_head *b)
 {
-    kmem_cache_free(&buf_kmem_cache,b);
+    kmem_cache_free(&buf_kmem_cache, b);
 }
 
 // 初始化 bhash

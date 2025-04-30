@@ -128,6 +128,7 @@ void assert(int condition, const char *fmt, ...)
         spin_unlock(&cons.lock);
         va_end(ap);
         putstr("[panic]: !!!\n");
+        panic("");
         for (;;)
             ;
     }
