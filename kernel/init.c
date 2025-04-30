@@ -36,9 +36,6 @@ static void init_thread(void *a)
 
 #ifdef CONF_MKFS
     mkfs_tmp_test();
-    printk("s\n");
-    while (1) {
-    printk("s\n");
         thread_timer_sleep(myproc(), 100);
     }
 #endif

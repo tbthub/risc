@@ -92,7 +92,7 @@ void *k_file_mmap_init(int fd) {
 void k_file_mmap_close(void *ctx) {
     vfs_file_context_t *ctx_ptr = (vfs_file_context_t *)ctx;
     vfs_close_with_context(ctx_ptr);
-    vfs_free(ctx);
+    // vfs_free(ctx);
 }
 
 void *k_file_mmap_dup(void *ctx) {

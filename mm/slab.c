@@ -140,17 +140,17 @@ static int is_slab_full(struct slab *slab, struct kmem_cache *cache)
 
 // 初始化每个 kmem_cache 缓存的 cache_cpu 部分
 // 注：kmem_cache.size 需要已经对齐
-// static void cache_cpu_init(struct kmem_cache *cache)
-// {
-//     uint16 i;
-//     struct slab *cpu_slab;
-//     for (i = 0; i < NCPU; i++) {
-//         cpu_slab = slab_create(cache);
-//         if (!cpu_slab)
-//             panic("slab.c: cache_cpu_init Faild!\n");
-//         cache->cache_cpu[i] = cpu_slab;
-//     }
-// }
+static void cache_cpu_init(struct kmem_cache *cache)
+{
+    uint16 i;
+    struct slab *cpu_slab;
+    for (i = 0; i < NCPU; i++) {
+        cpu_slab = slab_create(cache);
+        if (!cpu_slab)
+            panic("slab.c: cache_cpu_init Faild!\n");
+        cache->cache_cpu[i] = cpu_slab;
+    }
+}
 
 // 增加 slab
 static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
@@ -174,7 +174,7 @@ void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, 
     INIT_LIST_HEAD(&cache->part_slabs);
     INIT_LIST_HEAD(&cache->full_slabs);
     INIT_LIST_HEAD(&cache->list);
-    // cache_cpu_init(cache);
+    cache_cpu_init(cache);
 
     list_add_head(&cache->list, &kmem_cache_list);
 }
@@ -219,21 +219,21 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     // panic("kmem_cache_alloc: '%s' has already been freed!\n", cache->name);
 
     struct slab *slab;
-    // struct slab *cpu_slab;
+    struct slab *cpu_slab;
     void *addr;
 
-    // push_off();
-    // cpu_slab = cache->cache_cpu[cpuid()];
-    // pop_off();
+    push_off();
+    cpu_slab = cache->cache_cpu[cpuid()];
+    pop_off();
 
-    // spin_lock(&cpu_slab->lock);
-    // // 如果当前还有可用的，直接弹出即可
-    // if (!is_slab_full(cpu_slab, cache)) {
-    //     void *tmp = obj_pop(cpu_slab);
-    //     spin_unlock(&cpu_slab->lock);
-    //     return tmp;
-    // }
-    // spin_unlock(&cpu_slab->lock);
+    spin_lock(&cpu_slab->lock);
+    // 如果当前还有可用的，直接弹出即可
+    if (!is_slab_full(cpu_slab, cache)) {
+        void *tmp = obj_pop(cpu_slab);
+        spin_unlock(&cpu_slab->lock);
+        return tmp;
+    }
+    spin_unlock(&cpu_slab->lock);
 
     // 如果 cpu_cache 可用的已经分配完了
     // 则从 part_slabs 链中查找
@@ -279,14 +279,14 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj)
     // 如果链表为空，说明是 cpu_cache,直接释放即可
     // 如果是 cpu_cache,则其他cpu无法访问这个slab的，是安全的，不必加锁
     // ? 我们并不尽量都放在 cpu 中，这里加锁也是无奈，如果是其他CPU的（尽管效率更好）
-    // spin_lock(&slab->lock);
-    // if (list_empty(&slab->list)) {
-    //     // spin_lock(&slab->lock);
-    //     obj_push(slab, obj);
-    //     spin_unlock(&slab->lock);
-    //     return;
-    // }
-    // spin_unlock(&slab->lock);
+    spin_lock(&slab->lock);
+    if (list_empty(&slab->list)) {
+        // spin_lock(&slab->lock);
+        obj_push(slab, obj);
+        spin_unlock(&slab->lock);
+        return;
+    }
+    spin_unlock(&slab->lock);
 
     // 否则就是普通的
     spin_lock(&cache->lock);

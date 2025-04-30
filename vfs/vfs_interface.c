@@ -265,7 +265,7 @@ void vfs_wlock_acquire(void *lock)
     rwlock_t *alock = (rwlock_t *)lock;
     if (alock->writers_fifo.f_size < 0 || alock->readers_fifo.f_size > 50)
         panic("xxx %p\n",alock);
-    printk("wa: %p, pid: %d, lock: %d %d\n ", lock, myproc()->pid, alock->readers_fifo.f_size, alock->writers_fifo.f_size);
+    // printk("wa: %p, pid: %d, lock: %d %d\n ", lock, myproc()->pid, alock->readers_fifo.f_size, alock->writers_fifo.f_size);
     write_lock((rwlock_t *)lock);
 }
 void vfs_wlock_release(void *lock)

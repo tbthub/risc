@@ -405,11 +405,8 @@ static void copy_vm(struct task_struct *ch, struct task_struct *pa) {
 }
 
 static void copy_files(struct task_struct *ch, struct task_struct *pa) {
-    printk("copy_files 1\n");
     assert(pa == myproc()->task, "pa == myproc()");
     assert(k_copy_file(ch) >= 0, "k_copy_file(ch) >= 0");
-    printk("copy_files 2\n");
-
 }
 
 static void copy_sigs(struct task_struct *ch, struct task_struct *pa) {
@@ -428,7 +425,6 @@ static void copy_sigs(struct task_struct *ch, struct task_struct *pa) {
 static void copy_proc(struct thread_info *ch, struct thread_info *pa) {
     struct task_struct *ch_task = ch->task;
     struct task_struct *pa_task = pa->task;
-    printk("tf");
     copy_tf(ch, pa);
     copy_vm(ch_task, pa_task);
     copy_files(ch_task, pa_task);

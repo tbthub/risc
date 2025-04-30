@@ -226,10 +226,6 @@ vfs_file_context_t *vfs_open_with_context(vfs_process_t *proc, const char *path,
 
     ctx->mount_ptr = mount_io->mount_ptr;
     ctx->op        = mount_io;
-    if((uint64_t)ctx ==0x0000000087c69f88 || (uint64_t)ctx== 0x0000000087c6bf88)
-    {
-        printk("a");
-    }
     ctx->file_ptr  = NULL;
     ctx->flag      = flag;
     ctx->ref       = 1;
@@ -319,16 +315,12 @@ int vfs_write_with_context(vfs_file_context_t *ctx, void *buf, size_t size) {
 }
 
 int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence) {
-    printk("2.55\n");
-    printk("ctx: %p, %p\n",ctx,ctx->op);
-
-    if ((uint64_t)ctx->op > 0x200000000)
-        printk("1");
+  
 
     if (!ctx || ctx->op->lseek == NULL) {
         return -1;
     }
-    printk("2.6\n");
+
     vfs_rlock_acquire(ctx->lock);
     int res = (int)ctx->op->lseek(ctx, offset, whence);
     vfs_rlock_release(ctx->lock);
@@ -336,6 +328,7 @@ int vfs_lseek_with_context(vfs_file_context_t *ctx, vfs_off_t offset, int whence
 }
 
 int vfs_dup_with_context(vfs_file_context_t *ctx){
+    // printk("ctx: %p\n",ctx);
     vfs_wlock_acquire(ctx->lock);
     ctx->ref++;
     vfs_wlock_release(ctx->lock);
