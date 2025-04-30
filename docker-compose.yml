@@ -2,7 +2,7 @@ version: '3.8'
 services:
   riscv:
     image: bwtang/xv6-env
-    container_name: risc
+    container_name: risc_vfs
     volumes:
       - ./:/risc
     working_dir: /risc
