@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lm -I . -I../include
+CFLAGS = -lm -I. -I../include -I..
 TARGET_DIR = out
 
 # qemu-img create -f raw virtio_disk.img 1G

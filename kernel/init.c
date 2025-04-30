@@ -4,6 +4,7 @@
 #include "core/work.h"
 #include "dev/blk/buf.h"
 #include "dev/devs.h"
+#include "sys.h"
 
 extern struct thread_info *init_t;
 
@@ -24,6 +25,7 @@ static void init_thread(void *a)
     devs_init();
     work_queue_init();
     virtio_disk_init();
+    do_setup();
     // efs_mount(&virtio_disk);
 
     // rw_test();

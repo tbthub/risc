@@ -68,9 +68,8 @@ GDBPORT = $(shell expr `id -u` % 5000 + 25000)
 QEMUOPTS = -machine virt -bios none -kernel $(BUILD_DIR)/$(OUT_KERNEL_NAME) -m 128M -smp $(CPUS) -nographic
 QEMUOPTS += -serial mon:stdio
 QEMUOPTS += -global virtio-mmio.force-legacy=false
-# QEMUOPTS += -drive file=virtio_disk.img,if=none,format=raw,id=x0
-# QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
-# QEMUOPTS += -device pci-bridge,id=virtio-mmio-bus.0,chassis=1
+QEMUOPTS += -drive file=virtio_disk.img,if=none,format=raw,id=x0
+QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
         then echo "-gdb tcp::$(GDBPORT)"; \

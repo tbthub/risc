@@ -3,9 +3,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <math.h>
-#include "std/stdint.h"
-#include "std/string.h"
-#include "../fs/easyfs/easyfs.h"
+#include <string.h>
+#include <stdint.h>
+#include "driver/fs/easyfs/easyfs.h"
 
 static void write_block(int fd, uint32_t block_no, const void *data, size_t size) {
     off_t offset = block_no * BLOCK_SIZE;
