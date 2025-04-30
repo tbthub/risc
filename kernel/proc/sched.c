@@ -118,6 +118,10 @@ void scheduler() {
 #ifdef DEBUG_TASK_ON_CPU
             printk("pid: %d, \tname: %s, in running on hart %d\n", next->pid, next->name, cpuid());
 #endif
+
+            if(next->pid == 6){
+                printk("aa\n");
+            }
             swtch(&cpu->context, &next->context);
 
             // 线程已经在运行了

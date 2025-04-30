@@ -12,6 +12,9 @@
 
 // 需要持有 mem_map 锁
 struct mem_map_struct mem_map;
+// 注：mem_map的pages位于 bss段，编译后的大数组并不占用
+// 可执行文件空间，但是加载的时候会变大，
+// 截止25/4/25，这个数组占用 93.6% 的BSS大小
 
 // first address after kernel. defined by kernel.ld.
 // 由编译器最后计算出来，位于代码段和数据段的顶端

@@ -22,9 +22,10 @@ void *efs_mount(void *arg) {
     kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
     kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
 
+    printk("1\n");
     // 1. sb
     efs_sb_init();
-
+    printk("2\n");
     // 2. root inode
     efs_i_root_init();
     

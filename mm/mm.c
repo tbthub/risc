@@ -26,8 +26,9 @@ static struct
 } Buddy;
 
 // 寻找当前 page 的伙伴
-static struct page *find_buddy(const struct page *page, const int order) {
-    uint64 index       = page - mem_map.pages;
+static struct page *find_buddy(const struct page *page, const int order)
+{
+    uint64 index = page - mem_map.pages;
     uint64 buddy_index = index ^ (1UL << order);
     // printk("ord: %d, i:%d, i1: %d\n",order, index, buddy_index);
     if (buddy_index >= ALL_PFN || buddy_index < 0) {
@@ -38,7 +39,8 @@ static struct page *find_buddy(const struct page *page, const int order) {
     return mem_map.pages + buddy_index;
 }
 
-void mm_debug() {
+void mm_debug()
+{
     for (int i = 0; i < MAX_LEVEL; i++) {
         uint len = list_len(&Buddy.free_lists[i]);
         printk("{ L: %d, N: %d }\t", i, len);
@@ -46,7 +48,8 @@ void mm_debug() {
     printk("\n");
 }
 
-void mm_debug2() {
+void mm_debug2()
+{
     int free_cnt = 0;
     for (int i = 0; i < MAX_LEVEL; i++) {
         uint len = list_len(&Buddy.free_lists[i]);
@@ -56,7 +59,8 @@ void mm_debug2() {
 }
 
 // 分配
-static struct page *buddy_alloc(const int order) {
+static struct page *buddy_alloc(const int order)
+{
     if (order < 0 || order > MAX_LEVEL_INDEX)
         return NULL;
 
@@ -103,7 +107,8 @@ bad:
 }
 
 // 回收
-static void buddy_free(struct page *pg, const int order) {
+static void buddy_free(struct page *pg, const int order)
+{
     assert(page_count(pg) == 0, "buddy_free\n");
     int level;
     struct page *page = pg, *buddy_page;
@@ -120,7 +125,7 @@ static void buddy_free(struct page *pg, const int order) {
         }
 
         // 直接调用 list_del 避免冗余检查
-        page->order       = MAX_LEVEL;
+        page->order = MAX_LEVEL;
         buddy_page->order = MAX_LEVEL;
         list_del_init(&buddy_page->buddy);
         page = min(page, buddy_page);
@@ -136,7 +141,8 @@ static void buddy_free(struct page *pg, const int order) {
 }
 
 // 初始化 Buddy 系统
-static void buddy_init() {
+static void buddy_init()
+{
     uint64 i;
 
     spin_init(&Buddy.lock, "buddy");
@@ -146,8 +152,8 @@ static void buddy_init() {
         INIT_LIST_HEAD(&Buddy.free_lists[i]);
 
     // 计算最高阶块的大小
-    uint64 max_order  = MAX_LEVEL_INDEX;
-    uint64 chunk_size = 1UL << max_order; // 块大小为 2^max_order 页
+    uint64 max_order = MAX_LEVEL_INDEX;
+    uint64 chunk_size = 1UL << max_order;  // 块大小为 2^max_order 页
 
     // 计算对齐后的起始地址（向上取整到 chunk_size 的倍数）
     uint64 start_pfn = (kernel_pfn_end + chunk_size) / chunk_size * chunk_size;
@@ -161,29 +167,34 @@ static void buddy_init() {
 }
 
 // 分配 pages
-struct page *alloc_pages(uint32 flags, const int order) {
+struct page *alloc_pages(uint32 flags, const int order)
+{
     struct page *pages = buddy_alloc(order);
     get_page(pages);
     return pages;
 }
 
-void *__alloc_pages(uint32 flags, const int order) {
+void *__alloc_pages(uint32 flags, const int order)
+{
     return (void *)PG2PA(alloc_pages(flags, order));
 }
 
 // 分配一个 page
-struct page *alloc_page(uint32 flags) {
+struct page *alloc_page(uint32 flags)
+{
     return alloc_pages(flags, 0);
 }
 
-void *__alloc_page(uint32 flags) {
+void *__alloc_page(uint32 flags)
+{
     void *addr = (void *)PG2PA(alloc_pages(flags, 0));
     memset(addr, 0, PGSIZE);
     return addr;
 }
 
 // 释放 pages
-void free_pages(struct page *pages, const int order) {
+void free_pages(struct page *pages, const int order)
+{
     if (pages == 0)
         return;
     assert(page_count(pages) > 0, "free_pages page_count: %d\n", page_count(pages));
@@ -193,27 +204,31 @@ void free_pages(struct page *pages, const int order) {
     }
 }
 
-inline void __free_pages(void *addr, const int order) {
+inline void __free_pages(void *addr, const int order)
+{
     if (addr == NULL)
         return;
     free_pages(PA2PG(addr), order);
 }
 
 // 释放一个 page
-inline void free_page(struct page *page) {
+inline void free_page(struct page *page)
+{
     if (page == NULL)
         return;
     free_pages(page, 0);
 }
 
-inline void __free_page(void *addr) {
+inline void __free_page(void *addr)
+{
     if (addr == NULL)
         return;
     free_pages(PA2PG(addr), 0);
 }
 
 // 内存管理初始化: page、buddy、kmem_cache、kmalloc
-void mm_init() {
+void mm_init()
+{
     first_all_page_init();
     buddy_init();
     kmem_cache_init();

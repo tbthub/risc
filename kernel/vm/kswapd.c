@@ -23,17 +23,14 @@ static __attribute__((noreturn)) void kswapd(void *args)
 {
     for (;;) {
         sem_wait(&kswap.sem);
-        printk("1\n");
         spin_lock(&kswap.lock);
         struct fault_args_struct *fas = list_entry(fifo_pop(&kswap.queue), struct fault_args_struct, list);
         spin_unlock(&kswap.lock);
-        printk("2\n");
         struct mm_struct *mm = fas->mm;
         struct vm_area_struct *v = fas->vma;
         struct thread_info *t = fas->thread;
-
+        printk("%p, %p\n",v->vm_file,v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start));
         assert(k_file_mmap_lseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET) >= 0, "kswapd k_file_mmap_lseek");
-        printk("3\n");
         uint64 *new_page = __alloc_page(0);
 
         assert(k_file_mmap_read(v->vm_file, new_page, PGSIZE) == PGSIZE, "kswapd k_file_mmap_read");

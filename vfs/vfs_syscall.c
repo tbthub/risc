@@ -84,6 +84,7 @@ void *k_file_mmap_init(int fd) {
         return NULL;
     }
     else{
+        // vfs_file_context_t *ctx = (vfs_file_context_t *)ctx_ptr;
         return (void *)ctx_ptr;
     }
 }

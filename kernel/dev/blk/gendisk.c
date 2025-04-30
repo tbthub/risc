@@ -52,6 +52,7 @@ void gendisk_init(struct block_device *bd, const struct gendisk_operations *ops)
     kthread_create(get_init(), kthread_gen_start_io, gd, "gen_start_io", NO_CPU_AFF);
 
     kthread_create(get_init(), flush_bhash, &gd->bhash, "gen_flush_bhash", NO_CPU_AFF);
+    printk("A\n");
 }
 
 // 这个重要
