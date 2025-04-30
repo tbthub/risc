@@ -26,7 +26,7 @@ DIRS := $(sort $(dir $(K_OBJS)))
 
 TOOLPREFIX = riscv64-linux-gnu-
 CC = $(TOOLPREFIX)gcc
-GDB = $(TOOLPREFIX)gdb
+GDB = gdb-multiarch
 AS = $(TOOLPREFIX)as
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
@@ -56,7 +56,10 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
         then echo "-gdb tcp::$(GDBPORT)"; \
         else echo "-s -p $(GDBPORT)"; fi)
 
-GDBFLAGS = -q -ex "target remote :$(GDBPORT)" -ex "layout split" -ex "set confirm off"
+GDBFLAGS = -q  -ex " set architecture riscv:rv64"\
+				-ex "target remote :$(GDBPORT)" \
+				-ex "layout split" \
+				-ex "set confirm off"
 
 
 

@@ -172,6 +172,7 @@ __attribute__((noreturn)) void usertrapret()
 }
 
 // exec 会使用原来的内核栈
+// PS 这个函数确实写的太丑，不过我们很懒，能跑就行
 __attribute__((noreturn)) int do_exec(const char *path, char *const argv[])
 {
     int res = -1;

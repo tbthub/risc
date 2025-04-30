@@ -6,7 +6,6 @@ PHDRS {
     text PT_LOAD FLAGS(5);
     rodata PT_LOAD FLAGS(4);
     data PT_LOAD FLAGS(6);
-    bss PT_LOAD FLAGS(6);
 }
 
 SECTIONS {
@@ -40,14 +39,7 @@ SECTIONS {
 
   .data : {
     *(.data .data.*)
-  } :data
-
-  .bss : {
-    . = ALIGN(0x10);
-    __bss_start = .;
-    *(.sbss .sbss.*)
+    /* BSS 放在这里我们显示初始化为 0 */
     *(.bss .bss.*)
-    . = ALIGN(0x1000);
-    _end = .;
-  } :bss
+  } :data
 }

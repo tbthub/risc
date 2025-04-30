@@ -48,6 +48,20 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
     return 0;
 }
 
+static uint32 elf_calc_size(ElfParser *parser)
+{
+    uint32 mem_sz = 0;
+    struct proghdr *ph = parser->phdrs;
+    for (int i = 0; i < parser->ehdr.phnum; i++, ph++) {
+        if (ph->type != ELF_PROG_LOAD || ph->filesz == 0)
+            continue;  // 只加载LOAD段（排除掉空段）
+        // 这里包括BSS，也就是说，file_sz <= mem_sz
+        mem_sz += ph->memsz;
+    }
+    parser->mem_sz = mem_sz;
+    return mem_sz;
+}
+
 // 初始化ELF解析器
 int elf_parser_init(ElfParser *parser, const char *path)
 {
@@ -65,6 +79,9 @@ int elf_parser_init(ElfParser *parser, const char *path)
     // 读取程序段表
     parser->phdrs = kmalloc(sizeof(struct proghdr) * parser->ehdr.phnum, 0);
     file_read_no_off(parser->file, parser->ehdr.phoff, parser->phdrs, sizeof(struct proghdr) * parser->ehdr.phnum);
+
+    // 计算文件加载大小
+    elf_calc_size(parser);
 
     // 读取节头表
     parser->shdrs = kmalloc(sizeof(Elf64_Shdr) * parser->ehdr.shnum, 0);
@@ -125,16 +142,10 @@ void elf_parser_destroy(ElfParser *parser)
     file_close(parser->file);
 }
 
-uint32 elf_ptload_size(ElfParser *parser)
+
+inline uint32 elf_ptload_msize(ElfParser *parser)
 {
-    uint32 mem_sz = 0;
-    struct proghdr *ph = parser->phdrs;
-    for (int i = 0; i < parser->ehdr.phnum; i++, ph++) {
-        if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
-            continue;  // 只加载LOAD段（排除掉空段）
-        mem_sz += ph->memsz;
-    }
-    return mem_sz;
+    return parser->mem_sz;
 }
 
 Elf64_Shdr *elf_find_section(ElfParser *parser, const char *name) {

@@ -121,7 +121,7 @@ static uint64 alloc_mod_space(uint32 mem_size)
         panic("alloc_mod_space\n");
         return -1;
     }
-    Kmods.next_base = Kmods.next_base + mem_size + PGSIZE;
+    Kmods.next_base = PGROUNDUP(Kmods.next_base + mem_size + PGSIZE);
     spin_unlock(&Kmods.lock);
     return base;
 }
@@ -131,7 +131,7 @@ static int kmod_alloc_memory(struct kmod *km)
 {
     // 计算需要的内存大小（这里可以更精确）
     // ! 注意 这里实际上包含了 bss 段的大小
-    km->km_size = elf_ptload_size(km->km_parser);
+    km->km_size = elf_ptload_msize(km->km_parser);
     km->km_base = alloc_mod_space(km->km_size);
     return (km->km_base != -1) ? 0 : -1;
 }
@@ -156,7 +156,6 @@ static int kmod_load_code(struct kmod *km)
         // 计算当前页读取大小
         int sz = min(km->km_size - va, PGSIZE);
         // 从文件读取代码到物理页
-        // ! 接上述BSS,实际上是多读了的
         file_read_no_off(km->km_parser->file, code_offset + va, context, sz);
         mappages(kernel_pagetable, km->km_base + va, (uint64)context, PGSIZE, PTE_R | PTE_W | PTE_X);
     }

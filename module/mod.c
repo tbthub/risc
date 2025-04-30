@@ -7,7 +7,7 @@ void haha()
 {
     // int a = 0;
 }
-
+int C[10001];
 extern struct thread_info test_pro;
 static void *a;
 static int b = 0;
