@@ -42,4 +42,7 @@ typedef void (*exitcall_t)(void);
 #define module_init(initfn) module_init_level(initfn,INIT_LEVEL_DEVICE)
 #define module_exit(exitfn) module_exit_level(exitfn,EXIT_LEVEL_DEFAULT)
 
+extern const struct kernel_symbol *lookup_symbol(const char *name);
+
+
 #endif

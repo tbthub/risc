@@ -219,19 +219,19 @@ void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
     }
 }
 
-inline void set_cow_pte(pte_t *pte)
+void set_cow_pte(pte_t *pte)
 {
     *pte &= ~PTE_W;   // 清除写权限，设置为只读
     *pte |= PTE_COW;  // 设置为 COW 页面
 }
 
-inline void clear_cow_pte(pte_t *pte)
+void clear_cow_pte(pte_t *pte)
 {
     *pte |= PTE_W;
     *pte &= ~PTE_COW;
 }
 
-inline int is_cow_pte(pte_t *pte)
+int is_cow_pte(pte_t *pte)
 {
     return (*pte & PTE_COW);
 }

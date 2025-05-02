@@ -1,4 +1,5 @@
 #include "dev/devs.h"
+#include "core/export.h"
 
 struct dev_lists_struct
 {

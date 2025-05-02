@@ -34,10 +34,13 @@ OBJDUMP = $(TOOLPREFIX)objdump
 NM = $(TOOLPREFIX)nm
 
 
-CFLAGS = -Wall -O -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
+CFLAGS = -Wall -O0 -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -mcmodel=medany -fno-common -nostdlib
 CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include
 CFLAGS += -MMD -MP  # 启用自动依赖生成
+
+CFLAGS += -fpatchable-function-entry=4,0
+
 LDFLAGS = -z max-page-size=4096  
 
 

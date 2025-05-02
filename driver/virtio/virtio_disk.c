@@ -18,6 +18,7 @@
 #include "dev/blk/blk_dev.h"
 #include "dev/devs.h"
 #include "lib/string.h"
+#include "core/module.h"
 
 #define DISK_SIZE 100 * 1024 * 1024
 #define SECTOR_SIZE 512
@@ -166,6 +167,8 @@ void virtio_disk_init(void)
 
     register_block(&virtio_disk, &virtio_disk_ops, DISK_NAME, DISK_SIZE);
 }
+
+
 
 // find a free descriptor, mark it non-free, return its index.
 static int
@@ -323,3 +326,5 @@ static int virtio_disk_ll_rw(struct gendisk *gd, struct bio *bio, uint32 rw)
     virtio_disk_rw(bio, rw);
     return 0;
 }
+
+

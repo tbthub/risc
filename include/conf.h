@@ -4,7 +4,7 @@
 
 #define CONF_MKMOD
 
-#define CONF_MKFS
+// #define CONF_MKFS
 #ifdef CONF_MKFS
 #define DEBUG_FLUSH
 #endif

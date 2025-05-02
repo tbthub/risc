@@ -17,7 +17,8 @@ struct ksym
 /* 导出符号宏 */
 #define EXPORT_SYMBOL(sym)                                                                                                                                                                             \
     extern typeof(sym) sym;                                                                                                                                                                            \
-    __attribute__((used, section("__ksymtab"))) static const struct kernel_symbol __ksymtab_##sym = {.name = #sym, .addr = (void *)&sym}
+    __attribute__((used, section("__ksymtab"))) static const struct  \
+    kernel_symbol __ksymtab_##sym = {.name = #sym, .addr = (void *)&sym}
 
 extern struct kernel_symbol __start___ksymtab[];
 extern struct kernel_symbol __stop___ksymtab[];

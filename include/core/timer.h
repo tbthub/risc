@@ -27,4 +27,5 @@ extern void time_init();
 extern void time_update();
 extern ticks_t get_cur_time();
 extern void thread_timer_sleep(struct thread_info *thread, uint64 down_time);
+extern timer_t *timer_create(void (*callback)(void *), void *args, uint64 during_time, int count, int is_block);
 #endif

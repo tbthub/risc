@@ -68,7 +68,9 @@
     "rwlock.h": "c",
     "module.h": "c",
     "export.h": "c",
-    "*.bak": "c"
+    "*.bak": "c",
+    "khook.h": "c",
+    "kprobe.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

@@ -9,6 +9,7 @@
 #include "dev/devs.h"
 #include "lib/string.h"
 #include "mm/mm.h"
+#include "core/export.h"
 
 #define BLK_SIZE 4096
 
@@ -53,6 +54,7 @@ void gendisk_init(struct block_device *bd, const struct gendisk_operations *ops)
 
     kthread_create(get_init(), flush_bhash, &gd->bhash, "gen_flush_bhash", NO_CPU_AFF);
 }
+EXPORT_SYMBOL(gendisk_init);
 
 // 这个重要
 static __attribute__((noreturn)) int gen_start_io(struct gendisk *gd)
@@ -223,6 +225,7 @@ inline int gen_disk_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint
     }
     return gd->ops.read(gd, blockno, offset, len, vaddr);
 }
+EXPORT_SYMBOL(gen_disk_read);
 
 // 写设备
 inline int gen_disk_write(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr)
@@ -233,3 +236,4 @@ inline int gen_disk_write(struct gendisk *gd, uint32 blockno, uint32 offset, uin
     }
     return gd->ops.write(gd, blockno, offset, len, vaddr);
 }
+EXPORT_SYMBOL(gen_disk_write);

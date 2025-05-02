@@ -20,6 +20,21 @@ extern void kswapd_init();
 extern pid_t do_waitpid(pid_t pid, int *status, int options);
 extern int64 do_module(const char *path, int mode);
 
+#include "core/timer.h"
+#include "kprobe.h"
+extern void syscall();
+static void myprobe()
+{
+    printk("myprobe");
+}
+
+static void del_krpobe(void *arg)
+{
+    struct kprobe *kp = (struct kprobe *)arg;
+    printk("del_krpobe\n");
+    kprobe_clear(kp);
+}
+
 // 第一个内核线程
 static void init_thread(void *a)
 {
@@ -29,13 +44,16 @@ static void init_thread(void *a)
     efs_mount(&virtio_disk);
 
 #ifdef CONF_MKMOD
-    while (1) {
-        do_module("/mod", 1);
-        do_module("/mod", 0);
-        thread_timer_sleep(myproc(), 100);
-    }
+    // do_module("/mm_alarmer", 1);
+    // do_module("/sys_probe", 1);
+    // while (1) {
+    //     thread_timer_sleep(myproc(), 100);
+    // }
 #endif
 
+    struct kprobe *kp = kprobe_exec(syscall, myprobe);
+    timer_create(del_krpobe, kp, 1000, 1, TIMER_NO_BLOCK);
+    
 #ifdef CONF_MKFS
     mkfs_tmp_test();
     while (1) {

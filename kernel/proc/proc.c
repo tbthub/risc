@@ -12,6 +12,7 @@
 #include "mm/slab.h"
 #include "riscv.h"
 #include "std/stdarg.h"
+#include "core/export.h"
 
 static struct
 {
@@ -37,6 +38,7 @@ struct thread_info *get_init()
 {
     return init_t;
 }
+EXPORT_SYMBOL(get_init);
 
 // 退出（ZOMBIE）后重新调度
 static void quit()
@@ -265,6 +267,7 @@ struct thread_info *myproc()
     pop_off();
     return thread;
 }
+EXPORT_SYMBOL(myproc);
 
 void proc_init()
 {
@@ -476,10 +479,9 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa)
 }
 
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
-extern void mm_debug2();
+
 int do_fork()
 {
-    mm_debug2();
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();
@@ -699,8 +701,4 @@ void show_all_args(struct thread_info *t)
     panic("");
 }
 
-struct thread_info test_pro = {
-        .pid = 10086,
-};
-EXPORT_SYMBOL(test_pro);
 

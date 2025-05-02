@@ -7,6 +7,7 @@
 #include "lib/string.h"
 #include "riscv.h"
 #include "std/stddef.h"
+#include "core/export.h"
 
 // 0号进程也就是第一个内核线程，负责初始化部分内容后作为调度器而存在
 
@@ -191,10 +192,12 @@ struct thread_info *kthread_create(struct thread_info*pa, void (*func)(void *), 
     t->args = args;
     strncpy(t->name, name, 16);
     t->cpu_affinity = cpu_affinity;
-
+    // printk("create fun :%p, name:%s\n",(void*)func,name);
     wakeup_process(t);
     return t;
 }
+EXPORT_SYMBOL(kthread_create);
+
 
 int64 do_pause()
 {

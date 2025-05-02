@@ -48,7 +48,8 @@ extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, in
 extern struct ksym *alloc_ksym(struct kernel_symbol *sym);
 extern uint32 ksym_hash(struct ksym *ks);
 
-static const struct kernel_symbol *lookup_symbol(const char *name)
+// TODO 临时为了内核模块探针调试 导出下
+const struct kernel_symbol *lookup_symbol(const char *name)
 {
     uint32 key = strhash(name);
     struct ksym *ks = NULL;
@@ -63,6 +64,7 @@ static const struct kernel_symbol *lookup_symbol(const char *name)
     spin_unlock(&Kmods.lock);
     return NULL;
 }
+EXPORT_SYMBOL(lookup_symbol);
 
 static void kmod_add_global(struct kmod *kmod)
 {
@@ -180,7 +182,7 @@ static int kmod_apply_relocations(struct kmod *km)
             const struct kernel_symbol *ksym = lookup_symbol(symname);
             // printk("find sym: %s,ok -> %p\n",ksym->name,ksym->addr);
             if (!ksym) {
-                panic("sym not find");
+                panic("sym not find: %s\n", symname);
                 return -1;
             }
 
@@ -254,6 +256,7 @@ static int insmod(const char *path)
     kmod_add_global(mod);
     // 清理资源
     elf_parser_destroy(&parser);
+
     mod->km_init();
     return 0;
 

@@ -17,8 +17,17 @@
 // }
 
 #include "user.h"
-int main()
+// void  __attribute__((noreturn)) no_ret_func()
+// {
+   // fork();   
+// }
+void test()
 {
-   sleep(100);
-   return 0;
+
+}
+void main()
+{
+   test();
+    // return 0;
+   //  no_ret_func();
 }

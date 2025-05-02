@@ -4,6 +4,7 @@
 #include "mm/kmalloc.h"
 
 #include "dev/blk/bio.h"
+#include "core/export.h"
 #define BLK_SIZE 4096
 
 static struct bio *bio_alloc(uint32 blockno, uint32 offset, uint32 len, struct bio *next, void *page)
@@ -70,6 +71,7 @@ struct bio *bio_list_make(uint32 blockno, uint32 offset, uint32 len)
 
     return bio_list; // 返回新的链表头
 }
+EXPORT_SYMBOL(bio_list_make);
 
 inline void bio_del(struct bio *bio)
 {

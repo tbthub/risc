@@ -12,7 +12,7 @@ LIB_DIR = $(abspath ../tools/sym)
 LIBS = -L$(LIB_DIR) -lkexports  # -L指定库路径，-l指定库名（去掉lib前缀和.so后缀）
 
 
-TARGET = mod
+TARGET = syscall_probe
 SRC = $(shell find $(MOD_SRC) -type f -name '*.c')
 DUMP = $(TARGET).dump
 

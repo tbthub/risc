@@ -2,6 +2,7 @@
 
 #include "core/proc.h"
 #include "std/stddef.h"
+#include "core/export.h"
 
 extern int64 sys_debug();
 extern int64 sys_fork();
@@ -47,9 +48,12 @@ static int64 (*syscalls[])(void) = {[SYS_debug] sys_debug,   [SYS_fork] sys_fork
  *  中断发生的时候，这些寄存器会被保存在线程的 trapframe 中。
  */
 
+
+
 void syscall()
 {
     struct thread_info *p = myproc();
     int n = p->tf->a7;
     p->tf->a0 = (int64)syscalls[n]();
 }
+EXPORT_SYMBOL(syscall);

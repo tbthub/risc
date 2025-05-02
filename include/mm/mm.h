@@ -13,5 +13,7 @@ extern void free_page(struct page *page);
 extern void __free_pages(void* addr, const int order);
 extern void __free_page(void* addr);
 
+extern uint32 get_free_pages();
+
 
 #endif

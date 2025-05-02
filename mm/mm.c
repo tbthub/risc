@@ -9,6 +9,7 @@
 #include "riscv.h"
 #include "std/stddef.h"
 #include "std/stdio.h"
+#include "core/export.h"
 
 extern void kmalloc_init();
 extern void kmem_cache_init();
@@ -57,6 +58,19 @@ void mm_debug2()
     }
     printk("free mem:%d\n", free_cnt);
 }
+
+uint32 get_free_pages()
+{
+    spin_lock(&Buddy.lock);
+    uint32 free_cnt = 0;
+    for (int i = 0; i < MAX_LEVEL; i++) {
+        uint len = list_len(&Buddy.free_lists[i]);
+        free_cnt += (1 << i) * len;
+    }
+    spin_unlock(&Buddy.lock);
+    return free_cnt;
+}
+EXPORT_SYMBOL(get_free_pages);
 
 // 分配
 static struct page *buddy_alloc(const int order)

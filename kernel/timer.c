@@ -8,6 +8,7 @@
 #include "mm/kmalloc.h"
 #include "mm/slab.h"
 #include "std/stdio.h"
+#include "core/export.h"
 
 static ticks_t sys_ticks;
 
@@ -122,7 +123,7 @@ static void assign_cpu(timer_t *t)
 }
 
 // 创建的内核定时器 需要在关中断情况下执行
-static timer_t *timer_create(void (*callback)(void *), void *args, uint64 during_time, int count, int is_block)
+timer_t *timer_create(void (*callback)(void *), void *args, uint64 during_time, int count, int is_block)
 {
     timer_t *t = (timer_t *)kmem_cache_alloc(&timer_kmem_cache);
     if (!t) {
@@ -153,6 +154,7 @@ void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
     sched();
     // 被唤醒后返回，从这里继续
 }
+EXPORT_SYMBOL(thread_timer_sleep);
 
 int do_sleep(uint64 ticks)
 {
