@@ -26,22 +26,6 @@ extern void init_s();
 extern void kmods_init();
 extern void mm_init();
 
-// extern void syscall();
-// static void myprobe()
-// {
-//     printk("myprobe");
-// }
-
-// static void del_krpobe(void *arg)
-// {
-//     struct kprobe *kp = (struct kprobe *)arg;
-//     printk("del_krpobe\n");
-//     kprobe_clear(kp);
-// }
-// static void my_test()
-// {
-//     printk("my_test\n");
-// }
 void main()
 {
     if (cpuid() == 0) {
@@ -58,17 +42,7 @@ void main()
         kvm_init_hart();
         trap_inithart();
         plic_inithart();
-
-        // struct kprobe *kp = kprobe_exec(my_test, myprobe);
-        // my_test();
-        // del_krpobe(kp);
-        // my_test();
-        // while (1)
-        // {
-        //     /* code */
-        // }
         
-
         init_s();
         kmods_init();
 
