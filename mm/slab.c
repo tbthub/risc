@@ -88,7 +88,7 @@ static void slab_destory(struct slab *slab)
         clear_page_slab(page + i);
 
     // 释放页面
-    __free_pages((void *)slab->objs, slab->kc->order);
+    __free_pages((void *)slab->objs);
     __free_page((void *)slab);
 }
 
@@ -128,12 +128,6 @@ static void obj_push(struct slab *slab, void *obj)
     else
         panic("obj_push");
 }
-
-// slab 是不是未满，还有空
-// static int is_slab_partial(struct slab *slab, struct kmem_cache *cache)
-// {
-//     return slab->inuse < cache->count_per_slab;
-// }
 
 static int is_slab_full(struct slab *slab, struct kmem_cache *cache)
 {

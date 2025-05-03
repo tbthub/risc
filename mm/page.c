@@ -7,7 +7,6 @@
 #include "std/stdio.h"
 #include "core/locks/spinlock.h"
 #include "defs.h"
-#include "mm/buddy.h"
 #include "mm/slab.h"
 
 // 需要持有 mem_map 锁
@@ -68,6 +67,23 @@ void set_page_slab(struct page *page, struct slab *slab)
 	SET_FLAG(&page->flags, PG_Slab);
 	page->slab = slab;
 }
+
+
+void set_page_kmalloc_page(struct page *page)
+{
+	SET_FLAG(&page->flags,PG_KMALLOC_PAGE);
+}
+
+uint32 test_page_kmalloc_page(struct page *page)
+{
+	return TEST_FLAG(&page->flags,PG_KMALLOC_PAGE);
+}
+
+void clear_page_kmalloc_page(struct page *page)
+{
+	CLEAR_FLAG(&page->flags,PG_KMALLOC_PAGE);
+}
+
 
 void clear_page_slab(struct page *page)
 {

@@ -1,11 +1,11 @@
 #ifndef __PAGE_H__
 #define __PAGE_H__
 
-#include "std/stddef.h"
-#include "mm/memlayout.h"
-#include "lib/list.h"
-#include "lib/atomic.h"
 #include "core/locks/spinlock.h"
+#include "lib/atomic.h"
+#include "lib/list.h"
+#include "mm/memlayout.h"
+#include "std/stddef.h"
 
 /*
  *
@@ -13,15 +13,15 @@
  *
  */
 
-
 // 页面标志位
-#define PG_dirty (1 << 0)    // 页面脏
-#define PG_locked (1 << 1)   // 锁定页面，不能进行页面交换或被其他进程修改（可用于写时复制）
-#define PG_anon (1 << 2)     // 是否为匿名页面（非文件映射的页面），可用于堆栈、堆和内核
-#define PG_reserved (1 << 3) // 是否为保留页面，避免被操作系统的分配器使用
-#define PG_Slab (1 << 4)     // 用于 Slab
+#define PG_dirty (1 << 0)     // 页面脏
+#define PG_locked (1 << 1)    // 锁定页面，不能进行页面交换或被其他进程修改（可用于写时复制）
+#define PG_anon (1 << 2)      // 是否为匿名页面（非文件映射的页面），可用于堆栈、堆和内核
+#define PG_reserved (1 << 3)  // 是否为保留页面，避免被操作系统的分配器使用
+#define PG_Slab (1 << 4)      // 用于 Slab
 
-#define PG_WBACKING (1 << 31)     // 用于 kwback
+#define PG_KMALLOC_PAGE (1 << 30)  // 用于kmalloc 大页分配
+#define PG_WBACKING (1 << 31)      // 用于 kwback
 
 #define PG_FREE 0
 
@@ -54,18 +54,14 @@ extern void get_page(struct page *);
 extern void put_page(struct page *);
 
 #define I2PA(i) (((uint64)(i) << PGSHIFT) + KERNBASE)
-#define PA2I(pa) (((uint64)(pa) - KERNBASE) >> PGSHIFT)
+#define PA2I(pa) (((uint64)(pa)-KERNBASE) >> PGSHIFT)
 
-#define put_page_test(pg) \
-    atomic_dec_and_test(&(pg)->refcnt)
+#define put_page_test(pg) atomic_dec_and_test(&(pg)->refcnt)
 
-#define put_page_test_1(pg) \
-    atomic_dec_and_test_1(&(pg)->refcnt)
+#define put_page_test_1(pg) atomic_dec_and_test_1(&(pg)->refcnt)
 
-#define PA2PG(pa) \
-    (struct page *)(mem_map.pages + PA2I(pa))
+#define PA2PG(pa) ((struct page *)(mem_map.pages + PA2I(pa)))
 
-#define PG2PA(pg) \
-    (I2PA((pg) - mem_map.pages))
+#define PG2PA(pg) (I2PA((pg)-mem_map.pages))
 
 #endif

@@ -2,7 +2,10 @@
 #define __KMALLOC_H__
 
 #include "mm/slab.h"
-#define MAX_KMALLOC 8192
+#include "mm/mm.h"
+
+#define MAX_KMALLOC_SLAB 8192
+#define MAX_KMALLOC_PAGE MAX_LEVEL_PGSIZE
 
 extern void *kmalloc(int size, uint32 flags);
 extern void kfree(void *obj);

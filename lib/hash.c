@@ -8,7 +8,7 @@ inline int hash_init(struct hash_table *htable, int size, const char *name)
     strdup(htable->name, name);
     htable->size = size;
     htable->count = 0;
-    if (sizeof(struct list_head) * size > MAX_KMALLOC)
+    if (sizeof(struct list_head) * size > MAX_KMALLOC_PAGE)
         panic("hash_init kmalloc over\n");
     htable->heads = (struct list_head *)kmalloc(sizeof(struct list_head) * size, 0);
     if (!htable->heads) {

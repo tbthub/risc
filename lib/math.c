@@ -14,21 +14,25 @@ inline uint64 next_power_of_2(uint64 n)
     return n + 1; // 加1得到下一个2的幂
 }
 
-inline uint32 calculate_order(uint32 size)
+inline uint32 math_order2(uint32 size)
 {
-    if (size == 0)
-        return 0; // 特殊情况，大小为0时返回0
+    if (size == 0) return 0;
 
+    // 1. 向上取整到最近的 2 的幂
+    size--;
+    size |= size >> 1;
+    size |= size >> 2;
+    size |= size >> 4;
+    size |= size >> 8;
+    size |= size >> 16;
+    size++;
+
+    // 2. 计算阶数
     uint32 order = 0;
-
-    // 将 size 向上舍入到最接近的 2 的幂
-    size--; // 先减 1，确保当 size 是 2 的幂时能正确地映射到对应的 order
-    while (size > 0)
-    {
+    while (size > 1) {
         size >>= 1;
         order++;
     }
-
     return order;
 }
 

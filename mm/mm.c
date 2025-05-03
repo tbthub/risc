@@ -1,15 +1,15 @@
 #include "mm/mm.h"
 
+#include "core/export.h"
+#include "core/locks/spinlock.h"
 #include "defs.h"
 #include "lib/list.h"
-#include "core/locks/spinlock.h"
 #include "lib/string.h"
-#include "mm/buddy.h"
 #include "mm/page.h"
 #include "riscv.h"
 #include "std/stddef.h"
 #include "std/stdio.h"
-#include "core/export.h"
+#include "core/module.h"
 
 extern void kmalloc_init();
 extern void kmem_cache_init();
@@ -22,6 +22,7 @@ extern void first_all_page_init();
 
 static struct
 {
+    uint64 free;
     spinlock_t lock;
     struct list_head free_lists[MAX_LEVEL];
 } Buddy;
@@ -61,12 +62,9 @@ void mm_debug2()
 
 uint32 get_free_pages()
 {
-    spin_lock(&Buddy.lock);
     uint32 free_cnt = 0;
-    for (int i = 0; i < MAX_LEVEL; i++) {
-        uint len = list_len(&Buddy.free_lists[i]);
-        free_cnt += (1 << i) * len;
-    }
+    spin_lock(&Buddy.lock);
+    free_cnt = Buddy.free;
     spin_unlock(&Buddy.lock);
     return free_cnt;
 }
@@ -108,6 +106,7 @@ static struct page *buddy_alloc(const int order)
             if (page_count(page) != 0)
                 panic("buddy_alloc page_count, %d,page: %d\n", page_count(page), page - mem_map.pages);
             // 循环接受，该 page 也就是这个被拆分大块的起始地址（现在变成小块了）
+            Buddy.free -= (1 << order);
             spin_unlock(&Buddy.lock);
             page->order = order;
             return page;
@@ -121,7 +120,7 @@ bad:
 }
 
 // 回收
-static void buddy_free(struct page *pg, const int order)
+static void buddy_free(struct page *pg)
 {
     assert(page_count(pg) == 0, "buddy_free\n");
     int level;
@@ -129,7 +128,7 @@ static void buddy_free(struct page *pg, const int order)
 
     spin_lock(&Buddy.lock);
     // printk("free : %d, ref %d, ord: %d\n", pg - mem_map.pages, page_count(pg), order);
-
+    const int order = pg->order;
     // 向上合并伙伴
     for (level = order; level < MAX_LEVEL_INDEX; level++) {
         buddy_page = find_buddy(page, level);
@@ -138,7 +137,6 @@ static void buddy_free(struct page *pg, const int order)
             break;
         }
 
-        // 直接调用 list_del 避免冗余检查
         page->order = MAX_LEVEL;
         buddy_page->order = MAX_LEVEL;
         list_del_init(&buddy_page->buddy);
@@ -150,8 +148,8 @@ static void buddy_free(struct page *pg, const int order)
     page->order = level;
     // printk("Add page %d to free_lists[%d]\n", page - mem_map.pages, level);
     list_add_head(&page->buddy, &Buddy.free_lists[level]);
+    Buddy.free += (1 << order);
     spin_unlock(&Buddy.lock);
-    // printk("\n");
 }
 
 // 初始化 Buddy 系统
@@ -160,6 +158,7 @@ static void buddy_init()
     uint64 i;
 
     spin_init(&Buddy.lock, "buddy");
+    Buddy.free = 0;
 
     // 初始化所有链表
     for (i = 0; i < MAX_LEVEL; i++)
@@ -177,6 +176,7 @@ static void buddy_init()
         struct page *page = &mem_map.pages[i];
         list_add_head(&page->buddy, &Buddy.free_lists[max_order]);
         page->order = MAX_LEVEL_INDEX;
+        Buddy.free += chunk_size;
     }
 }
 
@@ -188,15 +188,15 @@ struct page *alloc_pages(uint32 flags, const int order)
     return pages;
 }
 
-void *__alloc_pages(uint32 flags, const int order)
-{
-    return (void *)PG2PA(alloc_pages(flags, order));
-}
-
-// 分配一个 page
+// 分配 page
 struct page *alloc_page(uint32 flags)
 {
     return alloc_pages(flags, 0);
+}
+
+void *__alloc_pages(uint32 flags, const int order)
+{
+    return (void *)PG2PA(alloc_pages(flags, order));
 }
 
 void *__alloc_page(uint32 flags)
@@ -206,38 +206,34 @@ void *__alloc_page(uint32 flags)
     return addr;
 }
 
-// 释放 pages
-void free_pages(struct page *pages, const int order)
+inline void free_pages(struct page *pages)
 {
-    if (pages == 0)
+    if (pages == NULL)
         return;
     assert(page_count(pages) > 0, "free_pages page_count: %d\n", page_count(pages));
     if (put_page_test(pages)) {
         // printk("put_page_test: %d, %d\n",pages - mem_map.pages,page_count(pages));
-        buddy_free(pages, order);
+        buddy_free(pages);
     }
 }
 
-inline void __free_pages(void *addr, const int order)
+inline void free_page(struct page *page)
+{
+    free_pages(page);
+}
+
+inline void __free_pages(void *addr)
 {
     if (addr == NULL)
         return;
-    free_pages(PA2PG(addr), order);
-}
-
-// 释放一个 page
-inline void free_page(struct page *page)
-{
-    if (page == NULL)
-        return;
-    free_pages(page, 0);
+    free_pages(PA2PG(addr));
 }
 
 inline void __free_page(void *addr)
 {
     if (addr == NULL)
         return;
-    free_pages(PA2PG(addr), 0);
+    free_pages(PA2PG(addr));
 }
 
 // 内存管理初始化: page、buddy、kmem_cache、kmalloc

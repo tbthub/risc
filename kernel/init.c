@@ -29,7 +29,7 @@ static void init_thread(void *a)
     efs_mount(&virtio_disk);
 
 #ifdef CONF_MKMOD
-    // do_module("/mm_alarmer", 1);
+    do_module("/mm_alarmer", 1);
     // do_module("/sys_probe", 1);
     // while (1) {
     //     thread_timer_sleep(myproc(), 100);
