@@ -163,7 +163,8 @@ void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, 
 
     strncpy(cache->name, name, CACHE_MAX_NAME_LEN);
     cache->flags = flags;
-    cache->size = (uint16)next_power_of_2(size);  // 对齐
+    // TODO 其实我感觉。。。不用对齐也行？这样专用 slab 可以容纳更多
+    cache->size = (uint16)next_power_of_2(size);  // 对齐  
     cache->order = calc_slab_order(cache->size);
     cache->count_per_slab = (1 << cache->order) * PGSIZE / cache->size;
     assert(cache->count_per_slab <= FREE_LIST_MAX_LEN, "kmem_cache_create cps:%d\n", cache->count_per_slab);

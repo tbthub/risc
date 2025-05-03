@@ -217,7 +217,8 @@ void signal_handler(struct signal *s)
     }
     else {
         struct thread_info *t = myproc();
-        memcpy((void *)t->tf->sp - sizeof(*t->tf), (void *)t->tf, sizeof(*t->tf));
+        // 保存 tf 到用户栈
+        memcpy((char *)t->tf->sp - sizeof(*t->tf), (void *)t->tf, sizeof(*t->tf));
         t->tf->sp -= sizeof(*t->tf);
         t->tf->a0 = (uint64)do_sig_handler;
         t->tf->epc = (uint64)sigact_call;
