@@ -1,23 +1,21 @@
-#include "dev/blk/blk_dev.h"
-#include "easyfs.h"
-#include "lib/atomic.h"
-#include "lib/math.h"
-#include "std/string.h"
 #include "mm/mm.h"
+#include "easyfs.h"
+#include "std/string.h"
+#include "dev/blk/blk_dev.h"
 #include "mm/slab.h"
+#include "lib/math.h"
+#include "lib/atomic.h"
 
 struct easy_m_inode root_m_inode;
 
 // 根据 inode 计算在磁盘 inode_area 的 offset
-static inline int offset_ino(int ino)
-{
+static inline int offset_ino(int ino) {
     return ino * m_esb.s_ds.inode_size;
 }
 
 // 分配 ino 的 inode，是新的
 // 搭配 efs_i_alloc 后 fill
-static struct easy_m_inode *efs_i_alloc()
-{
+static struct easy_m_inode *efs_i_alloc() {
     struct easy_m_inode *m_inode = kmem_cache_alloc(&efs_inode_kmem_cache);
     if (!m_inode)
         panic("efs_ialloc.\n");
@@ -36,22 +34,19 @@ static struct easy_m_inode *efs_i_alloc()
 
 // spin lock
 
-static void efs_i_sdirty(struct easy_m_inode *inode)
-{
+static void efs_i_sdirty(struct easy_m_inode *inode) {
     SET_FLAG(&inode->i_flags, I_DIRTY);
     if (list_empty(&inode->i_dirty))
         list_add_head(&inode->i_dirty, &inode->i_sb->s_idirty_list);
 }
 
-void efs_i_cdirty(struct easy_m_inode *inode)
-{
+void efs_i_cdirty(struct easy_m_inode *inode) {
     CLEAR_FLAG(&inode->i_flags, I_DIRTY);
     list_del_init(&inode->i_dirty);
 }
 
 // 把 inode 加到超级块链表中,需要加锁
-static void efs_i_addsb(struct easy_m_inode *m_inode)
-{
+static void efs_i_addsb(struct easy_m_inode *m_inode) {
     hash_add_head(&m_esb.s_ihash, m_inode->i_di.i_no, &m_inode->i_hnode);
     list_add_head(&m_inode->i_list, &m_esb.s_ilist);
 }
@@ -59,17 +54,15 @@ static void efs_i_addsb(struct easy_m_inode *m_inode)
 //  sleep lock
 
 // 根据 ino 读出磁盘的 d_inode 填充到 m_inode.i_di
-static int efs_i_fill(struct easy_m_inode *m_inode, int ino)
-{
+static int efs_i_fill(struct easy_m_inode *m_inode, int ino) {
     assert(ino > 0, "efs_i_fill\n");
     int offset = offset_ino(ino);
     return blk_read(m_inode->i_sb->s_bd, m_esb.s_ds.inode_area_start, offset, sizeof(m_inode->i_di), &m_inode->i_di);
 }
 
 // 把 inode 磁盘部分写回
-int efs_i_update(struct easy_m_inode *i)
-{
-    assert(i->i_di.i_no > 0, "efs_i_update i->i_di.i_no,i:%d\n", i->i_di.i_no);
+int efs_i_update(struct easy_m_inode *i) {
+    assert(i->i_di.i_no > 0, "efs_i_update i->i_di.i_no\n");
     int offset = offset_ino(i->i_di.i_no);
     // 写回 inode 元数据
     blk_write(i->i_sb->s_bd, m_esb.s_ds.inode_area_start, offset, sizeof(i->i_di), &i->i_di);
@@ -84,7 +77,7 @@ int efs_i_update(struct easy_m_inode *i)
 
 // static inline void efs_i_free(struct easy_m_inode *i)
 // {
-//     kmem_cache_free(i);
+//     kmem_cache_free(&efs_inode_kmem_cache, i);
 // }
 
 // // 引用计数为 0 后释放，i_put 确保了单线程释放
@@ -113,8 +106,7 @@ int efs_i_update(struct easy_m_inode *i)
 // 将逻辑块号对应到实际的物理块
 // 并在当没有分配块号时为其分配
 // 这个函数需要加睡眠锁互斥
-static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc)
-{
+static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc) {
     int bno = 0;
     if (lbno < 0)
         panic("efs_i_bmap");
@@ -146,7 +138,7 @@ static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc)
             inode->i_indir = __alloc_page(0);
             blk_read_count(inode->i_sb->s_bd, bno, 1, inode->i_indir);
         }
-        uint32_t *blk = inode->i_indir;
+        uint32 *blk = inode->i_indir;
         if (blk[lbno] == 0) {
             if (!alloc)
                 return 0;
@@ -163,29 +155,28 @@ static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc)
 }
 
 // 释放 inode
-void efs_i_put(struct easy_m_inode *m_inode)
-{
+void efs_i_put(struct easy_m_inode *m_inode) {
     assert(atomic_read(&m_inode->i_refcnt) > 0, "efs_i_put");
-    atomic_dec(&m_inode->i_refcnt);
+    if (atomic_dec_and_test(&m_inode->i_refcnt)) {
+        // efs_i_free(m_inode);
+    }
 }
 
-void efs_i_dup(struct easy_m_inode *inode)
-{
+void efs_i_dup(struct easy_m_inode *inode) {
     atomic_inc(&inode->i_refcnt);
 }
 
 // 获得 ino 索引节点（这个函数会陷入睡眠）
 // 这里的 ino 应该是确保有效的，并不是新创建的
-struct easy_m_inode *efs_i_get(int ino)
-{
+struct easy_m_inode *efs_i_get(int ino) {
     struct easy_m_inode *m_inode = NULL;
-    int creating = 0;
+    int creating                 = 0;
     spin_lock(&m_esb.s_lock);
-    hash_find(m_inode, &m_esb.s_ihash, i_di.i_no, ino, i_hnode);  // 先在哈希表中查找
+    hash_find(m_inode, &m_esb.s_ihash, i_di.i_no, ino, i_hnode); // 先在哈希表中查找
     // 如果没有，创建一个新的并加入
     if (!m_inode) {
         // printk("1\n");
-        m_inode = efs_i_alloc();
+        m_inode            = efs_i_alloc();
         m_inode->i_di.i_no = ino;
         efs_i_addsb(m_inode);
         // 这里由于一定是第一次的，且是互斥查找，并不会造成睡眠，
@@ -207,7 +198,7 @@ struct easy_m_inode *efs_i_get(int ino)
     // 如果当前这个无效，但是在哈希表中找到了，说明正在被创建
     else if (!TEST_FLAG(&m_inode->i_flags, I_VALID)) {
         // printk("5\n");
-        sleep_on(&m_inode->i_slock);  // 会在这里等待某个线程把这个 inode 初始化完成
+        sleep_on(&m_inode->i_slock); // 会在这里等待某个线程把这个 inode 初始化完成
         wake_up(&m_inode->i_slock);
         // printk("6\n");
     }
@@ -217,11 +208,10 @@ struct easy_m_inode *efs_i_get(int ino)
 }
 
 // 读 inode 指向的文件的 offset len 信息
-int efs_i_read(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr)
-{
+int efs_i_read(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr) {
     int bno;
-    uint32_t tot;  // 总共读的字节数 <= len
-    uint32_t m;    // 每一次读的字节数
+    uint32 tot; // 总共读的字节数 <= len
+    uint32 m;   // 每一次读的字节数
 
     if (offset >= inode->i_di.i_size || offset + len < offset)
         return 0;
@@ -242,10 +232,9 @@ int efs_i_read(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *
     return tot;
 }
 
-int efs_i_write(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr)
-{
+int efs_i_write(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr) {
     int bno;
-    uint32_t tot, m;
+    uint32 tot, m;
     if (offset > inode->i_di.i_size || offset + len < offset)
         return 0;
     if (offset + len >= MAXFILE * BLOCK_SIZE)
@@ -256,7 +245,6 @@ int efs_i_write(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void 
         if (bno == 0)
             break;
         m = min(len - tot, BLOCK_SIZE - offset % BLOCK_SIZE);
-        // printk("bno :%d, off:%d, len: %d\n,vaddr: %p", bno, (offset % BLOCK_SIZE), m,vaddr);
         blk_write(efs_bd, bno, (offset % BLOCK_SIZE), m, vaddr);
     }
 
@@ -273,8 +261,7 @@ int efs_i_write(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void 
 }
 
 // 释放数据块，需要对超级块加自旋锁、i_slock
-static void efs_i_data_free(struct easy_m_inode *inode)
-{
+static void efs_i_data_free(struct easy_m_inode *inode) {
     int i;
     for (i = 0; i < NDIRECT + 1; i++) {
         if (!inode->i_di.i_addrs[i])
@@ -292,13 +279,12 @@ static void efs_i_data_free(struct easy_m_inode *inode)
 
 // 截断inode（丢弃内容）。
 // 删除了这个Inode指向的文件，但是并没有删除inode本身
-void efs_i_trunc(struct easy_m_inode *i)
-{
+void efs_i_trunc(struct easy_m_inode *i) {
     // 释放数据块
 
     sleep_on(&i->i_slock);
     spin_lock(&m_esb.s_lock);
-    efs_i_data_free(i);  // 释放数据块
+    efs_i_data_free(i); // 释放数据块
     spin_unlock(&m_esb.s_lock);
     wake_up(&i->i_slock);
 
@@ -311,8 +297,7 @@ void efs_i_trunc(struct easy_m_inode *i)
 }
 
 // 申请一个新的 inode,理论上后面初始化不会发生竞争
-struct easy_m_inode *efs_i_new()
-{
+struct easy_m_inode *efs_i_new() {
     int ino;
     spin_lock(&m_esb.s_lock);
     ino = efs_imap_alloc();
@@ -323,10 +308,10 @@ struct easy_m_inode *efs_i_new()
     assert(inode != NULL, "efs_i_new\n");
 
     struct easy_d_inode *d_inode = &inode->i_di;
-    d_inode->i_no = ino;
-    d_inode->i_type = F_NONE;
-    d_inode->i_devno = efs_bd->bd_dev;
-    d_inode->i_size = 0;
+    d_inode->i_no                = ino;
+    d_inode->i_type              = F_NONE;
+    d_inode->i_devno             = efs_bd->bd_dev;
+    d_inode->i_size              = 0;
     memset(d_inode->i_addrs, '\0', sizeof(d_inode->i_addrs));
     atomic_set(&d_inode->i_nlink, 1);
 
@@ -343,8 +328,7 @@ struct easy_m_inode *efs_i_new()
 }
 
 // 减少 inode 的链接数，当链接数为 0 时释放空间
-int efs_i_unlink(struct easy_m_inode *inode)
-{
+int efs_i_unlink(struct easy_m_inode *inode) {
     if (!inode)
         return -1;
     if (inode->i_di.i_no <= 1) {
@@ -378,16 +362,14 @@ int efs_i_unlink(struct easy_m_inode *inode)
     return 0;
 }
 
-inline int efs_i_size(struct easy_m_inode *inode)
-{
+inline int efs_i_size(struct easy_m_inode *inode) {
     return inode->i_di.i_size;
 }
 
-void efs_i_root_init()
-{
+void efs_i_root_init() {
     int offset = offset_ino(1);
     blk_read(efs_bd, m_esb.s_ds.inode_area_start, offset, sizeof(struct easy_d_inode), &root_m_inode.i_di);
-    assert(root_m_inode.i_di.i_no == 1, "root_m_inode.i_di.i_no !=1, but %d", root_m_inode.i_di.i_no);
+    assert(root_m_inode.i_di.i_no == 1, "root_m_inode.i_di.i_no !=1");
     root_m_inode.i_flags = 0;
     // spin_init(&m_inode->i_lock, "i_lock");
     sleep_init(&root_m_inode.i_slock, "i_slock");
@@ -401,8 +383,7 @@ void efs_i_root_init()
     efs_i_addsb(&root_m_inode);
 }
 
-inline void efs_i_type(struct easy_m_inode *inode, enum easy_file_type ftype)
-{
+inline void efs_i_type(struct easy_m_inode *inode, enum easy_file_type ftype) {
     spin_lock(&m_esb.s_lock);
     spin_lock(&inode->i_lock);
 
@@ -413,8 +394,7 @@ inline void efs_i_type(struct easy_m_inode *inode, enum easy_file_type ftype)
     spin_unlock(&m_esb.s_lock);
 }
 
-__attribute__((unused)) void efs_i_info(const struct easy_m_inode *inode)
-{
+__attribute__((unused)) void efs_i_info(const struct easy_m_inode *inode) {
     const struct easy_d_inode *d_inode = &inode->i_di;
     printk("easy-fs easy_inode infomation:\n");
     printk("  no: %d\n", d_inode->i_no);
