@@ -6,6 +6,7 @@
 #include "core/locks/sleeplock.h"
 #include "dev/blk/blk_dev.h"
 
+
 #define EASYFS_MAGIC 0x12345678
 #define BLOCK_SIZE (4 * 1024)
 #define INODE_SIZE 128
@@ -41,7 +42,7 @@ struct easy_d_super_block
 
     char name[16];
 
-    uint32 magic;
+    uint32_t magic;
 };
 
 #define S_DIRTY (1 << 0) // 脏标志，用于定期同步
@@ -75,11 +76,11 @@ struct easy_m_super_block
 // 磁盘上的 inode
 struct easy_d_inode
 {
-    uint32 i_no;
+    uint32_t i_no;
     enum easy_file_type i_type;
-    uint16 i_devno;              // 如果是设备文件,标识设备号
-    uint32 i_size;               // 文件大小
-    uint32 i_addrs[NDIRECT + 1]; // 12个直接 + 1 个间接
+    uint16_t i_devno;              // 如果是设备文件,标识设备号
+    uint32_t i_size;               // 文件大小
+    uint32_t i_addrs[NDIRECT + 1]; // 12个直接 + 1 个间接
 
     atomic_t i_nlink; // 链接数量，用于支持硬链接
 };
@@ -105,7 +106,7 @@ struct easy_m_inode
     struct list_head i_list;
     struct list_head i_dirty;
 
-    uint32 *i_indir;
+    uint32_t *i_indir;
 };
 
 // -----------------------------------------------
@@ -118,7 +119,7 @@ struct easy_m_inode
 // 磁盘上的目录项
 struct easy_dirent
 {
-    uint32 d_ino;
+    uint32_t d_ino;
     enum easy_file_type d_type;
     char d_name[DIR_MAXLEN];
 };
@@ -175,8 +176,8 @@ extern int efs_i_unlink(struct easy_m_inode *inode);
 extern void efs_i_cdirty(struct easy_m_inode *inode);
 extern void efs_i_type(struct easy_m_inode *inode, enum easy_file_type ftype);
 
-extern int efs_i_read(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr);
-extern int efs_i_write(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr);
+extern int efs_i_read(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr);
+extern int efs_i_write(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr);
 
 extern int efs_i_size(struct easy_m_inode *inode);
 
@@ -199,10 +200,10 @@ extern void efs_d_root_init();
 extern void efs_d_info(struct easy_dentry *d);
 extern void efs_d_infos(struct easy_dentry *d);
 
-extern int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr);
-extern int efs_d_read_name(const char *path, uint32 offset, uint32 len, void *vaddr);
-extern int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr);
-extern int efs_d_write_name(const char *path, uint32 offset, uint32 len, void *vaddr);
+extern int efs_d_read(struct easy_dentry *d, uint32_t offset, uint32_t len, void *vaddr);
+extern int efs_d_read_name(const char *path, uint32_t offset, uint32_t len, void *vaddr);
+extern int efs_d_write(struct easy_dentry *d, uint32_t offset, uint32_t len, void *vaddr);
+extern int efs_d_write_name(const char *path, uint32_t offset, uint32_t len, void *vaddr);
 
 extern struct block_device *efs_bd;
 

@@ -1,11 +1,11 @@
 #include "mm/slab.h"
 
-#include "../fs/easyfs/easyfs.h"
+#include "fs/easyfs/easyfs.h"
+#include "fs/easyfs/file.h"
 #include "core/proc.h"
 #include "core/timer.h"
 #include "dev/blk/bio.h"
 #include "dev/blk/buf.h"
-#include "fs/file.h"
 #include "lib/math.h"
 #include "std/string.h"
 #include "mm/mm.h"

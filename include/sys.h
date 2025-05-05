@@ -29,6 +29,7 @@ void k_file_mmap_close(void *ctx);
 void *k_file_mmap_dup(void *ctx);
 int k_file_mmap_read(void *ctx, const void *buf, size_t size);
 int k_file_mmap_lseek(void *ctx, off_t offset, int whence);
+int k_file_read_no_off(int fd, vfs_off_t off, void *buf, size_t size);
 
 #endif
 

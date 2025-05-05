@@ -27,6 +27,8 @@ extern void page_fault_handler(uint64_t fault_addr, uint64_t scause);
 extern uint64_t parse_argv(struct thread_info *t, char *const argv[], char *args_page[]);
 extern void signal_handler(struct signal *s);
 extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
+extern void user_entry();
+
 
 void trap_init() {
     time_init();
@@ -196,7 +198,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
 
     if (f < 0)
         panic("do_exec f is NULL\n");
-
+    
     do_read(f, (void *)&ehdr, sizeof(ehdr));
 
     assert(intr_get() == 0, "exec intr 4\n");

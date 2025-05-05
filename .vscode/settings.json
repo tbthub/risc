@@ -71,7 +71,8 @@
     "*.bak": "c",
     "khook.h": "c",
     "kprobe.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "efs.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

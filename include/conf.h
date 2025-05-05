@@ -2,7 +2,7 @@
 #define __CONF_H__
 
 
-// #define CONF_MKMOD
+#define CONF_MKMOD
 
 // #define CONF_MKFS
 #ifdef CONF_MKFS

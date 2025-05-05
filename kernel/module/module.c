@@ -5,13 +5,13 @@
 #include "core/proc.h"
 #include "core/vm.h"
 #include "elf.h"
-#include "fs/file.h"
 #include "lib/hash.h"
 #include "lib/list.h"
 #include "std/string.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "std/stddef.h"
+#include "sys.h"
 
 #define MOD_MAX_TOP 0x80000000
 #define MOD_BASE 0x70000000
@@ -158,7 +158,7 @@ static int kmod_load_code(struct kmod *km)
         // 计算当前页读取大小
         int sz = min(km->km_size - va, PGSIZE);
         // 从文件读取代码到物理页
-        file_read_no_off(km->km_parser->file, code_offset + va, context, sz);
+        k_file_read_no_off(km->km_parser->file, code_offset + va, context, sz);
         mappages(kernel_pagetable, km->km_base + va, (uint64_t)context, PGSIZE, PTE_R | PTE_W | PTE_X);
     }
     sfence_vma();

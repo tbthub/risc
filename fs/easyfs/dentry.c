@@ -349,7 +349,7 @@ void efs_d_rename(struct easy_dentry *d, const char *rename) {
 // dup，namei 会增加引用计数，put 释放。
 // 在中间对 inode 内容读写操作，可以避免读写时有其他线程删除文件，从而导致未知错误
 // 我们允许目录项目被删除，这个 inode 暂存。之后这个 inode 也会被回收
-int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
+int efs_d_read(struct easy_dentry *d, uint32_t offset, uint32_t len, void *vaddr) {
     if (!d) {
         printk("efs_d_read: file not found\n");
         return -1;
@@ -367,7 +367,7 @@ int efs_d_read(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
     return res;
 }
 
-int efs_d_read_name(const char *path, uint32 offset, uint32 len, void *vaddr) {
+int efs_d_read_name(const char *path, uint32_t offset, uint32_t len, void *vaddr) {
     struct easy_dentry *d;
     d = efs_d_named(path);
     if (!d) {
@@ -377,7 +377,7 @@ int efs_d_read_name(const char *path, uint32 offset, uint32 len, void *vaddr) {
     return efs_d_read(d, offset, len, vaddr);
 }
 
-int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
+int efs_d_write(struct easy_dentry *d, uint32_t offset, uint32_t len, void *vaddr) {
     if (!d) {
         printk("efs_d_write: file not found\n");
         return -1;
@@ -400,7 +400,7 @@ int efs_d_write(struct easy_dentry *d, uint32 offset, uint32 len, void *vaddr) {
     return res;
 }
 
-int efs_d_write_name(const char *path, uint32 offset, uint32 len, void *vaddr) {
+int efs_d_write_name(const char *path, uint32_t offset, uint32_t len, void *vaddr) {
     struct easy_dentry *d;
     d = efs_d_named(path);
     if (!d) {

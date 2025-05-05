@@ -31,7 +31,7 @@ struct page
     flags_t flags;
     atomic_t refcnt;
     struct list_head buddy;
-    uchar order;
+    uint8_t order;
     struct slab *slab;
     spinlock_t lock;
 };

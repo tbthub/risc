@@ -10,7 +10,6 @@
 #include "std/string.h"
 #include "vfs/vfs_module.h"
 
-
 typedef struct vfs_hash_t
 {
     uint8_t *key;
@@ -54,42 +53,15 @@ int vfs_memcmp_n(void *buf1, size_t buf1_size, void *buf2, size_t buf2_size)
 
 void *vfs_malloc(size_t size)
 {
-    size = size + sizeof(vfs_alloc_t);
-
-    assert(size <= 1024 * 32, "vfs_malloc too big! %d\n", size);
-    uint8_t *ptr = NULL;
-    size_t order = 0;
-    if (size >= 8192) {
-        size_t page_size = (size + 4095) / 4096;
-        order = math_log(page_size, 2);
-        ptr = (uint8_t *)__alloc_pages(0, order);
+    if (size == 0) {
+        size = 1;
     }
-
-    else {
-        ptr = (uint8_t *)kmalloc((int)size, 0);
-    }
-
-    assert(ptr != NULL, "vfs_malloc NULL!\n");
-
-    vfs_alloc_t *ptr_head = (vfs_alloc_t *)ptr;
-    ptr_head->malloc_size = (uint32_t)size;
-    ptr_head->order = (uint32_t)order;
-
-    return ptr + sizeof(vfs_alloc_t);
+    return kmalloc((int)size, 0);
 }
 
 void vfs_free(void *ptr)
 {
-    uint8_t *data = (uint8_t *)ptr;
-    vfs_alloc_t *ptr_head = (vfs_alloc_t *)(data - sizeof(vfs_alloc_t));
-
-    if (ptr_head->malloc_size >= 8192) {
-        __free_pages((void *)ptr_head, ptr_head->order);
-    }
-
-    else {
-        kfree((void *)ptr_head);
-    }
+    kfree(ptr);
 }
 
 void vfs_raise_err(uint16_t error)
@@ -264,7 +236,7 @@ void vfs_wlock_acquire(void *lock)
 {
     rwlock_t *alock = (rwlock_t *)lock;
     if (alock->writers_fifo.f_size < 0 || alock->readers_fifo.f_size > 50)
-        panic("xxx %p\n",alock);
+        panic("xxx %p\n", alock);
     // printk("wa: %p, pid: %d, lock: %d %d\n ", lock, myproc()->pid, alock->readers_fifo.f_size, alock->writers_fifo.f_size);
     write_lock((rwlock_t *)lock);
 }

@@ -7,12 +7,6 @@
 #include "mm/mm.h"
 #include "mm/slab.h"
 
-struct file {
-    atomic_t f_ref;
-    struct easy_m_inode *f_ip;
-    uint32 f_off;
-    mutex_t f_mutex; // 读写互斥操作
-};
 
 static struct file *file_alloc(flags_t flags) {
     struct file *f = kmem_cache_alloc(&file_kmem_cache);
@@ -27,7 +21,7 @@ static struct file *file_alloc(flags_t flags) {
 
 static inline void file_free(struct file *f) {
     assert(f != NULL, "file_free\n");
-    kmem_cache_free(&file_kmem_cache, f);
+    kmem_cache_free(f);
 }
 
 // static struct file *file_dup(struct file *f) {
@@ -60,7 +54,7 @@ static void file_close(struct file *f) {
     // 有其他线程也在引用，则仅仅减
 }
 
-static int file_read(struct file *f, void *vaddr, uint32 len) {
+static int file_read(struct file *f, void *vaddr, uint32_t len) {
     int r = 0;
 
     assert(f->f_ip != NULL, "file_read f->f_ip\n");
@@ -71,7 +65,7 @@ static int file_read(struct file *f, void *vaddr, uint32 len) {
     return r;
 }
 
-static int file_write(struct file *f, void *vaddr, uint32 len) {
+static int file_write(struct file *f, void *vaddr, uint32_t len) {
     int w = 0;
     assert(f->f_ip != NULL, "file_write f->f_ip\n");
     if ((w = efs_i_write(f->f_ip, f->f_off, len, vaddr)) >= 0)
@@ -81,11 +75,11 @@ static int file_write(struct file *f, void *vaddr, uint32 len) {
     return w;
 }
 
-static int file_llseek(struct file *f, uint32 offset, int whence) {
+static int file_llseek(struct file *f, uint32_t offset, int whence) {
     assert(f->f_ip != NULL, "file_llseek f->f_ip\n");
 
     int ret = 0;
-    uint32 new_offset;
+    uint32_t new_offset;
     switch (whence) {
     case VFS_SEEK_SET: // 从文件开头设置偏移量
         if (offset > efs_i_size(f->f_ip)) {

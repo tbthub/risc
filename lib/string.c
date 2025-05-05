@@ -57,7 +57,7 @@ int strncmp(const char *p, const char *q, uint32_t n) {
         n--, p++, q++;
     if (n == 0)
         return 0;
-    return (uchar)*p - (uchar)*q;
+    return (uint8_t)*p - (uint8_t)*q;
 }
 
 

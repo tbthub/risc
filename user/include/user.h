@@ -1,7 +1,7 @@
 #ifndef __USER_H__
 #define __USER_H__
 #include "std/stddef.h"
-#include "fs/file.h"
+#include "fs/fcntl.h"
 
 typedef void (*__sighandler_t)(int);
 
@@ -15,7 +15,7 @@ extern int64_t read(int, void *, int);
 extern int64_t close(int);
 extern int64_t kill(int);
 extern int64_t exec(const char *, char **);
-extern int64_t open(const char *, int);
+extern int64_t open(const char *, int,int);
 extern int64_t mknod(const char *, short, short);
 extern int64_t unlink(const char *);
 // extern  int64_t fstat(int fd, struct stat *);

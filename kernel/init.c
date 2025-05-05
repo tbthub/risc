@@ -29,14 +29,13 @@ static void init_thread(void *a)
     virtio_disk_init();
     do_setup();
 #ifdef CONF_MKMOD
-    do_module("/mm_alarmer", 1);
-    // do_module("/sys_probe", 1);
+    do_module("/efs/mm_alarmer", 1);
+    do_module("/efs/sys_probe", 1);
+    
     // while (1) {
-    //     thread_timer_sleep(myproc(), 100);
+    // thread_timer_sleep(myproc(), 100);
     // }
 #endif
-
-
 
 #ifdef CONF_MKFS
     mkfs_tmp_test();
@@ -54,7 +53,6 @@ static void init_thread(void *a)
     spin_unlock(&p->lock);
 
     intr_off();
-
     do_exec("/efs/init", NULL);
 }
 

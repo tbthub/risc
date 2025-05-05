@@ -8,6 +8,9 @@
 #include "std/string.h"
 #include "mm/kmalloc.h"
 #include "riscv.h"
+#include "sys.h"
+#include "fs/fcntl.h"
+
 // 需要 file_lock
 
 static int is_valid_elf(struct elf64_hdr *ehdr)
@@ -72,32 +75,32 @@ static uint32_t elf_calc_size(ElfParser *parser)
 // 初始化ELF解析器
 int elf_parser_init(ElfParser *parser, const char *path)
 {
-    parser->file = file_open(path, FILE_READ);
-    if (!parser->file)
+    parser->file = do_open(path, O_RDONLY, 0);
+    if (parser->file < 0)
         return -1;
 
     // 读取ELF头
-    file_read_no_off(parser->file, 0, &parser->ehdr, sizeof(struct elf64_hdr));
+    k_file_read_no_off(parser->file, 0, &parser->ehdr, sizeof(struct elf64_hdr));
     if (!is_valid_elf(&parser->ehdr)) {
-        file_close(parser->file);
+        do_close(parser->file);
         return -1;
     }
 
     // 读取程序段表
     parser->phdrs = kmalloc(sizeof(struct proghdr) * parser->ehdr.phnum, 0);
-    file_read_no_off(parser->file, parser->ehdr.phoff, parser->phdrs, sizeof(struct proghdr) * parser->ehdr.phnum);
+    k_file_read_no_off(parser->file, parser->ehdr.phoff, parser->phdrs, sizeof(struct proghdr) * parser->ehdr.phnum);
 
     // 计算文件加载大小
     elf_calc_size(parser);
 
     // 读取节头表
     parser->shdrs = kmalloc(sizeof(Elf64_Shdr) * parser->ehdr.shnum, 0);
-    file_read_no_off(parser->file, parser->ehdr.shoff, parser->shdrs, sizeof(Elf64_Shdr) * parser->ehdr.shnum);
+    k_file_read_no_off(parser->file, parser->ehdr.shoff, parser->shdrs, sizeof(Elf64_Shdr) * parser->ehdr.shnum);
 
     // 读取节名字符串表
     Elf64_Shdr *shstrtab_shdr = &parser->shdrs[parser->ehdr.shstrndx];
     parser->shstrtab = kmalloc(shstrtab_shdr->sh_size, 0);
-    file_read_no_off(parser->file, shstrtab_shdr->sh_offset, parser->shstrtab, shstrtab_shdr->sh_size);
+    k_file_read_no_off(parser->file, shstrtab_shdr->sh_offset, parser->shstrtab, shstrtab_shdr->sh_size);
 
     return 0;
 }
@@ -112,17 +115,17 @@ int elf_parse_dynamic_sections(ElfParser *parser)
         if (strcmp(name, ".dynsym") == 0) {
             // printk("find dynsym\n");
             parser->dynsym = kmalloc(shdr->sh_size, 0);
-            file_read_no_off(parser->file, shdr->sh_offset, parser->dynsym, shdr->sh_size);
+            k_file_read_no_off(parser->file, shdr->sh_offset, parser->dynsym, shdr->sh_size);
         }
         else if (strcmp(name, ".dynstr") == 0) {
             // printk("find dynstr\n");
             parser->dynstr = kmalloc(shdr->sh_size, 0);
-            file_read_no_off(parser->file, shdr->sh_offset, parser->dynstr, shdr->sh_size);
+            k_file_read_no_off(parser->file, shdr->sh_offset, parser->dynstr, shdr->sh_size);
         }
         else if (strcmp(name, ".rela.dyn") == 0) {
             // printk("find rela.dyn\n");
             parser->rela_dyn = kmalloc(shdr->sh_size, 0);
-            file_read_no_off(parser->file, shdr->sh_offset, parser->rela_dyn, shdr->sh_size);
+            k_file_read_no_off(parser->file, shdr->sh_offset, parser->rela_dyn, shdr->sh_size);
             parser->rela_count = shdr->sh_size / sizeof(Elf64_Rela);
         }
         else if (strcmp(name, KINIT_SECTION) == 0) {
@@ -146,7 +149,7 @@ void elf_parser_destroy(ElfParser *parser)
     kfree(parser->dynsym);
     kfree(parser->dynstr);
     kfree(parser->rela_dyn);
-    file_close(parser->file);
+    do_close(parser->file);
 }
 
 

@@ -5,9 +5,9 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
-#include "../../fs/easyfs/easyfs.h"
+#include "fs/easyfs/easyfs.h"
 
-static void write_block(int fd, uint32_t_t block_no, const void *data, size_t size)
+static void write_block(int fd, uint32_t block_no, const void *data, size_t size)
 {
     off_t offset = block_no * BLOCK_SIZE;
 
@@ -69,18 +69,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    uint32_t_t total_blocks = disk_size / BLOCK_SIZE;
+    uint32_t total_blocks = disk_size / BLOCK_SIZE;
     // 计算 inode 数量：取文件数（disk_size / avg_file_size）与磁盘大小的 1% 之间的较大者
-    uint32_t_t inode_count = MAX(disk_size / AVG_FILE_SIZE, total_blocks * 0.01);
+    uint32_t inode_count = MAX(disk_size / AVG_FILE_SIZE, total_blocks * 0.01);
     // 计算 inode 位图所占用的块数
-    uint32_t_t inode_map_blocks = (uint32_t_t)ceil((double)inode_count / 8 / BLOCK_SIZE);
+    uint32_t inode_map_blocks = (uint32_t)ceil((double)inode_count / 8 / BLOCK_SIZE);
     // 计算 inode 区域所占用的块数
-    uint32_t_t inode_area_blocks = (uint32_t_t)ceil((double)(inode_count * INODE_SIZE) / BLOCK_SIZE);
+    uint32_t inode_area_blocks = (uint32_t)ceil((double)(inode_count * INODE_SIZE) / BLOCK_SIZE);
 
     // 数据块数量
-    uint32_t_t data_blocks = total_blocks;
+    uint32_t data_blocks = total_blocks;
     // 计算数据块位图所占用的块数
-    uint32_t_t data_map_blocks = (uint32_t_t)ceil((double)data_blocks / 8 / BLOCK_SIZE);
+    uint32_t data_map_blocks = (uint32_t)ceil((double)data_blocks / 8 / BLOCK_SIZE);
 
     easy_sb.inode_count = inode_count - 1; // 0 号不用
     easy_sb.inode_free = inode_count - 2;  // 0 和 root

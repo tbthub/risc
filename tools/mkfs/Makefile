@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lm -I . -I../../include
+CFLAGS = -lm -I . -I../../include -I../..
 
 DISK ?= virtio_disk.img
 DISK_SIZE = 500M

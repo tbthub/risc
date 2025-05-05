@@ -10,20 +10,20 @@
 struct elf64_hdr
 {
     uint32_t magic;  // must equal ELF_MAGIC
-    uchar elf[12];
-    ushort type;
-    ushort machine;
+    uint8_t elf[12];
+    uint16_t type;
+    uint16_t machine;
     uint32_t version;
     uint64_t entry;
     uint64_t phoff;
     uint64_t shoff;
     uint32_t flags;
-    ushort ehsize;
-    ushort phentsize;
-    ushort phnum;
-    ushort shentsize;
-    ushort shnum;
-    ushort shstrndx;
+    uint16_t ehsize;
+    uint16_t phentsize;
+    uint16_t phnum;
+    uint16_t shentsize;
+    uint16_t shnum;
+    uint16_t shstrndx;
 };
 
 // Program section header
@@ -119,7 +119,7 @@ typedef struct ElfParser
     uint32_t rela_count;       // 重定位条目数
     uint64_t mod_init_offset;  // init函数偏移
     uint64_t mod_exit_offset;  // exit函数偏移
-    struct file *file;       // 关联的文件对象 //@TODO
+    int file;       // 关联的文件对象
     uint32_t mem_sz;           // ? 模块的BSS在文件显示合并在数据段，占用空间
 } ElfParser;
 

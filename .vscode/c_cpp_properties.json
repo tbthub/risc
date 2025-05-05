@@ -6,7 +6,8 @@
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/kernel",
-                "${workspaceFolder}/user/include"
+                "${workspaceFolder}/user/include",
+                "${workspaceFolder}"
             ],
             "defines": [],
             "cStandard": "gnu11",
