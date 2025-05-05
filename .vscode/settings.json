@@ -75,5 +75,6 @@
     "efs.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "C_Cpp.clang_format_style": "file"
 }
