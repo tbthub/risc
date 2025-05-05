@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stddef.h>
-#include "vfs/vfs_io.h"
+#include "fs/vfs/vfs_io.h"
 
 // 文件节点结构体（链表形式）
 typedef struct simfs_file_node {
@@ -30,14 +30,6 @@ typedef struct simfs_file_t {
     simfs_file_node_t *node; // 指向链表中的文件节点
     size_t pos;              // 当前读写位置
 } simfs_file_t;
-
-int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode);
-int32_t simfs_read(vfs_file_context_t *context, uint8_t *buffer, size_t size);
-int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size);
-int8_t simfs_close(vfs_file_context_t *context);
-void *simfs_mount(void *mount_ptr);
-int8_t simfs_umount(void *mount_ptr);
-void simfs_io_table_init(vfs_io_t *table);
 
 #endif
 #ifdef __cplusplus

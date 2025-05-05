@@ -11,7 +11,7 @@
 #include "riscv.h"
 #include "std/stddef.h"
 #include "vm.h"
-#include "vfs/vfs_process.h"
+#include "fs/vfs/vfs_process.h"
 
 // Saved registers for kernel context switches.
 struct context {

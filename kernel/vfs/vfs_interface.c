@@ -1,4 +1,4 @@
-#include "vfs/vfs_interface.h"
+#include "fs/vfs/vfs_interface.h"
 
 #include "core/locks/rwlock.h"
 #include "core/proc.h"
@@ -8,7 +8,7 @@
 #include "mm/mm.h"
 #include "std/stdio.h"
 #include "std/string.h"
-#include "vfs/vfs_module.h"
+#include "fs/vfs/vfs_module.h"
 
 typedef struct vfs_hash_t
 {

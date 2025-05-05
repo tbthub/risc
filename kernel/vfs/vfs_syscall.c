@@ -1,11 +1,9 @@
 #include "core/proc.h"
-#include "fs/efs/efs.h"
-#include "fs/simfs/simfs.h"
 #include "std/stdint.h"
 #include "sys.h"
-#include "vfs/vfs_interface.h"
-#include "vfs/vfs_io.h"
-#include "vfs/vfs_module.h"
+#include "fs/vfs/vfs_interface.h"
+#include "fs/vfs/vfs_io.h"
+#include "fs/vfs/vfs_module.h"
 
 
 int do_open(const char *path, int flags, int mod)
@@ -31,22 +29,6 @@ int do_write(int fd, void *buf, size_t count)
 int do_lseek(int fd, off_t offset, int whence)
 {
     return vfs_lseek(fd, offset, whence);
-}
-
-int do_setup()
-{
-    vfs_io_t simfs_table;
-    simfs_io_table_init(&simfs_table);
-    simfs_table.mountTag = "init";
-    assert(vfs_mount(&simfs_table, NULL) >= 0, "simfs_mount");
-
-    extern struct block_device virtio_disk;
-    vfs_io_t efs_table;
-    efs_table.mountTag = "efs";
-    efs_io_table_init(&efs_table);
-    assert(vfs_mount(&efs_table, &virtio_disk) >= 0, "efs_mount");
-    printk("do_setup\n");
-    return 0;
 }
 
 int k_copy_file(struct task_struct *ch)

@@ -7,10 +7,10 @@
 #include "elf.h"
 #include "lib/hash.h"
 #include "lib/list.h"
-#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "std/stddef.h"
+#include "std/string.h"
 #include "sys.h"
 
 #define MOD_MAX_TOP 0x80000000
@@ -289,16 +289,14 @@ static void kmods_hash_init()
     }
 }
 
-// const struct kernel_symbol *lookup_symbol(const char *name) {
-//     for (struct kernel_symbol *sym = __start___ksymtab;
-//          sym < __stop___ksymtab;
-//          sym++) {
-//         if (strcmp(sym->name, name) == 0) {
-//             return sym;
-//         }
-//     }
-//     return NULL;
-// }
+
+void kmodules_init()
+{
+    // 执行所有的初始化函数
+    initcall_t *k_inits;
+    for (k_inits = (initcall_t *)kmod_init_start; k_inits < (initcall_t *)kmod_init_end; k_inits++)
+        (*k_inits)();
+}
 
 void kmods_init()
 {
@@ -311,10 +309,6 @@ void kmods_init()
     Kmods.next_base = MOD_BASE + 2 * PGSIZE;
 
     kmods_hash_init();
-    // 执行所有的初始化函数
-    initcall_t *k_inits;
-    for (k_inits = (initcall_t *)kmod_init_start; k_inits < (initcall_t *)kmod_init_end; k_inits++)
-        (*k_inits)();
 }
 
 int64_t do_module(const char *path, int mode)

@@ -1,5 +1,5 @@
 #include "dev/blk/blk_dev.h"
-#include "easyfs.h"
+#include "efs.h"
 #include "lib/atomic.h"
 #include "lib/math.h"
 #include "mm/mm.h"
@@ -7,6 +7,7 @@
 #include "std/string.h"
 
 struct easy_m_inode root_m_inode;
+
 
 // 根据 inode 计算在磁盘 inode_area 的 offset
 static inline int offset_ino(int ino)
@@ -18,7 +19,7 @@ static inline int offset_ino(int ino)
 // 搭配 efs_i_alloc 后 fill
 static struct easy_m_inode *efs_i_alloc()
 {
-    struct easy_m_inode *m_inode = kmem_cache_alloc(&efs_inode_kmem_cache);
+    struct easy_m_inode *m_inode = kmem_cache_alloc(&efs_inode_kc);
     if (!m_inode)
         panic("efs_ialloc.\n");
 

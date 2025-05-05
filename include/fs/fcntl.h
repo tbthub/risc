@@ -5,7 +5,7 @@ extern "C" {
 #ifndef _FCNTL_H
 #define _FCNTL_H
 
-#include "vfs/vfs_io.h"
+#include "fs/vfs/vfs_io.h"
 
 #define O_RDONLY VFS_O_RDONLY
 #define O_WRONLY VFS_O_WRONLY

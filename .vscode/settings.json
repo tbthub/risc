@@ -46,7 +46,7 @@
     "t_head.h": "c",
     "timer.h": "c",
     "bitmap.h": "c",
-    "easyfs.h": "c",
+    "efs.h": "c",
     "fs.h": "c",
     "hash.h": "c",
     "future": "c",
@@ -72,7 +72,10 @@
     "khook.h": "c",
     "kprobe.h": "c",
     "stdint.h": "c",
-    "efs.h": "c"
+    "simfs.h": "c",
+    "efile.h": "c",
+    "fcntl.h": "c",
+    "error.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true,

@@ -1,12 +1,17 @@
-#include "vfs/vfs_io.h"
-#include "vfs/vfs_interface.h"
 #include "fs/simfs/simfs.h"
-#include <string.h>
+
+#include "core/module.h"
+#include "fs/vfs/vfs_interface.h"
+#include "fs/vfs/vfs_io.h"
+#include "fs/vfs/vfs_module.h"
+
 #include <stdio.h>
+#include <string.h>
 
 //--------------------------------------------------
 // 内部工具函数：通过路径查找文件节点（假设调用者已持有适当的锁）
-static simfs_file_node_t *find_file_node_locked(simfs_t *fs, const char *path) {
+static simfs_file_node_t *find_file_node_locked(simfs_t *fs, const char *path)
+{
     simfs_file_node_t *current = fs->file_list;
     while (current) {
         if (strcmp(current->path, path) == 0) {
@@ -18,7 +23,8 @@ static simfs_file_node_t *find_file_node_locked(simfs_t *fs, const char *path) {
 }
 
 // 内部工具函数：通过路径查找文件节点（使用读锁）
-static simfs_file_node_t *find_file_node(simfs_t *fs, const char *path) {
+static simfs_file_node_t *find_file_node(simfs_t *fs, const char *path)
+{
     vfs_rlock_acquire(fs->lock);
     simfs_file_node_t *node = find_file_node_locked(fs, path);
     vfs_rlock_release(fs->lock);
@@ -27,8 +33,9 @@ static simfs_file_node_t *find_file_node(simfs_t *fs, const char *path) {
 
 //--------------------------------------------------
 // 打开文件（自动创建新文件）
-int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode) {
-    simfs_t *fs          = (simfs_t *)context->mount_ptr;
+static int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode)
+{
+    simfs_t *fs = (simfs_t *)context->mount_ptr;
     const char *path_str = (const char *)path;
 
     // 查找现有文件
@@ -36,8 +43,8 @@ int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mod
 
     // 如果文件不存在且需要创建
     if (!node && (flags & VFS_O_CREAT)) {
-        vfs_wlock_acquire(fs->lock);                // 获取写锁以修改文件列表
-        node = find_file_node_locked(fs, path_str); // 再次检查是否存在
+        vfs_wlock_acquire(fs->lock);                 // 获取写锁以修改文件列表
+        node = find_file_node_locked(fs, path_str);  // 再次检查是否存在
         if (!node) {
             node = (simfs_file_node_t *)vfs_malloc(sizeof(simfs_file_node_t));
             if (node == NULL) {
@@ -61,36 +68,37 @@ int8_t simfs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mod
             }
 
             strcpy(node->path, path_str);
-            node->data     = vfs_malloc(16);
-            node->size     = 0;
+            node->data = vfs_malloc(16);
+            node->size = 0;
             node->capacity = 16;
 
             // 插入链表头部
-            node->next    = fs->file_list;
+            node->next = fs->file_list;
             fs->file_list = node;
         }
         vfs_wlock_release(fs->lock);
     }
 
     if (!node)
-        return -1; // 文件不存在且未创建
+        return -1;  // 文件不存在且未创建
 
     // 创建文件上下文
     simfs_file_t *file_ctx = (simfs_file_t *)vfs_malloc(sizeof(simfs_file_t));
     if (!file_ctx)
         return -1;
 
-    file_ctx->node    = node;
+    file_ctx->node = node;
     context->file_ptr = (uint8_t *)file_ctx;
 
     // 根据打开模式重置位置
     if (flags & VFS_O_APPEND) {
         file_ctx->pos = node->size;
-    } else {
+    }
+    else {
         file_ctx->pos = 0;
     }
 
-    return 0; // 成功
+    return 0;  // 成功
 
 init_new_node_failed:
     return -1;
@@ -98,13 +106,14 @@ init_new_node_failed:
 
 //--------------------------------------------------
 // 读取文件
-int32_t simfs_read(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
-    simfs_file_t *file_ctx  = (simfs_file_t *)context->file_ptr;
+static int32_t simfs_read(vfs_file_context_t *context, uint8_t *buffer, size_t size)
+{
+    simfs_file_t *file_ctx = (simfs_file_t *)context->file_ptr;
     simfs_file_node_t *node = file_ctx->node;
 
     // 计算可读字节数
     vfs_rlock_acquire(node->lock);
-    size_t readable   = node->size - file_ctx->pos;
+    size_t readable = node->size - file_ctx->pos;
     size_t bytes_read = (size < readable) ? size : readable;
 
     if (bytes_read > 0) {
@@ -118,8 +127,9 @@ int32_t simfs_read(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
 
 //--------------------------------------------------
 // 写入文件（自动扩展数据空间）
-int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
-    simfs_file_t *file_ctx  = (simfs_file_t *)context->file_ptr;
+static int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size)
+{
+    simfs_file_t *file_ctx = (simfs_file_t *)context->file_ptr;
     simfs_file_node_t *node = file_ctx->node;
 
     vfs_wlock_acquire(node->lock);
@@ -128,7 +138,7 @@ int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
     size_t required_size = file_ctx->pos + size;
     if (required_size > node->capacity) {
         size_t new_capacity = required_size + (required_size >> 1);
-        uint8_t *new_data   = vfs_malloc(new_capacity);
+        uint8_t *new_data = vfs_malloc(new_capacity);
         if (!new_data) {
             vfs_wlock_release(node->lock);
             return -1;
@@ -137,7 +147,7 @@ int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
         memset(new_data + node->size, 0, new_capacity - node->size);
         memcpy(new_data, node->data, node->size);
         vfs_free(node->data);
-        node->data     = new_data;
+        node->data = new_data;
         node->capacity = new_capacity;
     }
 
@@ -153,7 +163,8 @@ int32_t simfs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
 
 //--------------------------------------------------
 // 关闭文件
-int8_t simfs_close(vfs_file_context_t *context) {
+static int8_t simfs_close(vfs_file_context_t *context)
+{
     simfs_file_t *file_ctx = (simfs_file_t *)context->file_ptr;
     vfs_free(file_ctx);
     context->file_ptr = NULL;
@@ -162,12 +173,13 @@ int8_t simfs_close(vfs_file_context_t *context) {
 
 //--------------------------------------------------
 // 挂载文件系统
-void* simfs_mount(void* arg) {
+static void *simfs_mount(void *arg)
+{
     simfs_t *fs = (simfs_t *)vfs_malloc(sizeof(simfs_t));
 
     if (fs) {
         fs->file_list = NULL;
-        fs->lock      = vfs_rwlock_init();
+        fs->lock = vfs_rwlock_init();
         if (!fs->lock) {
             vfs_free(fs);
             fs = NULL;
@@ -179,8 +191,9 @@ void* simfs_mount(void* arg) {
 
 //--------------------------------------------------
 // 卸载文件系统（清理所有资源）
-int8_t simfs_umount(void *mount_ptr) {
-    simfs_t *fs                = (simfs_t *)mount_ptr;
+static int8_t simfs_umount(void *mount_ptr)
+{
+    simfs_t *fs = (simfs_t *)mount_ptr;
     simfs_file_node_t *current = fs->file_list;
 
     // 遍历释放所有文件节点
@@ -204,7 +217,8 @@ int8_t simfs_umount(void *mount_ptr) {
 
 //--------------------------------------------------
 // 调整文件指针位置
-int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
+static int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence)
+{
     simfs_file_t *file_ctx = (simfs_file_t *)context->file_ptr;
     if (!file_ctx || !file_ctx->node) {
         return -1;
@@ -242,15 +256,34 @@ int32_t simfs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
     return (int32_t)new_pos;
 }
 
-
 //--------------------------------------------------
 // 文件系统表初始化
-void simfs_io_table_init(vfs_io_t *table) {
-    table->open   = simfs_open;
-    table->read   = simfs_read;
-    table->write  = simfs_write;
-    table->close  = simfs_close;
-    table->mount  = simfs_mount;
+static void simfs_io_table_init(vfs_io_t *table)
+{
+    table->open = simfs_open;
+    table->read = simfs_read;
+    table->write = simfs_write;
+    table->close = simfs_close;
+    table->mount = simfs_mount;
     table->umount = simfs_umount;
-    table->lseek  = simfs_lseek;
+    table->lseek = simfs_lseek;
 }
+
+static int simfs_init()
+{
+    printk("simfs_init start\n");
+    vfs_io_t simfs_table;
+    simfs_io_table_init(&simfs_table);
+    simfs_table.mountTag = "init";
+    assert(vfs_mount(&simfs_table, NULL) >= 0, "simfs_mount");
+    printk("simfs_init done\n");
+    return 0;
+}
+
+static void simfs_exit()
+{
+    printk("simfs_exit\n");
+}
+
+module_init_level(simfs_init, INIT_LEVEL_FS);
+module_exit_level(simfs_exit, INIT_LEVEL_FS);

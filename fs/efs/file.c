@@ -1,15 +1,12 @@
-#include "file.h"
-#include "easyfs.h"
-#include "core/proc.h"
-#include "error.h"
+#include "efs.h"
 #include "fs/fcntl.h"
 #include "std/string.h"
 #include "mm/mm.h"
 #include "mm/slab.h"
 
 
-static struct file *file_alloc(flags_t flags) {
-    struct file *f = kmem_cache_alloc(&file_kmem_cache);
+static struct efs_file *efs_file_alloc(flags_t flags) {
+    struct efs_file *f = kmem_cache_alloc(&efs_file_kc);
     if (!f)
         return NULL;
     f->f_ip  = NULL;
@@ -19,42 +16,36 @@ static struct file *file_alloc(flags_t flags) {
     return f;
 }
 
-static inline void file_free(struct file *f) {
+static inline void efs_file_free(struct efs_file *f) {
     assert(f != NULL, "file_free\n");
     kmem_cache_free(f);
 }
 
-// static struct file *file_dup(struct file *f) {
-//     assert(atomic_read(&f->f_ref) > 0, "file_dup\n");
-//     atomic_inc(&f->f_ref);
-//     return f;
-// }
-
-static struct file *file_open(const char *file_path, flags_t flags) {
+static struct efs_file *efs_file_open(const char *file_path, flags_t flags) {
     struct easy_m_inode *i = efs_d_namei(file_path);
     if (!i) {
         printk("file_open efs_d_namei\n");
         return NULL;
     }
 
-    struct file *f = file_alloc(flags);
+    struct efs_file *f = efs_file_alloc(flags);
     atomic_set(&f->f_ref, 1);
     f->f_ip  = i;
     f->f_off = 0;
     return f;
 }
 
-static void file_close(struct file *f) {
+static void efs_file_close(struct efs_file *f) {
     assert(atomic_read(&f->f_ref) > 0, "file_close");
     // 如果自减后为 0，则可以释放
     if (atomic_dec_and_test(&f->f_ref)) {
         efs_i_put(f->f_ip);
-        file_free(f);
+        efs_file_free(f);
     }
     // 有其他线程也在引用，则仅仅减
 }
 
-static int file_read(struct file *f, void *vaddr, uint32_t len) {
+static int efs_file_read(struct efs_file *f, void *vaddr, uint32_t len) {
     int r = 0;
 
     assert(f->f_ip != NULL, "file_read f->f_ip\n");
@@ -65,7 +56,7 @@ static int file_read(struct file *f, void *vaddr, uint32_t len) {
     return r;
 }
 
-static int file_write(struct file *f, void *vaddr, uint32_t len) {
+static int efs_file_write(struct efs_file *f, void *vaddr, uint32_t len) {
     int w = 0;
     assert(f->f_ip != NULL, "file_write f->f_ip\n");
     if ((w = efs_i_write(f->f_ip, f->f_off, len, vaddr)) >= 0)
@@ -75,7 +66,7 @@ static int file_write(struct file *f, void *vaddr, uint32_t len) {
     return w;
 }
 
-static int file_llseek(struct file *f, uint32_t offset, int whence) {
+static int efs_file_llseek(struct efs_file *f, uint32_t offset, int whence) {
     assert(f->f_ip != NULL, "file_llseek f->f_ip\n");
 
     int ret = 0;
@@ -117,7 +108,7 @@ static int file_llseek(struct file *f, uint32_t offset, int whence) {
 }
 
 int8_t efs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode) {
-    struct file *f = file_open((const char *)path, flags);
+    struct efs_file *f = efs_file_open((const char *)path, flags);
     if (!f)
         return -1;
     context->file_ptr = (uint8_t *)f;
@@ -125,34 +116,34 @@ int8_t efs_open(vfs_file_context_t *context, uint8_t *path, int flags, int mode)
 }
 
 int8_t efs_close(vfs_file_context_t *context) {
-    struct file *f = (struct file *)context->file_ptr;
+    struct efs_file *f = (struct efs_file *)context->file_ptr;
     assert(f != NULL, "efs_close f is NULL!\n");
-    file_close(f);
+    efs_file_close(f);
     return 0;
 }
 
 int32_t efs_read(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
-    struct file *f = (struct file *)context->file_ptr;
-    return (int32_t)file_read(f, (void *)buffer, size);
+    struct efs_file *f = (struct efs_file *)context->file_ptr;
+    return (int32_t)efs_file_read(f, (void *)buffer, size);
 }
 
 int32_t efs_write(vfs_file_context_t *context, uint8_t *buffer, size_t size) {
-    struct file *f = (struct file *)context->file_ptr;
-    return (int32_t)file_write(f, (void *)buffer, size);
+    struct efs_file *f = (struct efs_file *)context->file_ptr;
+    return (int32_t)efs_file_write(f, (void *)buffer, size);
 }
 
 int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
-    struct file *f = (struct file *)context->file_ptr;
-    return (int32_t)file_llseek(f, offset, whence);
+    struct efs_file *f = (struct efs_file *)context->file_ptr;
+    return (int32_t)efs_file_llseek(f, offset, whence);
 }
 
 
-// inline void file_lock(struct file *f)
+// inline void file_lock(struct efs_file *f)
 // {
 //     mutex_lock(&f->f_mutex);  // 锁定文件操作
 // }
 
-// inline void file_unlock(struct file *f)
+// inline void file_unlock(struct efs_file *f)
 // {
 //     mutex_unlock(&f->f_mutex);  // 解锁文件操作
 // }
@@ -160,13 +151,13 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 // // TODO 创建、权限检查
 // int64 do_open(const char *path, flags_t flags, int mod)
 // {
-//     struct file *f = file_open(path, flags);
+//     struct efs_file *f = file_open(path, flags);
 //     if (!f) {
 //         printk("No such entity\n");
 //         return -ENOENT;
 //     }
 
-//     struct files_struct *files = &myproc()->task->files;
+//     struct efs_files_struct *files = &myproc()->task->files;
 //     spin_lock(&files->file_lock);
 //     int fd = get_unused_fd(files);
 //     if (fd == -EMFILE) {
@@ -185,7 +176,7 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 // int64 do_close(fd_t fd)
 // {
 //     assert(fd > -1 && fd < NOFILE, "do_close fd");
-//     struct files_struct *files = &myproc()->task->files;
+//     struct efs_files_struct *files = &myproc()->task->files;
 
 //     spin_lock(&files->file_lock);
 //     fd_close(files, fd);
@@ -194,11 +185,11 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 //     return 0;
 // }
 
-// struct file *fget(struct files_struct *files, int fd)
+// struct efs_file *fget(struct efs_files_struct *files, int fd)
 // {
 //     assert(fd > -1 && fd < NOFILE, "fget fd");
 //     spin_lock(&files->file_lock);
-//     struct file *f = files->fdt[fd];
+//     struct efs_file *f = files->fdt[fd];
 //     if (!f)
 //         panic("fget file NULL\n");
 //     file_dup(f);  // 防止使用期间被释放
@@ -206,7 +197,7 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 //     return f;
 // }
 
-// struct file *fput(struct files_struct *files, struct file *f)
+// struct efs_file *fput(struct efs_files_struct *files, struct efs_file *f)
 // {
 //     assert(f != NULL, "fput");
 //     spin_lock(&files->file_lock);
@@ -225,8 +216,8 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 //     int bytes_to_read;
 //     assert(count > 0, "do_read count");
 
-//     struct files_struct *files = &myproc()->task->files;
-//     struct file *f = fget(files, fd);
+//     struct efs_files_struct *files = &myproc()->task->files;
+//     struct efs_file *f = fget(files, fd);
 
 //     char *kbuf = __alloc_page(0);
 //     if (!kbuf) {
@@ -265,8 +256,8 @@ int32_t efs_lseek(vfs_file_context_t *context, int32_t offset, int whence) {
 //     int bytes_to_write;
 //     assert(count > 0, "do_write count");
 
-//     struct files_struct *files = &myproc()->task->files;
-//     struct file *f = fget(files, fd);
+//     struct efs_files_struct *files = &myproc()->task->files;
+//     struct efs_file *f = fget(files, fd);
 
 //     char *kbuf = __alloc_page(0);
 //     if (!kbuf) {

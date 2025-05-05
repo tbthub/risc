@@ -1,9 +1,9 @@
 
-#include "vfs/vfs_io.h"
-#include "vfs/vfs_interface.h"
-#include "vfs/vfs_util.h"
-#include "vfs/vfs_process.h"
-#include "vfs/vfs_module.h"
+#include "fs/vfs/vfs_io.h"
+#include "fs/vfs/vfs_interface.h"
+#include "fs/vfs/vfs_util.h"
+#include "fs/vfs/vfs_process.h"
+#include "fs/vfs/vfs_module.h"
 #include <string.h>
 #include <stdio.h>
 

@@ -3,8 +3,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "vfs/vfs_interface.h"
-#include "vfs/vfs_process.h"
+#include "fs/vfs/vfs_interface.h"
+#include "fs/vfs/vfs_process.h"
 
 static char *resolve_path(const char *root, const char *path) {
     char *stack[64];

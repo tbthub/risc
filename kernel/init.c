@@ -9,28 +9,23 @@
 
 extern struct thread_info *init_t;
 
-// 内存虚拟块设备
-extern void mvirt_blk_dev_init();
-extern void virtio_disk_init();
-
-extern struct block_device virtio_disk;
-extern int efs_mount(struct block_device *bd);
 extern __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]);
 extern void kswapd_init();
 
-extern pid_t do_waitpid(pid_t pid, int *status, int options);
 extern int64_t do_module(const char *path, int mode);
+extern void kmodules_init();
 
 // 第一个内核线程
 static void init_thread(void *a)
 {
     devs_init();
     work_queue_init();
-    virtio_disk_init();
-    do_setup();
+
+    kmodules_init();
+
 #ifdef CONF_MKMOD
     do_module("/efs/mm_alarmer", 1);
-    do_module("/efs/sys_probe", 1);
+    // do_module("/efs/sys_probe", 1);
     
     // while (1) {
     // thread_timer_sleep(myproc(), 100);

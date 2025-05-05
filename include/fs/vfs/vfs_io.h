@@ -5,7 +5,7 @@ extern "C" {
 #ifndef _VFS_IO_H
 #define _VFS_IO_H
 
-#include "vfs/vfs_interface.h"
+#include "vfs_interface.h"
 #include <stdint.h>
 #include <stddef.h>
 

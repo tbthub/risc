@@ -7,7 +7,7 @@ extern "C" {
 #define _SYS_H
 
 #include "core/proc.h"
-#include "vfs/vfs_io.h"
+#include "fs/vfs/vfs_io.h"
 #include "std/stddef.h"
 #include "fs/fcntl.h"
 
@@ -18,7 +18,6 @@ int do_write(int fd, void *buf, size_t count);
 int do_lseek(int fd, off_t offset, int whence);
 int do_dup(int fd);
 int do_dup2(int oldfd, int newfd);
-int do_setup();
 
 int k_copy_file(struct task_struct *ch);
 int k_file_init(struct task_struct *task);

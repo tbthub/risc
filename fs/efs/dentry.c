@@ -1,4 +1,4 @@
-#include "easyfs.h"
+#include "efs.h"
 #include "std/string.h"
 #include "dev/blk/blk_dev.h"
 #include "mm/kmalloc.h"
@@ -61,7 +61,7 @@ static inline void efs_d_addsb(struct easy_dentry *d) {
 }
 
 static struct easy_dentry *efs_d_alloc() {
-    struct easy_dentry *d = kmem_cache_alloc(&efs_dentry_kmem_cache);
+    struct easy_dentry *d = kmem_cache_alloc(&efs_dentry_kc);
     assert(d != NULL, "efs_d_alloc");
 
     d->d_inode  = NULL;

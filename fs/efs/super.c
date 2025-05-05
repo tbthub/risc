@@ -1,4 +1,4 @@
-#include "easyfs.h"
+#include "efs.h"
 #include "mm/mm.h"
 #include "std/string.h"
 #include "lib/bitmap.h"
@@ -82,7 +82,6 @@ static void efs_sb_fill() {
 }
 
 // 写回超级块(更新) 需要持有 m_esb s_sleep_lock
-
 static __attribute__((noreturn)) void efs_sync() {
 #ifdef DEBUG_EFS_SYNC
     int i_dirty = 0;

@@ -46,9 +46,7 @@ extern struct kmem_cache thread_info_kmem_cache;
 extern struct kmem_cache buf_kmem_cache;
 extern struct kmem_cache bio_kmem_cache;
 extern struct kmem_cache timer_kmem_cache;
-extern struct kmem_cache efs_inode_kmem_cache;
-extern struct kmem_cache efs_dentry_kmem_cache;
-extern struct kmem_cache file_kmem_cache;
+
 extern struct kmem_cache tf_kmem_cache;
 extern struct kmem_cache vma_kmem_cache;
 

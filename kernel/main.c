@@ -36,18 +36,17 @@ extern int t_mem_test4();
 extern void vfs_init();
 void main() {
     if (cpuid() == 0) {
-
+        // uart 暂时这样初始化，使用模块的话，不能提前打印一些信息
         cons_init();
-        mm_init();
-        // t_mem_test4();
-        // intr_off();
-        // for (;;);
 
+        mm_init();
         kvm_init();
         trap_init();
         plic_init();
+        
         proc_init();
         sched_init();
+
         kvm_init_hart();
         trap_inithart();
         plic_inithart();

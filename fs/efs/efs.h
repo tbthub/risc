@@ -5,6 +5,12 @@
 #include "lib/list.h"
 #include "core/locks/sleeplock.h"
 #include "dev/blk/blk_dev.h"
+#include "core/locks/mutex.h"
+#include "lib/atomic.h"
+#include "param.h"
+#include "fs/fcntl.h"
+#include "fs/vfs/vfs_io.h"
+#include "fs/vfs/vfs_module.h"
 
 
 #define EASYFS_MAGIC 0x12345678
@@ -146,6 +152,17 @@ struct easy_dentry
     flags_t d_flags;
     atomic_t refcnt;
 };
+
+struct efs_file {
+    atomic_t f_ref;
+    struct easy_m_inode *f_ip;
+    uint32_t f_off;
+    mutex_t f_mutex; // 读写互斥操作
+};
+
+extern struct kmem_cache efs_inode_kc;
+extern struct kmem_cache efs_dentry_kc;
+extern struct kmem_cache efs_file_kc;
 
 // 2. super block
 extern void efs_sb_init();

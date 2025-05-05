@@ -1,4 +1,3 @@
-// #include "core/proc.h"
 #include "kprobe.h"
 
 #include "core/export.h"
