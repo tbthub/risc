@@ -62,7 +62,7 @@ void file_close(struct file *f)
     // 有其他线程也在引用，则仅仅减
 }
 
-int file_read(struct file *f, void *vaddr, uint32 len)
+int file_read(struct file *f, void *vaddr, uint32_t len)
 {
     int r = 0;
     if (!TEST_FLAG(&f->f_flags, FILE_READ)) {
@@ -78,9 +78,9 @@ int file_read(struct file *f, void *vaddr, uint32 len)
     return r;
 }
 
-int file_read_no_off(struct file *f, uint32 off,void *vaddr, uint32 len)
+int file_read_no_off(struct file *f, uint32_t off,void *vaddr, uint32_t len)
 {
-    uint32 tmp = f->f_off;
+    uint32_t tmp = f->f_off;
     int r = 0;
 
     if (!TEST_FLAG(&f->f_flags, FILE_READ)) {
@@ -100,7 +100,7 @@ int file_read_no_off(struct file *f, uint32 off,void *vaddr, uint32 len)
     return r;
 }
 
-int file_write(struct file *f, void *vaddr, uint32 len)
+int file_write(struct file *f, void *vaddr, uint32_t len)
 {
     int w = 0;
     if (!TEST_FLAG(&f->f_flags, FILE_WRITE)) {
@@ -127,12 +127,12 @@ inline void file_unlock(struct file *f)
 
 
 
-int file_llseek(struct file *f, uint32 offset, int whence)
+int file_llseek(struct file *f, uint32_t offset, int whence)
 {
     assert(f->f_ip != NULL, "file_llseek f->f_ip\n");
 
     int ret = 0;
-    uint32 new_offset;
+    uint32_t new_offset;
     switch (whence) {
     case SEEK_SET:  // 从文件开头设置偏移量
         if (offset > efs_i_size(f->f_ip)) {

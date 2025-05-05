@@ -9,7 +9,7 @@
 #include "mm/mm.h"
 #include "riscv.h"
 
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 
 static struct
 {
@@ -32,16 +32,16 @@ static __attribute__((noreturn)) void kswapd(void *args)
         struct thread_info *t = fas->thread;
 
         file_lock(v->vm_file);
-        uint64 *new_page = __alloc_page(0);
+        uint64_t *new_page = __alloc_page(0);
         // file_llseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET);
         // file_read(v->vm_file, new_page, PGSIZE);
-        uint32 off = v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start);
+        uint32_t off = v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start);
         file_read_no_off(v->vm_file, off, new_page, PGSIZE);
         file_unlock(v->vm_file);
         // 映射到原来线程的页表去
-        mappages(mm->pgd, PGROUNDDOWN(fas->fault_addr), (uint64)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
+        mappages(mm->pgd, PGROUNDDOWN(fas->fault_addr), (uint64_t)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
 #ifdef DEBUG_SF_PFMAP
-        printk("pid: %d, f-maps: %p - %p\n", t->pid, PGROUNDDOWN(fas->fault_addr), (uint64)new_page);
+        printk("pid: %d, f-maps: %p - %p\n", t->pid, PGROUNDDOWN(fas->fault_addr), (uint64_t)new_page);
 #endif
 
         kfree(fas);
@@ -51,7 +51,7 @@ static __attribute__((noreturn)) void kswapd(void *args)
 }
 
 // 目前我们只处理文件缺页
-void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
+void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr)
 {
     assert(v->vm_file != NULL, "kswap_wake");
     struct fault_args_struct *fas = kmalloc(sizeof(struct fault_args_struct), 0);

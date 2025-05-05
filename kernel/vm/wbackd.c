@@ -7,7 +7,7 @@
 // #include "mm/page.h"
 // #include "fs/file.h"
 
-// extern pte_t *walk(pagetable_t pagetable, uint64 va, int alloc);
+// extern pte_t *walk(pagetable_t pagetable, uint64_t va, int alloc);
 
 
 // // TODO 放在 vma 根据每个 vma 来刷写?
@@ -15,7 +15,7 @@
 // // 需要保存时机的 pa，防止进程挂掉导致内容错误
 // struct wback_args {
 //     struct vm_area_struct *v;
-//     uint64 va;
+//     uint64_t va;
 //     struct page *page;
 //     struct list_head list;
 // };
@@ -41,7 +41,7 @@
 //         struct wback_args *wa = list_entry(list_pop(&kwback.wpages), struct wback_args, list);
 //         struct vm_area_struct *v = wa->v;
 //         struct page *page = wa->page;
-//         uint64 va = wa->va;
+//         uint64_t va = wa->va;
 
 //         SET_FLAG(&wa->page->flags, PG_WBACKING);  // 设置页面正在被写
 //         file_llseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(va - v->vm_start), SEEK_SET);
@@ -52,7 +52,7 @@
 //     }
 // }
 
-// static struct wback_args * wback_args_init( struct vm_area_struct *v ,uint64 va, struct page*pg)
+// static struct wback_args * wback_args_init( struct vm_area_struct *v ,uint64_t va, struct page*pg)
 // {
 //     struct wback_args * wa = kmalloc(sizeof(struct wback_args),0);
 //     if(!wa){
@@ -68,7 +68,7 @@
 // // 负责处理可写页面的返回
 // // 调用此函数将页面加入 kwback,此时可以确保页面被使用且不再伙伴系统中
 // // 我们复用其 buddy 链表，以节省内存开支
-// void kwback_page_wake(struct mm_struct *mm,  struct vm_area_struct *v ,uint64 va)
+// void kwback_page_wake(struct mm_struct *mm,  struct vm_area_struct *v ,uint64_t va)
 // {
 //     if ((va % PGSIZE) != 0)
 //         panic("kwback_page_wake (va % PGSIZE) != 0\n");
@@ -93,7 +93,7 @@
 // // 我们对每个页面采取自旋锁 + 标志位，每个用户程序使用 while test_flag sched的方式
 // // 使得产生类似睡眠效果。来代替对每个页面新增一个睡眠锁结构
 // // 返回值 !=0 则说明
-// flags_t kwback_page_test(struct mm_struct *mm, uint64 va)
+// flags_t kwback_page_test(struct mm_struct *mm, uint64_t va)
 // {
 //     if ((va % PGSIZE) != 0)
 //         panic("kwback_page_test (va % PGSIZE) != 0\n");

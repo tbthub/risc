@@ -34,7 +34,7 @@
 //     (SLAB_TASK_CNT + SLAB_TINFO_CNT + SLAB_BUF_CNT + SLAB_TIMER_CNT + SLAB_INDDE_CNT + SLAB_DENTRY_CNT + SLAB_FILE_CNT + SLAB_TF_CNT + SLAB_VMA_CNT + KMALLOC16 + KMALLOC32 + KMALLOC64 + KMALLOC128 + 
 //      KMALLOC256 + KMALLOC512 + KMALLOC1024 + KMALLOC2048 + KMALLOC4096 + KMALLOC8192)
 
-// static uint64 *mem_test[ALL];
+// static uint64_t *mem_test[ALL];
 
 // extern struct kmem_cache task_struct_kmem_cache;
 // extern struct kmem_cache thread_info_kmem_cache;
@@ -46,10 +46,10 @@
 // extern struct kmem_cache tf_kmem_cache;
 // extern struct kmem_cache vma_kmem_cache;
 
-// extern void *kmalloc(int size, uint32 flags);
+// extern void *kmalloc(int size, uint32_t flags);
 // extern void kfree(void *obj);
 // extern void mm_debug();
-// static int ele_exist(uint64 *p)
+// static int ele_exist(uint64_t *p)
 // {
 //     if (p == NULL) {
 //         panic("P == NULL!");
@@ -65,16 +65,16 @@
 // {
 //     int i;
 //     int start = 0;
-//     uint64 *ptr;
+//     uint64_t *ptr;
 //     memset(mem_test, 0, sizeof(mem_test));
 //     int aaa = 0;
 //     for (i = 0; i < PAGE_CNT; i++) {
 //         if (i % 3 == 0)
-//             ptr = (uint64 *)__alloc_pages(0, 3);
+//             ptr = (uint64_t *)__alloc_pages(0, 3);
 //         else if (i % 3 == 1)
-//             ptr = (uint64 *)__alloc_pages(0, 1);
+//             ptr = (uint64_t *)__alloc_pages(0, 1);
 //         else if (i % 3 == 2)
-//             ptr = (uint64 *)__alloc_page(0);
+//             ptr = (uint64_t *)__alloc_page(0);
 //         else
 //             ptr = NULL;
 //         if (!ptr) {
@@ -119,7 +119,7 @@
 
 //     for (int j = 0; j < sizeof(kmalloc_sizes) / sizeof(kmalloc_sizes[0]); j++) {
 //         for (i = 0; i < kmalloc_counts[j]; i++) {
-//             ptr = (uint64 *)kmalloc(kmalloc_sizes[j], 0);
+//             ptr = (uint64_t *)kmalloc(kmalloc_sizes[j], 0);
 //             if (!ptr) {
 //                 panic("kmalloc returned NULL\n");
 //             }
@@ -142,11 +142,11 @@
 //     mm_debug2();
 
 //     int i;
-//     uint64 *ptr;
+//     uint64_t *ptr;
 //     memset(mem_test, 0, sizeof(mem_test));
 //     // int aaa = 0;
 //     for (i = 0; i < PAGE_CNT; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 4);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 4);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -173,7 +173,7 @@
 //     mm_debug2();
 
 //     for (i = 0; i < PAGE_CNT; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 4);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 4);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -199,7 +199,7 @@
 //     printk("------------FREE ALL------------\n");
 
 //     for (i = 0; i < PAGE_CNT; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 3);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 3);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -235,12 +235,12 @@
 //     mm_debug();
 //     mm_debug2();
 //     int i;
-//     uint64 *ptr;
+//     uint64_t *ptr;
 //     memset(mem_test, 0, sizeof(mem_test));
 //     // int aaa = 0;
 //     printk("----------1----------\n");
 //     for (i = 0; i < PAGE_CNT; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 4);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 4);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -267,7 +267,7 @@
 
 //     printk("----------3---------- alloc forhead half\n");
 //     for (i = 0; i < PAGE_CNT / 2; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 4);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 4);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -294,7 +294,7 @@
 
 //     printk("----------5---------- alloc posthead half\n");
 //     for (i = PAGE_CNT / 2; i < PAGE_CNT; i++) {
-//         ptr = (uint64 *)__alloc_pages(0, i % 4);
+//         ptr = (uint64_t *)__alloc_pages(0, i % 4);
 //         if (!ptr) {
 //             panic("__alloc_page returned NULL\n");
 //         }
@@ -334,7 +334,7 @@
 // int t_mem_test4()
 // {
 //     int i;
-//     uint64 *ptr;
+//     uint64_t *ptr;
 //     memset(mem_test, 0, sizeof(mem_test));
 //     struct kmem_cache *slabs[] = {
 //             &task_struct_kmem_cache, &thread_info_kmem_cache, &buf_kmem_cache, &timer_kmem_cache, &efs_inode_kmem_cache, &efs_dentry_kmem_cache, &file_kmem_cache, &tf_kmem_cache, &vma_kmem_cache};

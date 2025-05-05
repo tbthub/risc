@@ -46,6 +46,6 @@
 
 #define ALL_PFN ((AVAILABLE_MEMORY) >> PGSHIFT)
 #define KERNBASE_PFN ((KERNBASE) >> PGSHIFT)
-#define END_PFN (((uint64)end) >> PGSHIFT)
+#define END_PFN (((uint64_t)end) >> PGSHIFT)
 
 #endif

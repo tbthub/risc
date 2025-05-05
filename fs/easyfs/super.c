@@ -17,7 +17,7 @@ extern void efs_d_cdirty(struct easy_dentry *d);
 static void efs_fill_imap()
 {
 	// 这个位图同下 bmap，目前感觉一个块完全够了，理论最大支持 4096 * 8 = 32,768 个文件
-	uint64 *imap_addr = __alloc_page(0);
+	uint64_t *imap_addr = __alloc_page(0);
 	assert(imap_addr != NULL, "efs_fill_imap\n");
 	blk_read_count(efs_bd, m_esb.s_ds.inode_map_start, m_esb.s_ds.inode_area_start - m_esb.s_ds.inode_map_start,
 		       imap_addr);
@@ -29,7 +29,7 @@ static void efs_fill_imap()
 static void efs_fill_bmap()
 {
 	// 暂时很不幸，我们直接写死，目前最大支持 2 GB （2^4 * 4096 * 8 * BLOCK_SIZE / 1024/1024/1024）
-	uint64 *bmap_addr = __alloc_pages(0, 4);
+	uint64_t *bmap_addr = __alloc_pages(0, 4);
 	assert(bmap_addr != NULL, "efs_fill_bmap\n");
 	blk_read_count(efs_bd, m_esb.s_ds.block_map_start, m_esb.s_ds.block_area_start - m_esb.s_ds.block_map_start,
 		       bmap_addr);

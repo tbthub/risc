@@ -15,11 +15,11 @@ struct vm_area_struct
     // 这里对引用的操作时机：进程创建、进程销毁、kwback。不会出现释放一般时突然有人加引用
     // atomic_t ref;   
 
-    uint64 vm_start;      // 区域起始地址
-    uint64 vm_end;        // 区域结束地址
+    uint64_t vm_start;      // 区域起始地址
+    uint64_t vm_end;        // 区域结束地址
     flags64_t vm_prot;    // 区域标志 RWX
     flags_t vm_flags;     // 暂时没有使用
-    uint32 vm_pgoff;      // 文件页偏移
+    uint32_t vm_pgoff;      // 文件页偏移
     struct file *vm_file; // 关联文件
     struct vm_area_struct *vm_next;
     struct vm_operations_struct *vm_ops;
@@ -30,24 +30,24 @@ struct mm_struct
 {
     pagetable_t pgd;
 
-    uint64 start_code;
-    uint64 end_code;
+    uint64_t start_code;
+    uint64_t end_code;
 
-    uint64 start_data;
-    uint64 end_data;
+    uint64_t start_data;
+    uint64_t end_data;
 
-    uint64 start_brk;
-    uint64 end_brk;
+    uint64_t start_brk;
+    uint64_t end_brk;
 
-    uint64 start_stack;
+    uint64_t start_stack;
 
-    uint64 next_map;    // 我们目前采取最简单的挨个线性映射（不过当文件数映射过多时候会爆）
+    uint64_t next_map;    // 我们目前采取最简单的挨个线性映射（不过当文件数映射过多时候会爆）
 
     struct vm_area_struct *mmap;
     spinlock_t lock; // 保护并发访问
     int map_count;   // VMA 数量
 
-    uint64 size; // 总内存使用量
+    uint64_t size; // 总内存使用量
 };
 
 struct fault_args_struct
@@ -55,13 +55,13 @@ struct fault_args_struct
     struct thread_info *thread;
     struct mm_struct *mm;
     struct vm_area_struct *vma;
-    uint64 fault_addr;
+    uint64_t fault_addr;
     struct list_head list;
 };
 
 struct vm_operations_struct
 {
-    void (*fault)(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr); // 缺页中断
+    void (*fault)(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr); // 缺页中断
     void (*close)(struct mm_struct *mm, struct vm_area_struct *v);
     void (*dup)(struct mm_struct *mm, struct vm_area_struct *v, struct mm_struct *new_mm);
 };
@@ -77,7 +77,7 @@ extern int vma_is_x(struct vm_area_struct *vma);
 extern int vma_extra_prot(struct vm_area_struct *vma);
 extern void vma_prot_copy(struct vm_area_struct *vma, pte_t *pte);
 extern void vma_insert(struct mm_struct *mm, struct vm_area_struct *vma);
-extern struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghdr_flags, uint32 pgoff,
+extern struct vm_area_struct *vma_alloc_proghdr(uint64_t start, uint64_t end, uint64_t proghdr_flags, uint32_t pgoff,
                                                 struct file *file, struct vm_operations_struct *ops);
 extern void vma_list_cat(struct vm_area_struct *vma);
 

@@ -220,8 +220,8 @@ void signal_handler(struct signal *s)
         // 保存 tf 到用户栈
         memcpy((char *)t->tf->sp - sizeof(*t->tf), (void *)t->tf, sizeof(*t->tf));
         t->tf->sp -= sizeof(*t->tf);
-        t->tf->a0 = (uint64)do_sig_handler;
-        t->tf->epc = (uint64)sigact_call;
+        t->tf->a0 = (uint64_t)do_sig_handler;
+        t->tf->epc = (uint64_t)sigact_call;
     }
 }
 

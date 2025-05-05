@@ -19,7 +19,7 @@ static void *addr;
 
 static int mvirt_blk_open(struct gendisk *gd, mode_t mode);
 static int mvirt_blk_release(struct gendisk *gd, mode_t mode);
-static int mvirt_blk_ll_rw(struct gendisk *gd, struct bio *bio, uint32 rw);
+static int mvirt_blk_ll_rw(struct gendisk *gd, struct bio *bio, uint32_t rw);
 
 struct block_device mvirt_blk_dev;
 static struct gendisk_operations gd_ops = {
@@ -48,11 +48,11 @@ static int mvirt_blk_release(struct gendisk *gd, mode_t mode)
 	return 0;
 }
 
-static int mvirt_blk_ll_rw(struct gendisk *gd, struct bio *bio, uint32 rw)
+static int mvirt_blk_ll_rw(struct gendisk *gd, struct bio *bio, uint32_t rw)
 {
 	printk("mvirt_blk_ll_rw  rw: %d\n", rw);
 	// 起始位置
-	uint64 start = bio->b_blockno * PGSIZE;
+	uint64_t start = bio->b_blockno * PGSIZE;
 
 	if (rw == DEV_READ)
 		memcpy(bio->b_page, addr + start, PGSIZE);

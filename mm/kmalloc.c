@@ -7,7 +7,7 @@
 #include "mm/slab.h"
 
 extern void set_page_kmalloc_page(struct page *page);
-extern uint32 test_page_kmalloc_page(struct page *page);
+extern uint32_t test_page_kmalloc_page(struct page *page);
 extern void clear_page_kmalloc_page(struct page *page);
 
 static struct kmem_cache kmalloc16;
@@ -52,18 +52,18 @@ void kmalloc_init()
     kmem_cache_create(&kmalloc8192, "kmalloc-8192", 8192, 0);
 }
 
-void *kmalloc(int size, uint32 flags)
+void *kmalloc(int size, uint32_t flags)
 {
     if (size < 1 || size > MAX_KMALLOC_PAGE) {
         panic("!!! kmalloc: size illegal, must be between 1 and %d !!!\n", MAX_KMALLOC_PAGE);
         return NULL;
     }
     void *addr;
-    uint32 order = 0;
-    uint32 pages;
+    uint32_t order = 0;
+    uint32_t pages;
 
     if (size <= MAX_KMALLOC_SLAB) {
-        order = math_order2((uint32)size);
+        order = math_order2((uint32_t)size);
         addr = kmem_cache_alloc(kmalloc_caches[order]);
     }
 

@@ -22,7 +22,7 @@ extern void kprobe_attch_entry();
 extern void kprobe_attch_entry_set();
 
 extern pagetable_t kernel_pagetable;
-extern pte_t *walk(pagetable_t pagetable, uint64 va, int alloc);
+extern pte_t *walk(pagetable_t pagetable, uint64_t va, int alloc);
 
 // ! 注意：使用 exec 附加的函数需要打开对应的编译选项
 static struct kprobe *alloc_kprobe()
@@ -83,21 +83,21 @@ static void reset_pte_execable(pte_t *pte)
 //  jalr t0 xxx(t0)
 static void set_probe_jmp_t0(void *entry_func, const void *kprobe_entry)
 {
-    uint32 *patch = (uint32 *)entry_func;
-    int64 off = (uint64)kprobe_entry - (uint64)entry_func;
+    uint32_t *patch = (uint32_t *)entry_func;
+    int64 off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
     int64 hi = (off + 0x800) >> 12;
     int64 imm_hi = hi & 0xFFFFF;
     patch[0] = (imm_hi << 12) | (5 << 7) | 0x17;  // auipc t0, imm_hi
     int32 imm_lo = off - (hi << 12);
-    patch[1] = ((uint32)imm_lo << 20) | (5 << 15) | (0 << 12) | (5 << 7) | 0x67;
+    patch[1] = ((uint32_t)imm_lo << 20) | (5 << 15) | (0 << 12) | (5 << 7) | 0x67;
 }
 
 //  auipc ra
 //  jalr ra xxx(t0)
 static void set_probe_jmp_ra(void *entry_func, const void *kprobe_entry)
 {
-    uint32 *patch = (uint32 *)entry_func;
-    int64 off = (uint64)kprobe_entry - (uint64)entry_func;
+    uint32_t *patch = (uint32_t *)entry_func;
+    int64 off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
     int64 hi = (off + 0x800) >> 12;
     int64 imm_hi = hi & 0xFFFFF;
     patch[0] = (imm_hi << 12) | (1 << 7) | 0x17;  // auipc ra, imm_hi
@@ -107,7 +107,7 @@ static void set_probe_jmp_ra(void *entry_func, const void *kprobe_entry)
 
 static struct kprobe *kprobe_set(void *entry_func, void *my_func, void *kprobe_entry, void *kprobe_entry_set)
 {
-    pte_t *pte = walk(kernel_pagetable, (uint64)entry_func, 0);
+    pte_t *pte = walk(kernel_pagetable, (uint64_t)entry_func, 0);
     if (!pte) {
         printk("kprobe_set entry_func not found\n");
         return NULL;
@@ -130,7 +130,7 @@ static struct kprobe *kprobe_set(void *entry_func, void *my_func, void *kprobe_e
     set_probe_jmp_ra(probe_entry_set, my_func);
 
     // probe_page +x
-    pte_t *probe_pte = walk(kernel_pagetable, (uint64)kp->page, 0);
+    pte_t *probe_pte = walk(kernel_pagetable, (uint64_t)kp->page, 0);
     set_pte_execable(probe_pte);
     kp->entry = entry_func;
 
@@ -164,7 +164,7 @@ void kprobe_clear(struct kprobe *kp)
         return;
     int i;
     uint16 *patch = (uint16 *)kp->src;
-    pte_t *pte = walk(kernel_pagetable, (uint64)kp->entry, 0);
+    pte_t *pte = walk(kernel_pagetable, (uint64_t)kp->entry, 0);
     set_pte_writable(pte);
     int loop = auipc_jalr_len / sizeof(uint16);
     switch (kp->type) {
@@ -179,7 +179,7 @@ void kprobe_clear(struct kprobe *kp)
         panic("kprobe_clear type");
         break;
     }
-    pte_t *probe_pte = walk(kernel_pagetable, (uint64)kp->page, 0);
+    pte_t *probe_pte = walk(kernel_pagetable, (uint64_t)kp->page, 0);
     if (!probe_pte)
         panic("kp probe_pte is NULL\n");
 

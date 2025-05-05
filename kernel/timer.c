@@ -31,7 +31,7 @@ __attribute__((unused)) void debug_cpu_timer_list()
 inline void time_init()
 {
     sys_ticks = 0;
-    for (uint32 i = 0; i < NCPU; i++) {
+    for (uint32_t i = 0; i < NCPU; i++) {
         spin_init(&cpu_timer[i].lock, "cpu_timer");
         INIT_LIST_HEAD(&cpu_timer[i].list);
     }
@@ -123,7 +123,7 @@ static void assign_cpu(timer_t *t)
 }
 
 // 创建的内核定时器 需要在关中断情况下执行
-timer_t *timer_create(void (*callback)(void *), void *args, uint64 during_time, int count, int is_block)
+timer_t *timer_create(void (*callback)(void *), void *args, uint64_t during_time, int count, int is_block)
 {
     timer_t *t = (timer_t *)kmem_cache_alloc(&timer_kmem_cache);
     if (!t) {
@@ -146,7 +146,7 @@ static void timer_waker_up(void *args)
     wakeup_process(t);
 }
 
-void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
+void thread_timer_sleep(struct thread_info *thread, uint64_t down_time)
 {
     spin_lock(&thread->lock);
     thread->state = SLEEPING;
@@ -156,7 +156,7 @@ void thread_timer_sleep(struct thread_info *thread, uint64 down_time)
 }
 EXPORT_SYMBOL(thread_timer_sleep);
 
-int do_sleep(uint64 ticks)
+int do_sleep(uint64_t ticks)
 {
     struct thread_info *t = myproc();
     assert(t != NULL, "do_sleep\n");

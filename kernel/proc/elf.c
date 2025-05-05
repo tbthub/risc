@@ -37,8 +37,8 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
     for (int i = 0; i < ehdr->phnum; i++, ph--) {
         if (ph->type != ELF_PROG_LOAD || ph->memsz == 0)
             continue;  // 只加载LOAD段（排除掉空段）
-        uint64 va_start = PGROUNDDOWN(ph->vaddr);
-        uint64 va_end = PGROUNDUP(ph->vaddr + ph->memsz) - 1;
+        uint64_t va_start = PGROUNDDOWN(ph->vaddr);
+        uint64_t va_end = PGROUNDUP(ph->vaddr + ph->memsz) - 1;
         // ph->filesz == 0 但是   ph->memsz != 0，则是BSS，手动分配为0的物理页面
         struct vm_operations_struct *vma_ops = ph->filesz == 0 ? &vma_gen_ops : &vma_file_ops;
         v = vma_alloc_proghdr(va_start, va_end, ph->flags, ph->off >> PGSHIFT, f, vma_ops);
@@ -48,9 +48,9 @@ int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, struct file 
     return 0;
 }
 
-static uint32 elf_calc_size(ElfParser *parser)
+static uint32_t elf_calc_size(ElfParser *parser)
 {
-    uint32 mem_sz = 0;
+    uint32_t mem_sz = 0;
     struct proghdr *ph = parser->phdrs;
     for (int i = 0; i < parser->ehdr.phnum; i++, ph++) {
         if (ph->type != ELF_PROG_LOAD || ph->filesz == 0)
@@ -143,7 +143,7 @@ void elf_parser_destroy(ElfParser *parser)
 }
 
 
-inline uint32 elf_ptload_msize(ElfParser *parser)
+inline uint32_t elf_ptload_msize(ElfParser *parser)
 {
     return parser->mem_sz;
 }

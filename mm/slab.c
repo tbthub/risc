@@ -66,9 +66,9 @@ static struct slab *slab_create(struct kmem_cache *cache)
     slab->kc = cache;
     slab->inuse = 0;
     spin_init(&slab->lock, "slab");
-    sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
+    sstack_init(&slab->free_list, (uint64_t *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
     for (i = 0; i < cache->count_per_slab; i++) {
-        sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
+        sstack_push(&slab->free_list, (uint64_t)((char *)slab->objs + i * cache->size));
     }
     // printk("sz: %d, cnt: %d\n", cache->size,cache->count_per_slab);
 
@@ -96,10 +96,10 @@ static void slab_destory(struct slab *slab)
 static uint8 calc_slab_order(uint16 obj_size)
 {
     // 确保每个 slab 至少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象
-    uint32 require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
+    uint32_t require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
 
     uint8 order = 0;
-    uint32 slab_size = PGSIZE;
+    uint32_t slab_size = PGSIZE;
 
     while (require_size > slab_size) {
         order++;
@@ -123,7 +123,7 @@ static void *obj_pop(struct slab *slab)
 // 插入一个空闲的地址（释放地址）
 static void obj_push(struct slab *slab, void *obj)
 {
-    if (sstack_push(&slab->free_list, (uint64)obj) != -1)
+    if (sstack_push(&slab->free_list, (uint64_t)obj) != -1)
         slab->inuse--;
     else
         panic("obj_push");
@@ -157,7 +157,7 @@ static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
 }
 
 // 初始化缓存池
-void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags)
+void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32_t flags)
 {
     spin_init(&cache->lock, "slab");
 

@@ -28,10 +28,10 @@ extern int64 do_open(const char *path, flags_t flags, int mod);                 
 extern int64 do_close(int fd);                                                                        // file.c
 extern int64 do_read(int fd, const void *buf, int64 count);                                           // file.c
 extern int64 do_write(int fd, const void *buf, int64 count);                                          // file.c
-extern int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, uint32 offset);  // vma.c
+extern int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset);  // vma.c
 
 extern int64 do_exit(int exit_code) __attribute__((noreturn));  // 退出状态码
-extern int64 do_munmap(void *addr, uint32 len);
+extern int64 do_munmap(void *addr, uint32_t len);
 extern int64 do_wait(int *status);
 
 extern int64 do_pipe();
@@ -208,7 +208,7 @@ int64 sys_mmap()
 {
     int64 args[6];
     get_args(args, 6);
-    return do_mmap((void *)args[0], (uint32)args[1], (flags64_t)args[2], (flags_t)args[3], (fd_t)args[4], (uint32)args[5]);
+    return do_mmap((void *)args[0], (uint32_t)args[1], (flags64_t)args[2], (flags_t)args[3], (fd_t)args[4], (uint32_t)args[5]);
 }
 
 int64 sys_munmap()
@@ -216,7 +216,7 @@ int64 sys_munmap()
     int64 args[2];
     get_args(args, 2);
     READ_ONCE(*(char *)args[0]);
-    return do_munmap((void *)args[0], (uint32)args[1]);
+    return do_munmap((void *)args[0], (uint32_t)args[1]);
 }
 
 int64 sys_pause()

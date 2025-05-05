@@ -20,7 +20,7 @@ struct file
     atomic_t f_ref;
     flags_t f_flags;
     struct easy_m_inode *f_ip;
-    uint32 f_off;
+    uint32_t f_off;
 
     mutex_t f_mutex;    // 读写互斥操作
 };
@@ -33,10 +33,10 @@ struct files_struct {
 extern struct file *file_dup(struct file *f);
 extern struct file *file_open(const char *file_path, flags_t flags);
 extern void file_close(struct file *f);
-extern int file_read(struct file *f, void *vaddr, uint32 len);
-extern int file_read_no_off(struct file *f,uint32 off, void *vaddr, uint32 len);
-extern int file_write(struct file *f, void *vaddr, uint32 len);
-extern int file_llseek(struct file *f, uint32 offset, int whence);
+extern int file_read(struct file *f, void *vaddr, uint32_t len);
+extern int file_read_no_off(struct file *f,uint32_t off, void *vaddr, uint32_t len);
+extern int file_write(struct file *f, void *vaddr, uint32_t len);
+extern int file_llseek(struct file *f, uint32_t offset, int whence);
 extern void file_lock(struct file *f);
 extern void file_unlock(struct file *f);
 

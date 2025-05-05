@@ -5,7 +5,7 @@ int bitmap_test()
 {
     printk("Bitmap Test start.\n");
 
-    uint64 map[2]; // 128 位 (2 个 uint64)，更大位图
+    uint64_t map[2]; // 128 位 (2 个 uint64_t)，更大位图
     struct bitmap bmp;
 
     bitmap_init(&bmp, map, 128);

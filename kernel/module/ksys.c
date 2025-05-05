@@ -11,7 +11,7 @@ struct ksym *alloc_ksym(struct kernel_symbol *sym)
     return ks;
 }
 
-uint32 ksym_hash(struct ksym *ks)
+uint32_t ksym_hash(struct ksym *ks)
 {
     return strhash(ks->ksp->name);
 }

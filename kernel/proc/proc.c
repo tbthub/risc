@@ -28,8 +28,8 @@ static struct
 struct cpu cpus[NCPU];
 struct thread_info *init_t;
 extern void usertrapret() __attribute__((noreturn));
-extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 extern void files_init(struct files_struct *files);
 extern void sig_release_all(struct signal *s);
 __attribute__((noreturn)) int64 do_exit(int exit_code);
@@ -114,7 +114,7 @@ static inline void mm_init(struct mm_struct *mm)
 // 		return -1;
 // 	}
 // 	int found = -1;
-// 	for (uint32 i = th_table->alloc; i < MAX_THREADS_PER_TASK; i++) {
+// 	for (uint32_t i = th_table->alloc; i < MAX_THREADS_PER_TASK; i++) {
 // 		if (th_table->array[i] == NULL) {
 // 			found = i;
 // 			th_table->alloc = i + 1;
@@ -222,7 +222,7 @@ struct thread_info *kthread_struct_init()
         printk("kthread_struct_init error!\n");
         return NULL;
     }
-    t->context.ra = (uint64)thread_entry;
+    t->context.ra = (uint64_t)thread_entry;
     alloc_kern_pgd(&t->task->mm);
     return t;
 }
@@ -240,7 +240,7 @@ struct thread_info *uthread_struct_init()
         // printk("uthread_struct_init tf_kmem_cache\n");
         // TODO 添加回收的逻辑，不过我们暂时先这样，不考虑异常，直接堵死
     }
-    t->context.ra = (uint64)forkret;
+    t->context.ra = (uint64_t)forkret;
     return t;
 }
 
@@ -284,7 +284,7 @@ struct thread_info *find_proc(int _pid)
 }
 
 // 以后我们添加环境变量参数，这个应该是共享映射
-uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
+uint64_t parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
 {
     assert(USER_ARGV_MAX_SIZE > 0, "parse_argv USER_ARGV_MAX_SIZE");
     // 申请页面，我们将第一个页面用于参数的 char *
@@ -308,7 +308,7 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
     int arg_max_len = USER_ARGV_MAX_SIZE * PGSIZE;
 
     for (char *const *arg = argv; *arg != NULL; arg++) {
-        uint32 len = strlen(*arg) + 1;
+        uint32_t len = strlen(*arg) + 1;
 
         if (args_len + len > arg_max_len || argc >= USER_ARGV_MAX_CNT) {
             printk("Arguments too long or too many arguments");
@@ -319,8 +319,8 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
         args_list[argc] = args;
 
         // 如果当前页空间不足
-        if (PGSIZE - ((uint64)args % PGSIZE) < len) {
-            uint32 part_len = PGSIZE - ((uint64)args % PGSIZE);
+        if (PGSIZE - ((uint64_t)args % PGSIZE) < len) {
+            uint32_t part_len = PGSIZE - ((uint64_t)args % PGSIZE);
             memcpy(args, *arg, part_len);
             args_len += part_len;
 
@@ -339,8 +339,8 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[])
 
     // ! riscv64 是通过寄存器传参的
     t->tf->a0 = argc;
-    t->tf->a1 = (uint64)args_list;
-    return (uint64)args_list;
+    t->tf->a1 = (uint64_t)args_list;
+    return (uint64_t)args_list;
 
 bad:
     for (int i = 0; i < USER_ARGV_MAX_SIZE; i++) {

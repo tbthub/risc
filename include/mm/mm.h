@@ -8,10 +8,10 @@
 #define MAX_LEVEL_COUNT (1 << MAX_LEVEL_INDEX) // 最高 2^10个页面
 #define MAX_LEVEL_PGSIZE (PGSIZE * (1 << MAX_LEVEL_INDEX)) // 最高 2^10 * 4096 大小
 
-extern struct page * alloc_pages(uint32 flags, const int order);
-extern struct page * alloc_page(uint32 flags);
-extern void * __alloc_pages(uint32 flags, const int order);
-extern void * __alloc_page(uint32 flags);
+extern struct page * alloc_pages(uint32_t flags, const int order);
+extern struct page * alloc_page(uint32_t flags);
+extern void * __alloc_pages(uint32_t flags, const int order);
+extern void * __alloc_page(uint32_t flags);
 
 
 // 实际上这几个函数两两内部实现都是一毛一样的
@@ -21,7 +21,7 @@ extern void free_page(struct page *page);
 extern void __free_pages(void* addr);
 extern void __free_page(void* addr);
 
-extern uint32 get_free_pages();
+extern uint32_t get_free_pages();
 
 
 #endif

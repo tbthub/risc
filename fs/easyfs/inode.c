@@ -146,7 +146,7 @@ static int efs_i_bmap(struct easy_m_inode *inode, int lbno, int alloc)
             inode->i_indir = __alloc_page(0);
             blk_read_count(inode->i_sb->s_bd, bno, 1, inode->i_indir);
         }
-        uint32 *blk = inode->i_indir;
+        uint32_t *blk = inode->i_indir;
         if (blk[lbno] == 0) {
             if (!alloc)
                 return 0;
@@ -217,11 +217,11 @@ struct easy_m_inode *efs_i_get(int ino)
 }
 
 // 读 inode 指向的文件的 offset len 信息
-int efs_i_read(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr)
+int efs_i_read(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr)
 {
     int bno;
-    uint32 tot;  // 总共读的字节数 <= len
-    uint32 m;    // 每一次读的字节数
+    uint32_t tot;  // 总共读的字节数 <= len
+    uint32_t m;    // 每一次读的字节数
 
     if (offset >= inode->i_di.i_size || offset + len < offset)
         return 0;
@@ -242,10 +242,10 @@ int efs_i_read(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vadd
     return tot;
 }
 
-int efs_i_write(struct easy_m_inode *inode, uint32 offset, uint32 len, void *vaddr)
+int efs_i_write(struct easy_m_inode *inode, uint32_t offset, uint32_t len, void *vaddr)
 {
     int bno;
-    uint32 tot, m;
+    uint32_t tot, m;
     if (offset > inode->i_di.i_size || offset + len < offset)
         return 0;
     if (offset + len >= MAXFILE * BLOCK_SIZE)

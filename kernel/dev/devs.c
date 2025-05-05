@@ -19,7 +19,7 @@ void devs_init()
 dev_t devno_alloc()
 {
     spin_lock(&dev_lists.lock);
-    uint32 devno = dev_lists.devno++;
+    uint32_t devno = dev_lists.devno++;
     spin_unlock(&dev_lists.lock);
     return devno;
 }

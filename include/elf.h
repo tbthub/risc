@@ -16,9 +16,9 @@ struct elf64_hdr
     ushort type;
     ushort machine;
     uint version;
-    uint64 entry;
-    uint64 phoff;
-    uint64 shoff;
+    uint64_t entry;
+    uint64_t phoff;
+    uint64_t shoff;
     uint flags;
     ushort ehsize;
     ushort phentsize;
@@ -31,14 +31,14 @@ struct elf64_hdr
 // Program section header
 struct proghdr
 {
-    uint32 type;
+    uint32_t type;
     flags_t flags;
-    uint64 off;  // 文件内偏移地址
-    uint64 vaddr;
-    uint64 paddr;
-    uint64 filesz;
-    uint64 memsz;
-    uint64 align;
+    uint64_t off;  // 文件内偏移地址
+    uint64_t vaddr;
+    uint64_t paddr;
+    uint64_t filesz;
+    uint64_t memsz;
+    uint64_t align;
 };
 
 // Values for Proghdr type
@@ -50,12 +50,12 @@ struct proghdr
 #define ELF_PROG_FLAG_READ 4
 
 // RISC-V ELF 相关结构
-typedef uint64 Elf64_Addr;
-typedef uint64 Elf64_Off;
+typedef uint64_t Elf64_Addr;
+typedef uint64_t Elf64_Off;
 typedef uint16 Elf64_Half;
-typedef uint32 Elf64_Word;
+typedef uint32_t Elf64_Word;
 typedef int32 Elf64_Sword;
-typedef uint64 Elf64_Xword;
+typedef uint64_t Elf64_Xword;
 typedef int64 Elf64_Sxword;
 
 #define PT_LOAD 1
@@ -64,7 +64,7 @@ typedef int64 Elf64_Sxword;
 
 #define ELF64_R_SYM(info) ((info) >> 32)
 #define ELF64_R_TYPE(info) ((Elf64_Word)(info)&0xffffffff)
-#define ELF64_R_INFO(sym, type) (((uint64_t)(sym) << 32) | (uint32_t)(type))
+#define ELF64_R_INFO(sym, type) (((uint64_t_t)(sym) << 32) | (uint32_t_t)(type))
 
 // https://github.com/riscv-non-isa/riscv-elf-psabi-doc/releases
 #define R_RISCV_NONE 0      /* 无重定位 */
@@ -118,17 +118,17 @@ typedef struct ElfParser
     Elf64_Sym *dynsym;       // 动态符号表
     char *dynstr;            // 动态符号字符串表
     Elf64_Rela *rela_dyn;    // 动态重定位表
-    uint32 rela_count;       // 重定位条目数
-    uint64 mod_init_offset;  // init函数偏移
-    uint64 mod_exit_offset;  // exit函数偏移
+    uint32_t rela_count;       // 重定位条目数
+    uint64_t mod_init_offset;  // init函数偏移
+    uint64_t mod_exit_offset;  // exit函数偏移
     struct file *file;       // 关联的文件对象
-    uint32 mem_sz;           // ? 模块的BSS在文件显示合并在数据段，占用空间
+    uint32_t mem_sz;           // ? 模块的BSS在文件显示合并在数据段，占用空间
 } ElfParser;
 
 extern void elf_parser_destroy(ElfParser *parser);
 extern int elf_parse_dynamic_sections(ElfParser *parser);
 extern int elf_parser_init(ElfParser *parser, const char *path);
-extern uint32 elf_ptload_msize(ElfParser *parser);
+extern uint32_t elf_ptload_msize(ElfParser *parser);
 extern Elf64_Shdr *elf_find_section(ElfParser *parser, const char *section_name);
 
 #endif

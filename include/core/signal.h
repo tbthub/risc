@@ -6,7 +6,7 @@
 
 #define _NSIG 64
 #define _N_STDSIG 32
-typedef uint32 sigset_t;
+typedef uint32_t sigset_t;
 
 // 中断信号，通常由 Ctrl+C 触发
 #define SIGINT 2 // Interrupt from keyboard (Ctrl+C)
@@ -69,7 +69,7 @@ struct sigpending {
 
 struct signal {
 	spinlock_t lock; // 用于处理信号标准合并导致的 sigpend 数量不对的问题
-	uint32 sigpend;
+	uint32_t sigpend;
     struct sigpending sping;
 	struct signal_struct *sig;
 };

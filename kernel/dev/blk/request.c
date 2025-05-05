@@ -48,7 +48,7 @@ static inline void rq_append(struct request *rq, struct request_queue *rq_queue)
     spin_unlock(&rq_queue->lock);
 }
 
-struct request *make_request(struct gendisk *gd, uint64 blockno, uint32 offset, uint32 len, void *vaddr, uint32 rw)
+struct request *make_request(struct gendisk *gd, uint64_t blockno, uint32_t offset, uint32_t len, void *vaddr, uint32_t rw)
 {
 #ifdef DEBUG_RQ
     printk("rq: devno: %d, bno:%d,offset:%d, len:%d, vaddr:%p, rw:%d\n", 0, blockno, offset, len, vaddr, rw);

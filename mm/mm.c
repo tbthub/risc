@@ -22,7 +22,7 @@ extern void first_all_page_init();
 
 static struct
 {
-    uint64 free;
+    uint64_t free;
     spinlock_t lock;
     struct list_head free_lists[MAX_LEVEL];
 } Buddy;
@@ -30,8 +30,8 @@ static struct
 // 寻找当前 page 的伙伴
 static struct page *find_buddy(const struct page *page, const int order)
 {
-    uint64 index = page - mem_map.pages;
-    uint64 buddy_index = index ^ (1UL << order);
+    uint64_t index = page - mem_map.pages;
+    uint64_t buddy_index = index ^ (1UL << order);
     // printk("ord: %d, i:%d, i1: %d\n",order, index, buddy_index);
     if (buddy_index >= ALL_PFN || buddy_index < 0) {
         // 如果伙伴超出了内存页的范围，返回 NULL
@@ -60,9 +60,9 @@ void mm_debug2()
     printk("free mem:%d\n", free_cnt);
 }
 
-uint32 get_free_pages()
+uint32_t get_free_pages()
 {
-    uint32 free_cnt = 0;
+    uint32_t free_cnt = 0;
     spin_lock(&Buddy.lock);
     free_cnt = Buddy.free;
     spin_unlock(&Buddy.lock);
@@ -155,7 +155,7 @@ static void buddy_free(struct page *pg)
 // 初始化 Buddy 系统
 static void buddy_init()
 {
-    uint64 i;
+    uint64_t i;
 
     spin_init(&Buddy.lock, "buddy");
     Buddy.free = 0;
@@ -165,11 +165,11 @@ static void buddy_init()
         INIT_LIST_HEAD(&Buddy.free_lists[i]);
 
     // 计算最高阶块的大小
-    uint64 max_order = MAX_LEVEL_INDEX;
-    uint64 chunk_size = 1UL << max_order;  // 块大小为 2^max_order 页
+    uint64_t max_order = MAX_LEVEL_INDEX;
+    uint64_t chunk_size = 1UL << max_order;  // 块大小为 2^max_order 页
 
     // 计算对齐后的起始地址（向上取整到 chunk_size 的倍数）
-    uint64 start_pfn = (kernel_pfn_end + chunk_size) / chunk_size * chunk_size;
+    uint64_t start_pfn = (kernel_pfn_end + chunk_size) / chunk_size * chunk_size;
 
     // 初始化最高阶块
     for (i = start_pfn; i + chunk_size <= ALL_PFN; i += chunk_size) {
@@ -181,7 +181,7 @@ static void buddy_init()
 }
 
 // 分配 pages
-struct page *alloc_pages(uint32 flags, const int order)
+struct page *alloc_pages(uint32_t flags, const int order)
 {
     struct page *pages = buddy_alloc(order);
     get_page(pages);
@@ -189,17 +189,17 @@ struct page *alloc_pages(uint32 flags, const int order)
 }
 
 // 分配 page
-struct page *alloc_page(uint32 flags)
+struct page *alloc_page(uint32_t flags)
 {
     return alloc_pages(flags, 0);
 }
 
-void *__alloc_pages(uint32 flags, const int order)
+void *__alloc_pages(uint32_t flags, const int order)
 {
     return (void *)PG2PA(alloc_pages(flags, order));
 }
 
-void *__alloc_page(uint32 flags)
+void *__alloc_page(uint32_t flags)
 {
     void *addr = (void *)PG2PA(alloc_pages(flags, 0));
     memset(addr, 0, PGSIZE);

@@ -64,7 +64,7 @@ void bhash_init(struct bhash_struct *bhash, struct gendisk *gd)
 }
 
 // 块号为 blockno 的哈希链条是否为空
-static inline int bhash_empty(struct bhash_struct *bhash, uint32 blockno)
+static inline int bhash_empty(struct bhash_struct *bhash, uint32_t blockno)
 {
     return hash_empty(&bhash->buf_hash_table, blockno);
 }

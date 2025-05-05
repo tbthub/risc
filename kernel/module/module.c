@@ -24,7 +24,7 @@ static struct
     spinlock_t lock;
     int32 cnt;
     struct list_head list;
-    uint64 next_base;
+    uint64_t next_base;
 
     struct hash_table ht;
 } Kmods;
@@ -35,8 +35,8 @@ struct kmod
     char km_name[20];
     struct list_head km_list;
 
-    uint64 km_base;
-    uint32 km_size;
+    uint64_t km_base;
+    uint32_t km_size;
 
     initcall_t km_init;
     exitcall_t km_exit;
@@ -44,14 +44,14 @@ struct kmod
 };
 
 extern pagetable_t kernel_pagetable;
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 extern struct ksym *alloc_ksym(struct kernel_symbol *sym);
-extern uint32 ksym_hash(struct ksym *ks);
+extern uint32_t ksym_hash(struct ksym *ks);
 
 // TODO 临时为了内核模块探针调试 导出下
 const struct kernel_symbol *lookup_symbol(const char *name)
 {
-    uint32 key = strhash(name);
+    uint32_t key = strhash(name);
     struct ksym *ks = NULL;
     spin_lock(&Kmods.lock);
     hash_for_each_entry(ks, &Kmods.ht, key, node)
@@ -113,9 +113,9 @@ static inline void kmod_destroy(struct kmod *kmod)
 }
 
 // 分配虚存空间
-static uint64 alloc_mod_space(uint32 mem_size)
+static uint64_t alloc_mod_space(uint32_t mem_size)
 {
-    uint64 base;
+    uint64_t base;
     spin_lock(&Kmods.lock);
     base = Kmods.next_base;
     if (Kmods.next_base + mem_size >= MOD_MAX_TOP) {
@@ -146,9 +146,9 @@ static int kmod_load_code(struct kmod *km)
         printk("Module %s section not found\n", KINIT_SECTION);
         return -1;
     }
-    uint64 code_offset = code_shdr->sh_offset;
+    uint64_t code_offset = code_shdr->sh_offset;
 
-    for (uint64 va = 0; va < km->km_size; va += PGSIZE) {
+    for (uint64_t va = 0; va < km->km_size; va += PGSIZE) {
         // 分配物理页
         void *context = __alloc_page(0);
         if (!context) {
@@ -159,7 +159,7 @@ static int kmod_load_code(struct kmod *km)
         int sz = min(km->km_size - va, PGSIZE);
         // 从文件读取代码到物理页
         file_read_no_off(km->km_parser->file, code_offset + va, context, sz);
-        mappages(kernel_pagetable, km->km_base + va, (uint64)context, PGSIZE, PTE_R | PTE_W | PTE_X);
+        mappages(kernel_pagetable, km->km_base + va, (uint64_t)context, PGSIZE, PTE_R | PTE_W | PTE_X);
     }
     sfence_vma();
     return 0;
@@ -171,11 +171,11 @@ static int kmod_apply_relocations(struct kmod *km)
     ElfParser *p = km->km_parser;
     for (int i = 0; i < p->rela_count; i++) {
         Elf64_Rela *rela = &p->rela_dyn[i];
-        uint32 type = ELF64_R_TYPE(rela->r_info);
+        uint32_t type = ELF64_R_TYPE(rela->r_info);
 
         switch (type) {
         case R_RISCV_JUMP_SLOT: {
-            uint32 sym_idx = ELF64_R_SYM(rela->r_info);
+            uint32_t sym_idx = ELF64_R_SYM(rela->r_info);
             Elf64_Sym *sym = &p->dynsym[sym_idx];
             const char *symname = p->dynstr + sym->st_name;
 
@@ -186,17 +186,17 @@ static int kmod_apply_relocations(struct kmod *km)
                 return -1;
             }
 
-            *(uint64 *)(km->km_base + rela->r_offset) = (uint64)ksym->addr + rela->r_addend;
+            *(uint64_t *)(km->km_base + rela->r_offset) = (uint64_t)ksym->addr + rela->r_addend;
             break;
         }
         case R_RISCV_RELATIVE:
-            *(uint64 *)(km->km_base + rela->r_offset) = km->km_base + rela->r_addend;
+            *(uint64_t *)(km->km_base + rela->r_offset) = km->km_base + rela->r_addend;
             break;
         case R_RISCV_64:
             // 处理 64 位绝对地址重定位
-            uint32 sym_idx = ELF64_R_SYM(rela->r_info);
+            uint32_t sym_idx = ELF64_R_SYM(rela->r_info);
             Elf64_Sym *sym = &p->dynsym[sym_idx];
-            uint64 value;
+            uint64_t value;
 
             if (sym->st_shndx == SHN_UNDEF) {
                 // 外部符号：查找内核符号表
@@ -206,7 +206,7 @@ static int kmod_apply_relocations(struct kmod *km)
                     panic("Undefined symbol: %s\n", symname);
                     return -1;
                 }
-                value = (uint64)ksym->addr;
+                value = (uint64_t)ksym->addr;
             }
             else {
                 // 内部符号：计算模块内地址
@@ -214,7 +214,7 @@ static int kmod_apply_relocations(struct kmod *km)
             }
 
             // 写入重定位地址 = 符号地址 + addend
-            *(uint64 *)(km->km_base + rela->r_offset) = value + rela->r_addend;
+            *(uint64_t *)(km->km_base + rela->r_offset) = value + rela->r_addend;
             break;
         default:
             panic("undeal type: %d\n", type);
@@ -307,7 +307,7 @@ void kmods_init()
     INIT_LIST_HEAD(&Kmods.list);
     // TODO 我们做了取巧，直接把基地址映射，这样顶层页表就会有对应条目
     void *no_use_page = __alloc_page(0);
-    mappages(kernel_pagetable, MOD_BASE, (uint64)no_use_page, PGSIZE, 0);
+    mappages(kernel_pagetable, MOD_BASE, (uint64_t)no_use_page, PGSIZE, 0);
     Kmods.next_base = MOD_BASE + 2 * PGSIZE;
 
     kmods_hash_init();

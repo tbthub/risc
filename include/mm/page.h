@@ -46,15 +46,15 @@ struct mem_map_struct
 
 // 需要持有 mem_map 锁
 extern struct mem_map_struct mem_map;
-extern uint32 kernel_pfn_end;
+extern uint32_t kernel_pfn_end;
 
 extern int page_count(struct page *);
 extern int page_is_free(struct page *);
 extern void get_page(struct page *);
 extern void put_page(struct page *);
 
-#define I2PA(i) (((uint64)(i) << PGSHIFT) + KERNBASE)
-#define PA2I(pa) (((uint64)(pa)-KERNBASE) >> PGSHIFT)
+#define I2PA(i) (((uint64_t)(i) << PGSHIFT) + KERNBASE)
+#define PA2I(pa) (((uint64_t)(pa)-KERNBASE) >> PGSHIFT)
 
 #define put_page_test(pg) atomic_dec_and_test(&(pg)->refcnt)
 

@@ -36,7 +36,7 @@ void putstr(char *str)
 
 void putptr(void *ptr)
 {
-    uint64 uptr = (uint64)ptr;
+    uint64_t uptr = (uint64_t)ptr;
     putstr("0x");  // 输出十六进制前缀
 
     // 按十六进制逐位输出，从高位到低位

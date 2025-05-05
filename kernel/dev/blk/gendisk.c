@@ -18,11 +18,11 @@ static int gen_open(struct gendisk *gd, mode_t mode);
 static int gen_release(struct gendisk *gd, mode_t mode);
 static __attribute__((noreturn)) int gen_start_io(struct gendisk *gd);
 
-static int gen_ll_rw(struct gendisk *gd, struct bio *bio, uint32 rw);
-static uint64 gen_disk_size(struct gendisk *gd);
+static int gen_ll_rw(struct gendisk *gd, struct bio *bio, uint32_t rw);
+static uint64_t gen_disk_size(struct gendisk *gd);
 
-static int gen_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr);
-static int gen_write(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr);
+static int gen_read(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr);
+static int gen_write(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr);
 
 static __attribute__((noreturn)) void kthread_gen_start_io(void *args)
 {
@@ -158,19 +158,19 @@ static int gen_release(struct gendisk *gd, mode_t mode)
     return 0;
 }
 
-static uint64 gen_disk_size(struct gendisk *gd)
+static uint64_t gen_disk_size(struct gendisk *gd)
 {
     printk("gen_disk_size\n");
     return gd->dev->disk_size;
 }
 
-static int gen_ll_rw(struct gendisk *gd, struct bio *bio, uint32 rw)
+static int gen_ll_rw(struct gendisk *gd, struct bio *bio, uint32_t rw)
 {
     printk("gen_ll_rw\n");
     return 0;
 }
 
-static int gen_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr)
+static int gen_read(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr)
 {
     struct request *rq = make_request(gd, blockno, offset, len, vaddr, DEV_READ);
 
@@ -193,7 +193,7 @@ static int gen_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 le
     return 0;
 }
 
-static int gen_write(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr)
+static int gen_write(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr)
 {
     struct request *rq = make_request(gd, blockno, offset, len, vaddr, DEV_WRITE);
 
@@ -217,7 +217,7 @@ static int gen_write(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 l
 }
 
 // 读设备
-inline int gen_disk_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr)
+inline int gen_disk_read(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr)
 {
     if (!vaddr) {
         printk("gendisk.c - gen_disk_read -  %s The given vaddr pointer is null \n", gd->dev->name);
@@ -228,7 +228,7 @@ inline int gen_disk_read(struct gendisk *gd, uint32 blockno, uint32 offset, uint
 EXPORT_SYMBOL(gen_disk_read);
 
 // 写设备
-inline int gen_disk_write(struct gendisk *gd, uint32 blockno, uint32 offset, uint32 len, void *vaddr)
+inline int gen_disk_write(struct gendisk *gd, uint32_t blockno, uint32_t offset, uint32_t len, void *vaddr)
 {
     if (!vaddr) {
         printk("gendisk.c - gen_disk_write -  %s The given vaddr pointer is null \n", gd->dev->name);

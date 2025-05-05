@@ -56,8 +56,8 @@
 // virtio queue descriptor
 struct virtq_desc {
   // 起始地址和偏移长度
-  uint64 addr;
-  uint32 len;
+  uint64_t addr;
+  uint32_t len;
 
   // 指向下一个 desc
   uint16 flags;
@@ -79,8 +79,8 @@ struct virtq_avail {
 // one entry in the "used" ring, with which the
 // device tells the driver about completed requests.
 struct virtq_used_elem {
-  uint32 id;   // index of start of completed descriptor chain
-  uint32 len;
+  uint32_t id;   // index of start of completed descriptor chain
+  uint32_t len;
 };
 
 struct virtq_used {
@@ -99,9 +99,9 @@ struct virtq_used {
 // to be followed by two more descriptors containing
 // the block, and a one-byte status.
 struct virtio_blk_req {
-  uint32 type; // VIRTIO_BLK_T_IN or ..._OUT
-  uint32 reserved;
-  uint64 sector;
+  uint32_t type; // VIRTIO_BLK_T_IN or ..._OUT
+  uint32_t reserved;
+  uint64_t sector;
 };
 
 

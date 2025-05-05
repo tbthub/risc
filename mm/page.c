@@ -17,7 +17,7 @@ struct mem_map_struct mem_map;
 
 // first address after kernel. defined by kernel.ld.
 // 由编译器最后计算出来，位于代码段和数据段的顶端
-uint32 kernel_pfn_end;
+uint32_t kernel_pfn_end;
 
 static inline void init_page(struct page *pg, flags_t flags)
 {
@@ -74,7 +74,7 @@ void set_page_kmalloc_page(struct page *page)
 	SET_FLAG(&page->flags,PG_KMALLOC_PAGE);
 }
 
-uint32 test_page_kmalloc_page(struct page *page)
+uint32_t test_page_kmalloc_page(struct page *page)
 {
 	return TEST_FLAG(&page->flags,PG_KMALLOC_PAGE);
 }

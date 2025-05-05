@@ -1,6 +1,6 @@
 #include "lib/math.h"
 #include "std/stddef.h"
-inline uint64 next_power_of_2(uint64 n)
+inline uint64_t next_power_of_2(uint64_t n)
 {
     if (n == 0)
         return 1; // 特殊情况
@@ -14,7 +14,7 @@ inline uint64 next_power_of_2(uint64 n)
     return n + 1; // 加1得到下一个2的幂
 }
 
-inline uint32 math_order2(uint32 size)
+inline uint32_t math_order2(uint32_t size)
 {
     if (size == 0) return 0;
 
@@ -28,7 +28,7 @@ inline uint32 math_order2(uint32 size)
     size++;
 
     // 2. 计算阶数
-    uint32 order = 0;
+    uint32_t order = 0;
     while (size > 1) {
         size >>= 1;
         order++;
@@ -36,9 +36,9 @@ inline uint32 math_order2(uint32 size)
     return order;
 }
 
-inline uint32 math_log(uint32 num, uint16 base)
+inline uint32_t math_log(uint32_t num, uint16 base)
 {
-    uint32 result = 0;
+    uint32_t result = 0;
 
     // 如果底数为1或者num小于1则没有有效结果
     if (base <= 1 || num <= 0)
@@ -54,9 +54,9 @@ inline uint32 math_log(uint32 num, uint16 base)
     return result;
 }
 
-inline uint32 math_pow(uint32 base, uint16 exponent)
+inline uint32_t math_pow(uint32_t base, uint16 exponent)
 {
-    uint32 result = 1;
+    uint32_t result = 1;
 
     // 如果指数是0，任何数的0次方都为1
     if (exponent == 0)

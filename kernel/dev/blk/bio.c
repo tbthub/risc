@@ -7,7 +7,7 @@
 #include "core/export.h"
 #define BLK_SIZE 4096
 
-static struct bio *bio_alloc(uint32 blockno, uint32 offset, uint32 len, struct bio *next, void *page)
+static struct bio *bio_alloc(uint32_t blockno, uint32_t offset, uint32_t len, struct bio *next, void *page)
 {
     struct bio *b = (struct bio *)kmem_cache_alloc(&bio_kmem_cache);
     if (!b)
@@ -25,13 +25,13 @@ static struct bio *bio_alloc(uint32 blockno, uint32 offset, uint32 len, struct b
 // 但是为了插入方便(头插简单)，我们把 blockno 倒过来赋值，即 --blockno_top
 
 // 这里返回的链表没有链表头的
-struct bio *bio_list_make(uint32 blockno, uint32 offset, uint32 len)
+struct bio *bio_list_make(uint32_t blockno, uint32_t offset, uint32_t len)
 {
     if (len == 0)
         return NULL;
     struct bio *bio_list = NULL; // 使用动态分配来保存链表头
     struct bio *b;
-    uint32 count;
+    uint32_t count;
 
     // 预处理, 避免 offset 超过一个块大小导致实际上有块没必要读
     blockno += offset / BLK_SIZE;

@@ -2,7 +2,7 @@
 #include "lib/string.h"
 #include "std/stdio.h"
 
-void bitmap_init(struct bitmap *bmp, uint64 *map, int size_bits)
+void bitmap_init(struct bitmap *bmp, uint64_t *map, int size_bits)
 {
 	bmp->map = map;
 	bmp->size = size_bits;
@@ -11,7 +11,7 @@ void bitmap_init(struct bitmap *bmp, uint64 *map, int size_bits)
 	memset(map, '\0', (size_bits + 7) / 8);
 }
 
-void bitmap_init_zone(struct bitmap *bmp, uint64 *map, int size_bits)
+void bitmap_init_zone(struct bitmap *bmp, uint64_t *map, int size_bits)
 {
 	bmp->map = map;
 	bmp->size = size_bits;
