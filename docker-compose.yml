@@ -1,7 +1,7 @@
 services:
   riscv:
     image: ghcr.io/tbthub/riscv:latest
-    container_name: risc
+    container_name: risc-vfs
     volumes:
       - ./:/risc
     working_dir: /risc

@@ -1,5 +1,5 @@
 #!/bin/bash
-docker exec -it  risc bash
+docker exec -it  risc-vfs bash
 
 #cloc .
 

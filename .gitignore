@@ -11,4 +11,6 @@ user/build/
 *.dump
 *.bin
 *.so
+docker.sh
+docker-compose.yml
 virtio_disk.img
