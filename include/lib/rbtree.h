@@ -1,40 +1,61 @@
-// #ifndef __RBTREE_H__
-// #define __RBTREE_H__
-// #include "std/stddef.h"
+#ifndef _RBTREE_H_
+#define _RBTREE_H_
 
-// typedef struct rb_node
-// {
-//     char color;
-//     struct rb_node *left;
-//     struct rb_node *right;
-//     struct rb_node *parent;
-// } rb_node;
+#include "std/stddef.h"
 
-// typedef struct rb_tree rb_tree;
+/* 红黑树节点颜色 */
+#define RBT_RED 0
+#define RBT_BLACK 1
 
+/* 红黑树节点结构 */
+struct rb_node
+{
+    unsigned long rb_parent_color;
+    struct rb_node *rb_right;
+    struct rb_node *rb_left;
+};
 
-// // arg 传递给所有操作函数的附加参数这可以让调用者向各种操作函数传递额外的上下文信息。
-// // 例如，在比较、合并、分配或释放节点时，可能需要一些额外的上下文（如自定义配置、状态等）。
+/* 红黑树根结构 */
+struct rb_root
+{
+    struct rb_node *rb_node;
+};
 
-// /* Support functions to be provided by caller */
-// typedef int (*rbt_comparator)(const rb_node *a, const rb_node *b, void *arg);
-// typedef void (*rbt_combiner)(rb_node *existing, const rb_node *newdata, void *arg);
-// typedef rb_node *(*rbt_allocfunc)(void *arg);
-// typedef void (*rbt_freefunc)(rb_node *x, void *arg);
+/* 初始化宏 */
+#define RB_ROOT                                                                                                                                                                                        \
+    (struct rb_root)                                                                                                                                                                                   \
+    {                                                                                                                                                                                                  \
+        NULL                                                                                                                                                                                           \
+    }
 
-// extern rb_tree *rbt_create(uint16 node_size,
-//                           rbt_comparator comparator,
-//                           rbt_combiner combiner,
-//                           rbt_allocfunc allocfunc,
-//                           rbt_freefunc freefunc,
-//                           void *arg);
+/* 容器宏 */
+#define rb_entry(ptr, type, member)                                                                                                                                                                    \
+    ({                                                                                                                                                                                                 \
+        typeof(ptr) ____ptr = (ptr);                                                                                                                                                                   \
+        ____ptr ? container_of(____ptr, type, member) : NULL;                                                                                                                                          \
+    })
 
-// extern rb_node *rbt_find(rb_tree *rbt, const rb_node *data);
-// extern rb_node *rbt_find_great(rb_tree *rbt, const rb_node *data, int equal_match);
-// extern rb_node *rbt_find_less(rb_tree *rbt, const rb_node *data, int equal_match);
-// extern rb_node *rbt_leftmost(rb_tree *rbt);
+#define rb_is_red(node) (!rb_color(node))
+#define rb_is_black(node) rb_color(node)
+#define rb_color(node) ((node)->rb_parent_color & 1)
 
-// extern rb_node *rbt_insert(rb_tree *rbt, const rb_node *data, int *isNew);
-// extern void rbt_delete(rb_tree *rbt, rb_node *node);
+#define rb_parent(r) ((struct rb_node *)((r)->rb_parent_color & ~3))
 
-// #endif
+/* 接口声明 */
+extern void rb_insert(struct rb_node *node, struct rb_root *root, int (*cmp)(struct rb_node *, struct rb_node *));
+extern void rb_erase(struct rb_node *node, struct rb_root *root);
+extern struct rb_node *rb_search(struct rb_root *root, void *key, int (*cmp)(struct rb_node *, void *));
+extern struct rb_node *rb_first(struct rb_root *root);
+extern struct rb_node *rb_next(struct rb_node *node);
+
+/* 调试接口 */
+#define RBT_DEBUG
+#ifdef RBT_DEBUG
+extern void validate_rbtree(struct rb_root *root);
+#else
+static inline void validate_rbtree(struct rb_root *root)
+{
+}
+#endif
+
+#endif /* _RBTREE_H_ */

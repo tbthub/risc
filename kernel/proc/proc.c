@@ -1,5 +1,5 @@
 #include "core/proc.h"
-
+#include "core/export.h"
 #include "core/sched.h"
 #include "core/signal.h"
 #include "core/vm.h"
@@ -36,6 +36,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code);
 struct thread_info *get_init() {
     return init_t;
 }
+EXPORT_SYMBOL(get_init);
 
 // 退出（ZOMBIE）后重新调度
 static void quit() {
@@ -175,7 +176,7 @@ static struct thread_info *alloc_thread() {
         return NULL;
     struct thread_info *thread = kmem_cache_alloc(&thread_info_kmem_cache);
     if (!thread) {
-        kmem_cache_free(&task_struct_kmem_cache, task);
+        kmem_cache_free(task);
         return NULL;
     }
     task_struct_init(task);
@@ -211,7 +212,7 @@ struct thread_info *kthread_struct_init() {
         printk("kthread_struct_init error!\n");
         return NULL;
     }
-    t->context.ra = (uint64)thread_entry;
+    t->context.ra = (uint64_t)thread_entry;
     alloc_kern_pgd(&t->task->mm);
     return t;
 }
@@ -228,7 +229,7 @@ struct thread_info *uthread_struct_init() {
         // printk("uthread_struct_init tf_kmem_cache\n");
         // TODO 添加回收的逻辑，不过我们暂时先这样，不考虑异常，直接堵死
     }
-    t->context.ra = (uint64)forkret;
+    t->context.ra = (uint64_t)forkret;
     return t;
 }
 
@@ -252,6 +253,7 @@ struct thread_info *myproc() {
     pop_off();
     return thread;
 }
+EXPORT_SYMBOL(myproc);
 
 void proc_init() {
     spin_init(&Proc.lock, "Proc");
@@ -266,7 +268,7 @@ struct thread_info *find_proc(int _pid) {
 }
 
 // 以后我们添加环境变量参数，这个应该是共享映射
-uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) {
+uint64_t parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) {
     assert(USER_ARGV_MAX_SIZE > 0, "parse_argv USER_ARGV_MAX_SIZE");
     // 申请页面，我们将第一个页面用于参数的 char *
     // 指针，大概最多可支持 4096/8 = 512个参数
@@ -289,7 +291,7 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) 
     int arg_max_len = USER_ARGV_MAX_SIZE * PGSIZE;
 
     for (char *const *arg = argv; *arg != NULL; arg++) {
-        uint32 len = strlen(*arg) + 1;
+        uint32_t len = strlen(*arg) + 1;
 
         if (args_len + len > arg_max_len || argc >= USER_ARGV_MAX_CNT) {
             printk("Arguments too long or too many arguments");
@@ -300,8 +302,8 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) 
         args_list[argc] = args;
 
         // 如果当前页空间不足
-        if (PGSIZE - ((uint64)args % PGSIZE) < len) {
-            uint32 part_len = PGSIZE - ((uint64)args % PGSIZE);
+        if (PGSIZE - ((uint64_t)args % PGSIZE) < len) {
+            uint32_t part_len = PGSIZE - ((uint64_t)args % PGSIZE);
             memcpy(args, *arg, part_len);
             args_len += part_len;
 
@@ -319,8 +321,8 @@ uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]) 
 
     // ! riscv64 是通过寄存器传参的
     t->tf->a0 = argc;
-    t->tf->a1 = (uint64)args_list;
-    return (uint64)args_list;
+    t->tf->a1 = (uint64_t)args_list;
+    return (uint64_t)args_list;
 
 bad:
     for (int i = 0; i < USER_ARGV_MAX_SIZE; i++) {
@@ -432,9 +434,9 @@ static void copy_proc(struct thread_info *ch, struct thread_info *pa) {
 }
 
 void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
-extern void mm_debug2();
+
 int do_fork() {
-    mm_debug2();
+
     struct thread_info *pa = myproc();
 
     struct thread_info *ch = uthread_struct_init();
@@ -567,7 +569,7 @@ __attribute__((noreturn)) int64 do_exit(int exit_code) {
         free_user_memory(&task->mm);
 
         if (t->tf) {
-            kmem_cache_free(&tf_kmem_cache, t->tf);
+            kmem_cache_free(t->tf);
             t->tf = NULL;
         }
 
@@ -601,7 +603,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options) {
     // free_user_pgd(&ch->task->mm);
 
     // 移除各种结构（sibling(在__waitpid已移除)，global，task,thread_info）
-    kmem_cache_free(&task_struct_kmem_cache, ch->task);
+    kmem_cache_free(ch->task);
 
     spin_lock(&Proc.lock);
     hash_del_node(&Proc.global_proc_table, &ch->global);
@@ -612,7 +614,7 @@ pid_t do_waitpid(pid_t pid, int *status, int options) {
 #ifdef DEBUG_SYSCALL
     printk("[wait]: pid: %d, thread: %s code: %d ok. by %d\n", ch->pid, ch->name, ch->exit_code, ch->parent->pid);
 #endif
-    kmem_cache_free(&thread_info_kmem_cache, ch);
+    kmem_cache_free(ch);
 
     return _pid;
 }

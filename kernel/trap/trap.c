@@ -23,10 +23,10 @@ extern void userret() __attribute__((noreturn));
 extern void syscall();
 extern int alloc_user_stack(struct mm_struct *mm, tid_t tid);
 extern int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f);
-extern void page_fault_handler(uint64 fault_addr, uint64 scause);
+extern void page_fault_handler(uint64_t fault_addr, uint64_t scause);
 extern uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]);
 extern void signal_handler(struct signal *s);
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 
 void trap_init() {
     time_init();
@@ -38,7 +38,7 @@ void trap_init() {
 // 寄存器中。 stvec 是用于在 RISC-V 中存储异常/中断向量表的寄存器。 在 RISC-V
 // 中，当发生异常或中断时，CPU 会自动将控制权转交给 stvec 中存储的地址
 void trap_inithart(void) {
-    w_stvec((uint64)kernelvec);
+    w_stvec((uint64_t)kernelvec);
 }
 
 // 时钟中断，由 intr_handler 调用
@@ -103,7 +103,7 @@ extern void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 
 extern void show_all_args(struct thread_info *t);
 // 异常
-static void excep_handler(uint64 scause) {
+static void excep_handler(uint64_t scause) {
     switch (scause) {
     case E_SYSCALL:
         syscall();
@@ -125,9 +125,9 @@ static void excep_handler(uint64 scause) {
         printk("satp: %p\n", r_satp());
         printk("proc satp: %p\n", myproc()->task->mm.pgd);
         printk("page: %d\n", page_count(PA2PG(myproc()->task->mm.pgd)));
-
+		printk("intr noff: %d\n",cpus[cpuid()].noff);
         // vm2pa_show(&t->task->mm);
-        // show_all_args(t);
+        show_all_args(t);
         panic("excep_handler unknown scause, sp:%p\n", t->tf->sp);
         panic("\n");
         break;
@@ -152,9 +152,9 @@ __attribute__((noreturn)) void usertrapret() {
     }
     spin_unlock(&p->task->mm.lock);
 
-    w_stvec((uint64)uservec);
+    w_stvec((uint64_t)uservec);
     w_sepc(p->tf->epc);
-    w_sscratch((uint64)(p->tf));
+    w_sscratch((uint64_t)(p->tf));
     // printk("%p,%p,%p\n",p,p->tf->epc,p->tf->kernel_sp);
 
     // set S Previous Privilege mode to User.
@@ -168,6 +168,7 @@ __attribute__((noreturn)) void usertrapret() {
 }
 
 // exec 会使用原来的内核栈
+// PS 这个函数确实写的太丑，不过我们很懒，能跑就行
 __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
     int res = -1;
 
@@ -204,7 +205,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
 
     // ! 解析参数的时候，前面已经 free_user_memory
 
-    uint64 args_list;
+    uint64_t args_list;
     if (argv) {
         args_list = parse_argv(t, argv, args_page);
         if (args_list == 0)
@@ -224,7 +225,7 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
         mappages(mm->pgd, PGROUNDDOWN(USER_ARGS_PAGE), args_list, PGSIZE, PTE_R | PTE_W | PTE_U);
 
         for (int i = 0; i < USER_ARGV_MAX_SIZE; i++)
-            mappages(mm->pgd, PGROUNDDOWN(USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + i) * PGSIZE), (uint64)args_page[i], PGSIZE, PTE_R | PTE_W | PTE_U);
+            mappages(mm->pgd, PGROUNDDOWN(USER_ARGS_PAGE + (USER_ARGS_MAX_CNT + i) * PGSIZE), (uint64_t)args_page[i], PGSIZE, PTE_R | PTE_W | PTE_U);
     }
 
     res = alloc_user_stack(&t->task->mm, t->tid);
@@ -235,8 +236,11 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
 
     sig_refault_all(&t->task->sigs);
 
-    t->tf->epc = ehdr.entry;
-    t->tf->sp  = USER_STACK_TOP(t->tid);
+	memset(t->tf,0,sizeof(*t->tf));
+	t->tf->epc = (uint64_t)user_entry;
+	
+    t->tf->a0 = ehdr.entry;
+	t->tf->sp  = USER_STACK_TOP(t->tid);
 
     t->tf->kernel_sp = KERNEL_STACK_TOP(t);
 #ifdef DEBUG_SYSCALL
@@ -247,11 +251,11 @@ __attribute__((noreturn)) int do_exec(const char *path, char *const argv[]) {
 
 // 内核 trap 处理函数 kernel_trap
 void kerneltrap() {
-    uint64 sepc = r_sepc();       // sepc: 保存异常发生时的 sepc 寄存器的值，sepc
+    uint64_t sepc = r_sepc();       // sepc: 保存异常发生时的 sepc 寄存器的值，sepc
                                   // 存储了引发异常或中断时的程序计数器（PC）的值
-    uint64 sstatus = r_sstatus(); // sstatus: 保存当前的 sstatus 寄存器的值，sstatus
+    uint64_t sstatus = r_sstatus(); // sstatus: 保存当前的 sstatus 寄存器的值，sstatus
                                   // 包含状态标志，例如当前的运行模式
-    uint64 scause = r_scause();   // scause: 保存 scause 寄存器的值，scause
+    uint64_t scause = r_scause();   // scause: 保存 scause 寄存器的值，scause
     assert((sstatus & SSTATUS_SPP) != 0, "kerneltrap: not from supervisor mode %d", sstatus & SSTATUS_SPP);
     assert(intr_get() == 0,
            "kerneltrap: interrupts enabled"); // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
@@ -269,9 +273,9 @@ void kerneltrap() {
 
 // 用户 trap 处理函数 user_trap
 void usertrap() {
-    uint64 scause  = r_scause();
-    uint64 sstatus = r_sstatus();
-    uint64 sepc    = r_sepc();
+    uint64_t scause  = r_scause();
+    uint64_t sstatus = r_sstatus();
+    uint64_t sepc    = r_sepc();
     // printk("[u-trap] pid: %d, scause: %p\n",myproc()->pid,scause);
     // 检查是否来自用户模式下的中断，也就是不是内核中断,确保中断来自用户态
     assert((sstatus & SSTATUS_SPP) == 0, "usertrap: not from user mode\n");
@@ -279,7 +283,7 @@ void usertrap() {
            "usertrap: interrupts enabled"); // xv6不允许嵌套中断，因此执行到这里的时候一定是关中断的
 
     // 现在位于内核，要设置 stvec 为 kernelvec
-    w_stvec((uint64)kernelvec);
+    w_stvec((uint64_t)kernelvec);
 
     // (位于进程上下文的，别忘记了:-)
     struct thread_info *p = myproc();

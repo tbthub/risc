@@ -1,11 +1,13 @@
 #include "mm/slab.h"
 
+#include "../fs/easyfs/easyfs.h"
 #include "core/proc.h"
 #include "core/timer.h"
 #include "dev/blk/bio.h"
 #include "dev/blk/buf.h"
+#include "fs/file.h"
 #include "lib/math.h"
-#include "std/string.h"
+#include "lib/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
 #include "param.h"
@@ -64,9 +66,9 @@ static struct slab *slab_create(struct kmem_cache *cache)
     slab->kc = cache;
     slab->inuse = 0;
     spin_init(&slab->lock, "slab");
-    sstack_init(&slab->free_list, (uint64 *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
+    sstack_init(&slab->free_list, (uint64_t *)((char *)slab + sizeof(*slab)), FREE_LIST_MAX_LEN);
     for (i = 0; i < cache->count_per_slab; i++) {
-        sstack_push(&slab->free_list, (uint64)((char *)slab->objs + i * cache->size));
+        sstack_push(&slab->free_list, (uint64_t)((char *)slab->objs + i * cache->size));
     }
     // printk("sz: %d, cnt: %d\n", cache->size,cache->count_per_slab);
 
@@ -86,7 +88,7 @@ static void slab_destory(struct slab *slab)
         clear_page_slab(page + i);
 
     // 释放页面
-    __free_pages((void *)slab->objs, slab->kc->order);
+    __free_pages((void *)slab->objs);
     __free_page((void *)slab);
 }
 
@@ -94,10 +96,10 @@ static void slab_destory(struct slab *slab)
 static uint8 calc_slab_order(uint16 obj_size)
 {
     // 确保每个 slab 至少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象
-    uint32 require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
+    uint32_t require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
 
     uint8 order = 0;
-    uint32 slab_size = PGSIZE;
+    uint32_t slab_size = PGSIZE;
 
     while (require_size > slab_size) {
         order++;
@@ -121,17 +123,11 @@ static void *obj_pop(struct slab *slab)
 // 插入一个空闲的地址（释放地址）
 static void obj_push(struct slab *slab, void *obj)
 {
-    if (sstack_push(&slab->free_list, (uint64)obj) != -1)
+    if (sstack_push(&slab->free_list, (uint64_t)obj) != -1)
         slab->inuse--;
     else
         panic("obj_push");
 }
-
-// slab 是不是未满，还有空
-// static int is_slab_partial(struct slab *slab, struct kmem_cache *cache)
-// {
-//     return slab->inuse < cache->count_per_slab;
-// }
 
 static int is_slab_full(struct slab *slab, struct kmem_cache *cache)
 {
@@ -161,13 +157,14 @@ static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
 }
 
 // 初始化缓存池
-void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32 flags)
+void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32_t flags)
 {
     spin_init(&cache->lock, "slab");
 
     strncpy(cache->name, name, CACHE_MAX_NAME_LEN);
     cache->flags = flags;
-    cache->size = (uint16)next_power_of_2(size);  // 对齐
+    // TODO 其实我感觉。。。不用对齐也行？这样专用 slab 可以容纳更多
+    cache->size = (uint16)next_power_of_2(size);  // 对齐  
     cache->order = calc_slab_order(cache->size);
     cache->count_per_slab = (1 << cache->order) * PGSIZE / cache->size;
     assert(cache->count_per_slab <= FREE_LIST_MAX_LEN, "kmem_cache_create cps:%d\n", cache->count_per_slab);
@@ -226,14 +223,13 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
     cpu_slab = cache->cache_cpu[cpuid()];
     pop_off();
 
-    spin_lock(&cpu_slab->lock);
     // 如果当前还有可用的，直接弹出即可
     if (!is_slab_full(cpu_slab, cache)) {
+        spin_lock(&cpu_slab->lock);
         void *tmp = obj_pop(cpu_slab);
         spin_unlock(&cpu_slab->lock);
         return tmp;
     }
-    spin_unlock(&cpu_slab->lock);
 
     // 如果 cpu_cache 可用的已经分配完了
     // 则从 part_slabs 链中查找
@@ -262,12 +258,13 @@ void *kmem_cache_alloc(struct kmem_cache *cache)
 }
 
 // 释放对象
-void kmem_cache_free(struct kmem_cache *cache, void *obj)
+void kmem_cache_free(void *obj)
 {
     if (!obj)
         panic("kmem_cache_free obj NULL\n");
 
     struct slab *slab = page_slab(PA2PG(obj));
+    struct kmem_cache *cache = slab->kc;
     // printk("free: %p, slab: %p, cache: %s\n", obj, slab, cache->name);
 
     if (!cache)
@@ -279,14 +276,12 @@ void kmem_cache_free(struct kmem_cache *cache, void *obj)
     // 如果链表为空，说明是 cpu_cache,直接释放即可
     // 如果是 cpu_cache,则其他cpu无法访问这个slab的，是安全的，不必加锁
     // ? 我们并不尽量都放在 cpu 中，这里加锁也是无奈，如果是其他CPU的（尽管效率更好）
-    spin_lock(&slab->lock);
     if (list_empty(&slab->list)) {
-        // spin_lock(&slab->lock);
+        spin_lock(&slab->lock);
         obj_push(slab, obj);
         spin_unlock(&slab->lock);
         return;
     }
-    spin_unlock(&slab->lock);
 
     // 否则就是普通的
     spin_lock(&cache->lock);
@@ -311,9 +306,10 @@ void kmem_cache_init()
     kmem_cache_create(&thread_info_kmem_cache, "thread_info_kmem_cache", 2 * PGSIZE, 0);
     kmem_cache_create(&buf_kmem_cache, "buf_kmem_cache", sizeof(struct buf_head), 0);
     kmem_cache_create(&bio_kmem_cache, "bio_kmem_cache", sizeof(struct bio), 0);
-   
+    kmem_cache_create(&timer_kmem_cache, "timer_kmem_cache", sizeof(struct timer), 0);
+    kmem_cache_create(&efs_inode_kmem_cache, "inode_kmem_cache", sizeof(struct easy_m_inode), 0);
+    kmem_cache_create(&efs_dentry_kmem_cache, "dentry_kmem_cache", sizeof(struct easy_dentry), 0);
+    kmem_cache_create(&file_kmem_cache, "file_kmem_cache", sizeof(struct file), 0);
     kmem_cache_create(&tf_kmem_cache, "tf_kmem_cache", sizeof(struct trapframe), 0);
     kmem_cache_create(&vma_kmem_cache, "vma_kmem_cache", sizeof(struct vm_area_struct), 0);
-    
-    kmem_cache_create(&timer_kmem_cache, "timer_kmem_cache", sizeof(struct timer), 0);
 }

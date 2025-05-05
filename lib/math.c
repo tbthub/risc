@@ -1,6 +1,6 @@
 #include "lib/math.h"
 #include "std/stddef.h"
-inline uint64 next_power_of_2(uint64 n)
+inline uint64_t next_power_of_2(uint64_t n)
 {
     if (n == 0)
         return 1; // 特殊情况
@@ -14,27 +14,31 @@ inline uint64 next_power_of_2(uint64 n)
     return n + 1; // 加1得到下一个2的幂
 }
 
-inline uint32 calculate_order(uint32 size)
+inline uint32_t math_order2(uint32_t size)
 {
-    if (size == 0)
-        return 0; // 特殊情况，大小为0时返回0
+    if (size == 0) return 0;
 
-    uint32 order = 0;
+    // 1. 向上取整到最近的 2 的幂
+    size--;
+    size |= size >> 1;
+    size |= size >> 2;
+    size |= size >> 4;
+    size |= size >> 8;
+    size |= size >> 16;
+    size++;
 
-    // 将 size 向上舍入到最接近的 2 的幂
-    size--; // 先减 1，确保当 size 是 2 的幂时能正确地映射到对应的 order
-    while (size > 0)
-    {
+    // 2. 计算阶数
+    uint32_t order = 0;
+    while (size > 1) {
         size >>= 1;
         order++;
     }
-
     return order;
 }
 
-inline uint32 math_log(uint32 num, uint16 base)
+inline uint32_t math_log(uint32_t num, uint16 base)
 {
-    uint32 result = 0;
+    uint32_t result = 0;
 
     // 如果底数为1或者num小于1则没有有效结果
     if (base <= 1 || num <= 0)
@@ -50,9 +54,9 @@ inline uint32 math_log(uint32 num, uint16 base)
     return result;
 }
 
-inline uint32 math_pow(uint32 base, uint16 exponent)
+inline uint32_t math_pow(uint32_t base, uint16 exponent)
 {
-    uint32 result = 1;
+    uint32_t result = 1;
 
     // 如果指数是0，任何数的0次方都为1
     if (exponent == 0)

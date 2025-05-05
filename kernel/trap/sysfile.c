@@ -20,16 +20,17 @@ extern int64 do_sleep(int64 ticks);                                             
 extern pid_t do_getpid();                                                             // proc.c
 extern int64 do_pause();                                                              // sched.c
 extern int64 do_sigaction(int sig, __sighandler_t handler);
+extern int64 do_sigret();
 extern int64 do_waitpid(pid_t pid, int *status, int options);
 
 extern int64 do_open(const char *path, flags_t flags, int mod);                                      // file.c
 extern int64 do_close(int fd);                                                                       // file.c
 extern int64 do_read(int fd, const void *buf, int64 count);                                          // file.c
 extern int64 do_write(int fd, const void *buf, int64 count);                                         // file.c
-extern int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, uint32 offset); // vma.c
+extern int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset);  // vma.c
 
 extern int64 do_exit(int exit_code) __attribute__((noreturn)); // 退出状态码
-extern int64 do_munmap(void *addr, uint32 len);
+extern int64 do_munmap(void *addr, uint32_t len);
 extern int64 do_wait(int *status);
 
 extern int64 do_pipe();
@@ -43,6 +44,7 @@ extern int64 do_mknod(const char *path, int mode, int dev);
 extern int64 do_unlink(const char *path);
 extern int64 do_link();
 extern int64 do_mkdir(const char *path);
+extern int64 do_module(const char * path,int mod);
 
 // * 请确保在 trapframe 结构体中顺序放置 a0->a6
 static void get_args(int64 *args, int n) {
@@ -180,14 +182,14 @@ int64 sys_close() {
 int64 sys_mmap() {
     int64 args[6];
     get_args(args, 6);
-    return do_mmap((void *)args[0], (uint32)args[1], (flags64_t)args[2], (flags_t)args[3], (fd_t)args[4], (uint32)args[5]);
+    return do_mmap((void *)args[0], (uint32_t)args[1], (flags64_t)args[2], (flags_t)args[3], (fd_t)args[4], (uint32_t)args[5]);
 }
 
 int64 sys_munmap() {
     int64 args[2];
     get_args(args, 2);
     READ_ONCE(*(char *)args[0]);
-    return do_munmap((void *)args[0], (uint32)args[1]);
+    return do_munmap((void *)args[0], (uint32_t)args[1]);
 }
 
 int64 sys_pause() {
@@ -205,4 +207,16 @@ int64 sys_waitpid() {
     int64 args[3];
     get_args(args, 3);
     return do_waitpid((pid_t)args[0], (int *)args[1], (int)args[2]);
+}
+int64 sys_sigret()
+{
+    return do_sigret();
+}
+
+int64 sys_module()
+{
+    int64 args[2];
+    get_args(args, 2);
+    READ_ONCE(*(const char *)args[0]);
+    return do_module((const char *)args[0], (int)args[1]);
 }

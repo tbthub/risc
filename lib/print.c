@@ -6,6 +6,7 @@
 #include "riscv.h"
 #include "std/stdarg.h"
 #include "std/stdio.h"
+#include "core/export.h"
 
 // 该文件临时用来打印一些调试信息
 
@@ -35,7 +36,7 @@ void putstr(char *str)
 
 void putptr(void *ptr)
 {
-    uint64 uptr = (uint64)ptr;
+    uint64_t uptr = (uint64_t)ptr;
     putstr("0x");  // 输出十六进制前缀
 
     // 按十六进制逐位输出，从高位到低位
@@ -91,6 +92,7 @@ void printk(const char *fmt, ...)
     spin_unlock(&cons.lock);
     va_end(ap);
 }
+EXPORT_SYMBOL(printk);
 
 // 关中断，死循环
 void panic(const char *fmt, ...)

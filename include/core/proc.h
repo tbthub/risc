@@ -15,22 +15,23 @@
 
 // Saved registers for kernel context switches.
 struct context {
-    uint64 ra;
-    uint64 sp;
+    uint64_t ra;
+    uint64_t sp;
 
     // callee-saved
-    uint64 s0;
-    uint64 s1;
-    uint64 s2;
-    uint64 s3;
-    uint64 s4;
-    uint64 s5;
-    uint64 s6;
-    uint64 s7;
-    uint64 s8;
-    uint64 s9;
-    uint64 s10;
-    uint64 s11;
+    uint64_t s0;
+    uint64_t s1;
+    uint64_t s2;
+    uint64_t s3;
+    uint64_t s4;
+    uint64_t s5;
+    uint64_t s6;
+    uint64_t s7;
+    uint64_t s8;
+    uint64_t s9;
+    uint64_t s10;
+    uint64_t s11;
+
 };
 
 // Per-CPU state.
@@ -82,40 +83,41 @@ struct task_struct {
 };
 
 struct trapframe {
-    /*   0 */ uint64 kernel_sp;
-    /*   8 */ uint64 epc;
+    /*   0 */ uint64_t kernel_sp;
+    /*   8 */ uint64_t epc;
 
-    /*  16 */ uint64 ra;
-    /*  24 */ uint64 sp;
-    /*  32 */ uint64 gp;
-    /*  40 */ uint64 tp;
-    /*  48 */ uint64 t0;
-    /*  56 */ uint64 t1;
-    /*  64 */ uint64 t2;
-    /*  72 */ uint64 s0;
-    /*  80 */ uint64 s1;
-    /*  88 */ uint64 a0;
-    /*  96 */ uint64 a1;
-    /* 104 */ uint64 a2;
-    /* 112 */ uint64 a3;
-    /* 120 */ uint64 a4;
-    /* 128 */ uint64 a5;
-    /* 136 */ uint64 a6;
-    /* 144 */ uint64 a7;
-    /* 152 */ uint64 s2;
-    /* 160 */ uint64 s3;
-    /* 168 */ uint64 s4;
-    /* 176 */ uint64 s5;
-    /* 184 */ uint64 s6;
-    /* 192 */ uint64 s7;
-    /* 200 */ uint64 s8;
-    /* 208 */ uint64 s9;
-    /* 216 */ uint64 s10;
-    /* 224 */ uint64 s11;
-    /* 232 */ uint64 t3;
-    /* 240 */ uint64 t4;
-    /* 248 */ uint64 t5;
-    /* 256 */ uint64 t6;
+    /*  16 */ uint64_t ra;
+    /*  24 */ uint64_t sp;
+    /*  32 */ uint64_t gp;
+    /*  40 */ uint64_t tp;
+    /*  48 */ uint64_t t0;
+    /*  56 */ uint64_t t1;
+    /*  64 */ uint64_t t2;
+    /*  72 */ uint64_t s0;
+    /*  80 */ uint64_t s1;
+    /*  88 */ uint64_t a0;
+    /*  96 */ uint64_t a1;
+    /* 104 */ uint64_t a2;
+    /* 112 */ uint64_t a3;
+    /* 120 */ uint64_t a4;
+    /* 128 */ uint64_t a5;
+    /* 136 */ uint64_t a6;
+    /* 144 */ uint64_t a7;
+    /* 152 */ uint64_t s2;
+    /* 160 */ uint64_t s3;
+    /* 168 */ uint64_t s4;
+    /* 176 */ uint64_t s5;
+    /* 184 */ uint64_t s6;
+    /* 192 */ uint64_t s7;
+    /* 200 */ uint64_t s8;
+    /* 208 */ uint64_t s9;
+    /* 216 */ uint64_t s10;
+    /* 224 */ uint64_t s11;
+    /* 232 */ uint64_t t3;
+    /* 240 */ uint64_t t4;
+    /* 248 */ uint64_t t5;
+    /* 256 */ uint64_t t6;
+
 };
 
 struct thread_info {
@@ -125,10 +127,10 @@ struct thread_info {
     spinlock_t lock;
 
     // p->lock must be held when using these:
-    uint32 flags;
+    uint32_t flags;
     enum task_state state;
     pid_t pid;
-    uint64 ticks;
+    uint64_t ticks;
 
     // wait_lock must be held when using this:
     struct thread_info *parent; // 父进程指针
@@ -164,6 +166,6 @@ extern struct thread_info *kthread_struct_init();
 extern struct thread_info *uthread_struct_init();
 extern struct thread_info *get_init();
 
-#define KERNEL_STACK_TOP(t) ((uint64)t + 2 * PGSIZE - 16)
+#define KERNEL_STACK_TOP(t) ((uint64_t)t + 2 * PGSIZE - 16)
 
 #endif

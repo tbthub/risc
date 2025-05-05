@@ -8,9 +8,9 @@
 #include "std/string.h"
 #include "sys.h"
 
-extern pte_t *walk(pagetable_t pagetable, uint64 va, int alloc);
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
-extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
+extern pte_t *walk(pagetable_t pagetable, uint64_t va, int alloc);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
+extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr);
 extern void __attribute__((unused)) vm2pa_show(struct mm_struct *mm);
 
 // debug
@@ -53,13 +53,13 @@ struct vm_area_struct *vma_dup(struct vm_area_struct *old_vma)
 
 void free_vma(struct vm_area_struct *vma)
 {
-    kmem_cache_free(&vma_kmem_cache, vma);
+    kmem_cache_free(vma);
 }
 
 void vma_prot_copy(struct vm_area_struct *vma, pte_t *pte)
 {
-    uint64 vma_perm = vma->vm_prot & 0b1110;  // 取出bit1,2,3（R/W/X）
-    uint64 pte_val = *pte;
+    uint64_t vma_perm = vma->vm_prot & 0b1110;  // 取出bit1,2,3（R/W/X）
+    uint64_t pte_val = *pte;
 
     pte_val &= ~0b1110;
     pte_val |= vma_perm;
@@ -73,7 +73,7 @@ void vma_prot_copy(struct vm_area_struct *vma, pte_t *pte)
 // 但是堆栈是个例外，堆栈是往下增长的，因此堆栈的 end 是栈顶，也就是 USER_STACK_TOP
 // 堆栈每一次因为页面不足发生缺页，要往下移动 start，但是有个最大的限度。
 // 并不会一次性把堆栈所有空间 vma 分配完成
-struct vm_area_struct *find_vma(struct mm_struct *mm, uint64 addr)
+struct vm_area_struct *find_vma(struct mm_struct *mm, uint64_t addr)
 {
     // TODO 我们暂时使用比较简单的线性查找，以后有机会改为红黑树
     struct vm_area_struct *v;
@@ -95,7 +95,7 @@ void vma_insert(struct mm_struct *mm, struct vm_area_struct *vma)
     mm->mmap = vma;
 }
 
-struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghdr_flags, uint32 pgoff, void *file, struct vm_operations_struct *ops)
+struct vm_area_struct *vma_alloc_proghdr(uint64_t start, uint64_t end, uint64_t proghdr_flags, uint32_t pgoff, void *file, struct vm_operations_struct *ops)
 {
     struct vm_area_struct *v = kmem_cache_alloc(&vma_kmem_cache);
     assert(v != NULL, "vma_alloc_proghdr");
@@ -117,9 +117,9 @@ struct vm_area_struct *vma_alloc_proghdr(uint64 start, uint64 end, uint64 proghd
 
 // size 要求页对齐,
 // 返回 end
-static uint64 find_free_region_map(struct mm_struct *mm, int aligned_size)
+static uint64_t find_free_region_map(struct mm_struct *mm, int aligned_size)
 {
-    uint64 top = mm->next_map;
+    uint64_t top = mm->next_map;
     mm->next_map = mm->next_map - aligned_size - PGSIZE;
 
     if (top < USER_MAP_BOTTOM || mm->next_map < USER_MAP_BOTTOM) {
@@ -134,19 +134,20 @@ static void vma_gen_close(struct mm_struct *mm, struct vm_area_struct *v)
     assert(v != NULL, "vma_gen_close v == NULL");
     pte_t *pte;
     pte = walk(mm->pgd, v->vm_start, 0);
-    for (uint64 _i_ = 0, _va_ = v->vm_start; _va_ < v->vm_end; _va_ += PGSIZE, _i_++) {
+    for (uint64_t va = v->vm_start; va < v->vm_end; va += PGSIZE) {
         if (!pte) {
-            pte = walk(mm->pgd, _va_ + PGSIZE, 0);
+            pte = walk(mm->pgd, va + PGSIZE, 0);
             continue;
         }
         else if (*pte & PTE_V) {
+            // printk("vma_gen_close va: %p, pa:%p, ref %d\n",va,PTE2PA(*pte),page_count(PA2PG(PTE2PA(*pte))));
             __free_page((void *)PTE2PA(*pte));
             *pte = 0;
         }
 
         pte += 1;
-        if (((uint64)pte & (PGSIZE - 1)) == 0)
-            pte = walk(mm->pgd, _va_ + PGSIZE, 0);
+        if (((uint64_t)pte & (PGSIZE - 1)) == 0)
+            pte = walk(mm->pgd, va + PGSIZE, 0);
     }
 }
 
@@ -158,7 +159,7 @@ static void vma_gen_dup(struct mm_struct *mm, struct vm_area_struct *v, struct m
     struct vm_area_struct *vma2;
 
     pte = walk(mm->pgd, v->vm_start, 0);
-    for (uint64 _i_ = 0, va = v->vm_start; va < v->vm_end; va += PGSIZE, _i_++) {
+    for (uint64_t va = v->vm_start; va < v->vm_end; va += PGSIZE) {
         if (!pte) {
             pte = walk(mm->pgd, va + PGSIZE, 0);
             continue;
@@ -167,20 +168,31 @@ static void vma_gen_dup(struct mm_struct *mm, struct vm_area_struct *v, struct m
             if (*pte & PTE_W)
                 set_cow_pte(pte);
             get_page(PA2PG(PTE2PA(*pte)));
-
+            // printk("npg: %p, opg: %p, va: %p, ref %d\n",mm->pgd,new_mm->pgd,va, page_count(PA2PG(PTE2PA(*pte))));
             pte2 = walk(new_mm->pgd, va, 1);
             *pte2 = *pte;
         }
 
         pte += 1;
-        if (((uint64)pte & (PGSIZE - 1)) == 0)
+        if (((uint64_t)pte & (PGSIZE - 1)) == 0)
             pte = walk(mm->pgd, va + PGSIZE, 0);
     }
     vma2 = vma_dup(v);
     vma_insert(new_mm, vma2);
 }
 
-static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
+static void vma_gen_fault(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr)
+{
+    uint64_t *new_page = __alloc_page(0);
+    if (!new_page)
+        panic("vma_bss_fault\n");
+    mappages(t->task->mm.pgd, PGROUNDDOWN(fault_addr), (uint64_t)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
+#ifdef DEBUG_SF_PFMAP
+    printk("pid: %d, g-maps: %p - %p\n", t->pid, PGROUNDDOWN(fault_addr), (uint64_t)new_page);
+#endif
+}
+
+static void vma_gen_file_fault(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr)
 {
     assert(v->vm_file != NULL, "vma_gen_file_fault");
 
@@ -217,20 +229,12 @@ static void vma_gen_stack_fault(struct thread_info *t, struct vm_area_struct *v,
 {
     if (v->vm_end - v->vm_start >= USER_STACK_SIZE)
         panic("stack overhidden\n");  // 杀死
-
-    uint64 *new_page = __alloc_page(0);
-    if (!new_page)
-        panic("vma_gen_stack_fault\n");
-    // printk("vma_gen_stack_fault %s, addr: %p\n", t->name,fault_addr);
-    mappages(t->task->mm.pgd, PGROUNDDOWN(fault_addr), (uint64)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
-#ifdef DEBUG_SF_PFMAP
-    printk("pid: %d, s-maps: %p - %p\n", t->pid, PGROUNDDOWN(fault_addr), (uint64)new_page);
-#endif
+    vma_gen_fault(t, v, fault_addr);
     v->vm_start -= PGSIZE;
 }
 
 // * 参数页面理论上不会发生缺页
-static void vma_gen_args_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
+static void vma_gen_args_fault(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr)
 {
     panic("vma_gen_args_fault\n");
 }
@@ -253,25 +257,18 @@ struct vm_operations_struct vma_args_ops = {
         .fault = vma_gen_args_fault,
 };
 
-static void vma_gen_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
-{
-    uint64 *new_page = __alloc_page(0);
-    if (!new_page)
-        panic("vma_bss_fault\n");
-    mappages(t->task->mm.pgd, PGROUNDDOWN(fault_addr), (uint64)new_page, PGSIZE, vma_extra_prot(v) | PTE_U);
-#ifdef DEBUG_SF_PFMAP
-    printk("pid: %d, g-maps: %p - %p\n", t->pid, PGROUNDDOWN(fault_addr), (uint64)new_page);
-#endif
-}
-
-struct vm_operations_struct vma_gen_ops = {.close = vma_gen_close, .dup = vma_gen_dup, .fault = vma_gen_fault};
+struct vm_operations_struct vma_gen_ops = {
+    .close = vma_gen_close,
+    .dup = vma_gen_dup,
+    .fault = vma_gen_fault
+};
 
 // addr：
 // 用户期望的起始虚拟地址。
 // 一般情况下，用户会指定 NULL，由内核决定合适的起始地址。
-int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, uint32 offset)
+int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset)
 {
-    uint64 aligned_len;
+    uint64_t aligned_len;
     struct mm_struct *mm = &myproc()->task->mm;
     struct vm_area_struct *v;
 
@@ -308,12 +305,12 @@ int64 do_mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, ui
     return (int64)v->vm_start;
 }
 
-int64 do_munmap(void *addr, uint32 len)
+int64 do_munmap(void *addr, uint32_t len)
 {
     // struct vm_area_struct *v;
     // struct mm_struct *mm = &myproc()->task->mm;
     // spin_lock(&mm->lock);
-    // v = find_vma(mm, (uint64)addr);
+    // v = find_vma(mm, (uint64_t)addr);
     // if (!v)
     //     panic("do_munmap, v is NULL\n");
     return 0;

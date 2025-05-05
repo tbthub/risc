@@ -14,9 +14,10 @@
 #include "elf.h"
 
 // 内核页表
-static pagetable_t kernel_pagetable;
-extern struct vm_area_struct *find_vma(struct mm_struct *mm, uint64 addr);
-extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
+pagetable_t kernel_pagetable;
+extern struct vm_area_struct *find_vma(struct mm_struct *mm, uint64_t addr);
+extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr);
+
 
 //   64 位的虚拟地址字段分布
 //   39..63 -- must be zero.
@@ -42,7 +43,8 @@ extern void kswap_wake(struct thread_info *t, struct vm_area_struct *v, uint64 f
 //  0       -- V    (Valid)     仅当位 V 为 1 时，页表项才是有效的；
 
 // 返回最下面的那个页表项的地址,并根据 alloc 的值看是否决定分配
-pte_t *walk(pagetable_t pagetable, uint64 va, int alloc) {
+pte_t *walk(pagetable_t pagetable, uint64_t va, int alloc)
+{
     if (va >= MAXVA) {
         printk("vm.c walk: Virtual address out of bounds!");
         // (杀死当前进程?)
@@ -87,11 +89,12 @@ pte_t *walk(pagetable_t pagetable, uint64 va, int alloc) {
 // 0，若 walk() 无法分配所需的页表页，则返回 -1。 从 va 到 va + sz
 // 的虚拟地址范围映射到从 pa 到 pa + sz 的物理地址范围。 再次强调下，va
 // 区域连续，pa 区域也连续的！！！。
-int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm) {
-    uint64 a, last;
+int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm)
+{
+    uint64_t a, last;
     pte_t *pte;
     if ((va % PGSIZE) != 0)
-        panic("mappages: va not aligned");
+        panic("mappages: va: %p not aligned\n",va);
 
     if ((size % PGSIZE) != 0)
         panic("mappages: size not aligned");
@@ -111,7 +114,7 @@ int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
             return ERR;
 
         if (*pte & PTE_V)
-            panic("vm.c mappages: remap\n");
+            panic("vm.c mappages: remap va: %p\n", va);
 
         // 查看该文件上面对SV39的字段解释
         // 添加页面映射和权限信息
@@ -130,13 +133,15 @@ int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm)
  * 内核页表映射
  */
 
-static void kvm_map(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm) {
+static void kvm_map(pagetable_t kpgtbl, uint64_t va, uint64_t pa, uint64_t sz, int perm)
+{
     if (mappages(kpgtbl, va, pa, sz, perm) != 0)
         panic("vm.c kvm_map: Error!");
 }
 
 // 内核虚存初始化
-void kvm_init() {
+void kvm_init()
+{
     pagetable_t kpgtbl;
 
     kpgtbl = __alloc_page(0);
@@ -159,29 +164,25 @@ void kvm_init() {
     // 内核代码段的映射（可读可执行）
     // etext
     // 表示内核代码的结束位置。链接器在内核编译时会生成这个符号，表示内核代码段的末尾地址。参见kernel.ld
-    kvm_map(kpgtbl, KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X);
+    kvm_map(kpgtbl, KERNBASE, KERNBASE, (uint64_t)etext - KERNBASE, PTE_R | PTE_X);
 
     // 内核数据段的映射
-    // kvm_map(kpgtbl, (uint64)etext, (uint64)etext, PGROUNDUP((uint64)end)
-    // - (uint64)etext, PTE_R | PTE_W);
+    // kvm_map(kpgtbl, (uint64_t)etext, (uint64_t)etext, PGROUNDUP((uint64_t)end)
+    // - (uint64_t)etext, PTE_R | PTE_W);
 
     // 内核数据段和物理内存的映射（可读可写，包括堆、栈、BSS）
-    kvm_map(kpgtbl, (uint64)etext, (uint64)etext, PHYSTOP - (uint64)etext, PTE_R | PTE_W);
+    kvm_map(kpgtbl, (uint64_t)etext, (uint64_t)etext, PHYSTOP - (uint64_t)etext, PTE_R | PTE_W);
 
     // 下面是我们暂时还没有实现的
 
-    // map the trampoline for trap entry/exit to
-    // the highest virtual address in the kernel.
-    // 映射 TRAMPOLINE 页面
-    // kvm_map(kpgtbl, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R |
-    // PTE_X);
     printk("kvm init ok!\n");
     kernel_pagetable = kpgtbl;
 }
 
 // 将硬件页表寄存器 satp 切换到内核的页表（stap寄存器保存页表地址），
 // 并启用分页功能。
-void kvm_init_hart() {
+void kvm_init_hart()
+{
     w_sstatus(SSTATUS_SUM);
     // 等待之前对页表内存的任何写操作完成。
     sfence_vma();
@@ -199,12 +200,13 @@ void kvm_init_hart() {
  */
 
 // debug，打印已经映射的页表
-void __attribute__((unused)) vm2pa_show(struct mm_struct *mm) {
+void __attribute__((unused)) vm2pa_show(struct mm_struct *mm)
+{
     struct vm_area_struct *v = mm->mmap;
     pte_t *pte;
     while (v) {
         spin_lock(&mem_map.lock);
-        for (uint64 va = v->vm_start; va < v->vm_end; va += PGSIZE) {
+        for (uint64_t va = v->vm_start; va < v->vm_end; va += PGSIZE) {
             pte = walk(mm->pgd, va, 0);
             if (!pte)
                 continue;
@@ -217,34 +219,40 @@ void __attribute__((unused)) vm2pa_show(struct mm_struct *mm) {
     }
 }
 
-inline void set_cow_pte(pte_t *pte) {
-    *pte &= ~PTE_W;  // 清除写权限，设置为只读
-    *pte |= PTE_COW; // 设置为 COW 页面
+void set_cow_pte(pte_t *pte)
+{
+    *pte &= ~PTE_W;   // 清除写权限，设置为只读
+    *pte |= PTE_COW;  // 设置为 COW 页面
 }
 
-inline void clear_cow_pte(pte_t *pte) {
+void clear_cow_pte(pte_t *pte)
+{
     *pte |= PTE_W;
     *pte &= ~PTE_COW;
 }
 
-inline int is_cow_pte(pte_t *pte) {
+int is_cow_pte(pte_t *pte)
+{
     return (*pte & PTE_COW);
 }
-
 // 设置页面正在处理缺页(需互斥情况下)
-static inline void set_pf_pte(pte_t *pte) {
+static inline void set_pf_pte(pte_t *pte)
+{
     *pte |= PTE_PF;
 }
 
-static inline int is_pf_pte(pte_t *pte) {
+static inline int is_pf_pte(pte_t *pte)
+{
     return (*pte & PTE_PF);
 }
 
-static inline void clear_pf_pte(pte_t *pte) {
+static inline void clear_pf_pte(pte_t *pte)
+{
     *pte &= ~PTE_PF;
 }
 
-static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr) {
+static void handle_cow_page_fault(pte_t *pte, uint64_t fault_addr)
+{
 #ifdef DEBUG_COW
     struct thread_info *th = myproc();
     printk("pid %d: cow page: %p\n", th->pid, PGROUNDDOWN(fault_addr));
@@ -257,13 +265,13 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr) {
         void *new_page = __alloc_page(0);
         memcpy(new_page, (void *)PGROUNDDOWN(fault_addr), PGSIZE);
 #ifdef DEBUG_COW
-
-        printk("pid %d: cow NEW page, cow-maps: %p - %p\n", th->pid, PGROUNDDOWN(fault_addr), (uint64)new_page);
+        printk("pid %d: cow NEW page, cow-maps: %p - %p\n", th->pid, PGROUNDDOWN(fault_addr), (uint64_t)new_page);
 #endif
         // 先保留原PTE的权限位(0 - 9,即低10位)
-        uint64 old_flags = *pte & 0x3FF;
-        *pte             = PA2PTE(new_page) | old_flags;
-    } else {
+        uint64_t old_flags = *pte & 0x3FF;
+        *pte = PA2PTE(new_page) | old_flags;
+    }
+    else {
         get_page(pg);
 #ifdef DEBUG_COW
         printk("pid %d: cow OLD page. addr is %p\n", th->pid, PGROUNDDOWN(fault_addr));
@@ -273,7 +281,8 @@ static void handle_cow_page_fault(pte_t *pte, uint64 fault_addr) {
     clear_cow_pte(pte);
 }
 
-void page_fault_handler(uint64 fault_addr, uint64 scause) {
+void page_fault_handler(uint64_t fault_addr, uint64_t scause)
+{
     assert(intr_get() == 0, "page_fault_handler intr on!\n");
     struct thread_info *th = myproc();
 
@@ -292,7 +301,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause) {
 #endif
     v = find_vma(mm, fault_addr);
     if (!v) {
-        panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause); // TODO 杀死进程，不过我们暂时先报错
+        panic("page_fault_handler: illegal addr %p, scause: %p\n", fault_addr, scause);  // TODO 杀死进程，不过我们暂时先报错
         // return;
     }
 
@@ -329,7 +338,7 @@ void page_fault_handler(uint64 fault_addr, uint64 scause) {
 
     // 无效、未在处理->（第一个线程）
     if (!(*pte & PTE_V) || !is_pf_pte(pte)) {
-        set_pf_pte(pte); // 标记这个页面正在被处理
+        set_pf_pte(pte);  // 标记这个页面正在被处理
         spin_unlock(&mm->lock);
         v->vm_ops->fault(th, v, fault_addr);
 
@@ -337,11 +346,12 @@ void page_fault_handler(uint64 fault_addr, uint64 scause) {
         spin_lock(&mm->lock);
         clear_pf_pte(pte);
         spin_unlock(&mm->lock);
-    } else {
+    }
+    else {
         // 页面正在被其他线程缺页处理中
         while (is_pf_pte(pte)) {
             spin_unlock(&mm->lock);
-            yield(); // (就绪态)让出 CPU，等待缺页处理完成
+            yield();  // (就绪态)让出 CPU，等待缺页处理完成
             spin_lock(&mm->lock);
         }
         spin_unlock(&mm->lock);
@@ -366,23 +376,26 @@ void page_fault_handler(uint64 fault_addr, uint64 scause) {
  * 用户虚存管理(部分)
  */
 
-int alloc_user_stack(struct mm_struct *mm, tid_t tid) {
+int alloc_user_stack(struct mm_struct *mm, tid_t tid)
+{
     // 理论上。。。栈第一个页面也可以通过缺页中断实现，不过我们为了效率，预分配栈
-    uint64 *stack            = NULL;
+    uint64_t *stack = NULL;
     struct vm_area_struct *v = NULL;
 
     stack = __alloc_page(0);
     if (!stack)
         return -1;
 
-    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1, ELF_PROG_FLAG_READ | ELF_PROG_FLAG_WRITE, 0, NULL, &vma_stack_ops);
+    v = vma_alloc_proghdr(PGROUNDDOWN(USER_STACK_TOP(tid)), PGROUNDUP(USER_STACK_TOP(tid) + 1) - 1,
+     ELF_PROG_FLAG_READ | ELF_PROG_FLAG_WRITE, 0, NULL, &vma_stack_ops);
 
     vma_insert(mm, v);
-    mappages(mm->pgd, PGROUNDDOWN(USER_STACK_TOP(tid)), (uint64)stack, PGSIZE, PTE_R | PTE_W | PTE_U);
+    mappages(mm->pgd, PGROUNDDOWN(USER_STACK_TOP(tid)), (uint64_t)stack, PGSIZE, PTE_R | PTE_W | PTE_U);
     return 0;
 }
 
-int alloc_user_pgd(struct mm_struct *mm) {
+int alloc_user_pgd(struct mm_struct *mm)
+{
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
     if (!mm->pgd)
@@ -393,34 +406,37 @@ int alloc_user_pgd(struct mm_struct *mm) {
     return 0;
 }
 
-int alloc_kern_pgd(struct mm_struct *mm) {
+int alloc_kern_pgd(struct mm_struct *mm)
+{
     assert(mm != NULL, "alloc_user_pgd\n");
     mm->pgd = __alloc_page(0);
-    // printk("alloc_kern_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
     if (!mm->pgd) {
         panic("alloc_kern_pgd mm->pgd\n");
         return -1;
     }
 
-    // 把内核也映射到用户地址空间
     memcpy(mm->pgd, kernel_pagetable, PGSIZE);
+    // mm->pgd = kernel_pagetable;
     return 0;
 }
 
-void free_user_pgd(struct mm_struct *mm) {
+void free_user_pgd(struct mm_struct *mm)
+{
     if (!mm) {
         panic("mm\n");
     }
-    // 内核线程是没有页表的
+
     if (mm->pgd) {
-        // printk("free_user_pgd, pgd: %p, kern:%p\n", mm->pgd, kernel_pagetable);
+        // printk("free_user_pgd, pgd: %p ref:%d \n", mm->pgd,page_count(PA2PG(mm->pgd)));
         __free_page(mm->pgd);
         mm->pgd = NULL;
     }
 }
 
 // ! 我们暂时没有实现页表本身的释放，后面补充
-void free_user_memory(struct mm_struct *mm) {
+// ! 页表自身需要父进程来回收，但是我们在这里有 bug
+void free_user_memory(struct mm_struct *mm)
+{
     // 根据 mm->map 指导释放内存，尽管页表可能没有映射
     struct vm_area_struct *vma = mm->mmap;
     struct vm_area_struct *tmp = NULL;
@@ -431,4 +447,12 @@ void free_user_memory(struct mm_struct *mm) {
         vma = tmp;
     }
     mm->mmap = NULL;
+}
+
+// 用户程序引导代码，所有程序共享
+void user_init()
+{
+    pte_t *pte = walk(kernel_pagetable, (uint64_t)user_entry, 0);
+    assert(pte != NULL, "user_init\n");
+    *pte |= (PTE_R | PTE_X | PTE_U);
 }

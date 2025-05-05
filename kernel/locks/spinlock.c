@@ -8,8 +8,7 @@
 
 void spin_init(spinlock_t *lock, const char *name) {
     lock->lock = SPIN_UNLOCKED;
-    // strncpy(lock->name, name, 12);
-    strdup(lock->name, name);
+	strncpy(lock->name, name, 12);
     lock->cpuid = -1;
 }
 

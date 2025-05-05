@@ -3,18 +3,23 @@
 #include "core/proc.h"
 #include "core/locks/semaphore.h"
 #include "core/locks/spinlock.h"
+#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "std/stdio.h"
 extern  pid_t do_waitpid(pid_t pid, int *status, int options);
+extern int64 do_exit(int exit_code) __attribute__((noreturn));
 
+//  2 ctrl + b
 static void sigint_handler(int sig)
 {
     printk("sigint_default_handler: %d\n", sig);
 }
 
+// 3 ctrl + c
 static void sigquit_handler(int sig)
 {
     printk("sigquit_default_handler: %d\n", sig);
+	do_exit(sig);
 }
 
 static void sigtrap_handler(int sig)
@@ -64,7 +69,7 @@ static void sigterm_handler(int sig)
 
 static void sigchld_handler(int sig)
 {
-    // do_waitpid(-1, NULL, 1);
+    do_waitpid(-1, NULL, 1);
 }
 
 static void sigcont_handler(int sig)
@@ -179,6 +184,7 @@ void sig_init(struct signal *s)
     signal_struct_init(s->sig);
 }
 
+extern void sigact_call();
 // 此函数在从内核返回用户的时候调用
 // 检测并处理信号
 void signal_handler(struct signal *s)
@@ -205,8 +211,19 @@ void signal_handler(struct signal *s)
         return;
     }
     spin_unlock(&s->lock);
+	if (do_sig_handler == default_signal_handlers[si]) {
+        do_sig_handler(si);
+    }
+    else {
+        struct thread_info *t = myproc();
+        // 保存 tf 到用户栈
+        memcpy((char *)t->tf->sp - sizeof(*t->tf), (void *)t->tf, sizeof(*t->tf));
+        t->tf->sp -= sizeof(*t->tf);
+        t->tf->a0 = (uint64_t)do_sig_handler;
+        t->tf->epc = (uint64_t)sigact_call;
+    }
 
-    do_sig_handler(si);
+
 }
 
 void send_sig(int sig, pid_t pid)
@@ -309,6 +326,9 @@ void sig_refault(struct signal *s, int sig)
     spin_unlock(&ss->lock);
 }
 
+// *自定义信号处理函数
+// *对于内核线程，我们认为没有必要做，或者以后有需求再说
+// *当前只针对用户程序。
 int sig_set_sigaction(struct signal *s, int sig, __sighandler_t handler)
 {
     if (detect_sig_valid(sig) < 0) {
@@ -338,6 +358,12 @@ int64 do_sigaction(int sig, __sighandler_t handler)
     return sig_set_sigaction(&t->sigs, sig, handler);
 }
 
+int64 do_sigret()
+{
+    struct thread_info *t = myproc();
+    memcpy((void *)t->tf, (void *)t->tf->sp, sizeof(*t->tf));
+    return 0;
+}
 // 在回收进程使用，没有并发冲突
 void sig_release_all(struct signal *s)
 {

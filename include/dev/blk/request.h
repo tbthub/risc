@@ -19,7 +19,7 @@ struct request
     spinlock_t lock;
     struct list_head queue_node;
     // 本次请求是读操作还是写操作？
-    uint32 rq_flags;
+    uint32_t rq_flags;
     // 请求的 bio 链（不含链表头）
     struct bio *bio;
     uint8 completed;
@@ -40,7 +40,7 @@ struct request_queue
 };
 
 extern void rq_queue_init(struct gendisk *gd);
-extern struct request *make_request(struct gendisk *gd, uint64 blockno, uint32 offset, uint32 len, void *vaddr, uint32 rw);
+extern struct request *make_request(struct gendisk *gd, uint64_t blockno, uint32_t offset, uint32_t len, void *vaddr, uint32_t rw);
 extern struct request *get_next_rq(struct request_queue *rq_queue);
 extern void rq_del(struct request *rq);
 

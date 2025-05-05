@@ -26,7 +26,7 @@ struct buf_head
     struct gendisk *gd; // 哪一个通用块
 
     flags_t flags;
-    uint32 blockno; // 起始块号
+    uint32_t blockno; // 起始块号
 
     sleeplock_t lock; // 用于 IO 互斥
     atomic_t refcnt;
@@ -49,8 +49,8 @@ struct bhash_struct
     // 这里采用 LRU2 管理
     struct list_head active_list;   // 活跃的LRU链
     struct list_head inactive_list; // 不活跃
-    uint32 active_count;
-    uint32 inactive_count;
+    uint32_t active_count;
+    uint32_t inactive_count;
 
     struct list_head dirty_list; // 脏链
 };

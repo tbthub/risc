@@ -16,6 +16,7 @@ struct hash_table
     hash_node_t *heads;
 };
 
+
 extern int hash_init(struct hash_table *htable, int size, const char *name);
 extern void hash_free(struct hash_table *htable);
 

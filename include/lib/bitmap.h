@@ -5,7 +5,7 @@
 // 以后我们采取一簇一簇对位图分配进行优化
 
 struct bitmap {
-	uint64 *map; // 实际的物理指针
+	uint64_t *map; // 实际的物理指针
 	int size; // 位图的大小
 	int unused; // 剩余可用的
 
@@ -14,8 +14,8 @@ struct bitmap {
 	int allocation;
 };
 
-extern void bitmap_init(struct bitmap *bmp, uint64 *map, int size_bits);
-extern void bitmap_init_zone(struct bitmap *bmp, uint64 *map, int size_bits);
+extern void bitmap_init(struct bitmap *bmp, uint64_t *map, int size_bits);
+extern void bitmap_init_zone(struct bitmap *bmp, uint64_t *map, int size_bits);
 extern int bitmap_alloc(struct bitmap *bmp);
 extern void bitmap_free(struct bitmap *bmp, int index);
 extern int bitmap_is_free(struct bitmap *bmp, int index);

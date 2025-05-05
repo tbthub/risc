@@ -1,11 +1,9 @@
 #ifndef __USER_H__
 #define __USER_H__
 #include "std/stddef.h"
-#include "fs/fcntl.h"
+#include "fs/file.h"
 
 typedef void (*__sighandler_t)(int);
-
-
 
 // 系统调用
 extern int64 fork(void);
@@ -30,7 +28,7 @@ extern int64 sbrk(int);
 extern int64 sleep(int);
 extern int64 uptime(void);
 extern int64 pause(void);
-extern int64 mmap(void *addr, uint32 len, flags64_t prot, flags_t flags, fd_t fd, uint32 offset);
+extern int64 mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset);
 
 extern pid_t waitpid(pid_t pid, int *status, int options);
 extern int64 sigaction(int sig, __sighandler_t handler);

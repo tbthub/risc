@@ -17,7 +17,7 @@ typedef struct
 
 typedef struct
 {
-    uint32 access;
+    uint32_t access;
     struct list_head list;
 } lru2_node_t;
 

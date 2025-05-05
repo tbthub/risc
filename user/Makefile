@@ -8,20 +8,8 @@ SRCS_C := $(shell find $(SRC_DIR) -type f -name '*.c')
 TARGETS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%, $(SRCS_C))
 DIRS := $(sort $(dir $(TARGETS)))
 
-# 自动检测工具链（保持原样）
-ifndef TOOLPREFIX
-TOOLPREFIX := $(shell if riscv64-unknown-elf-objdump -i 2>&1 | grep 'elf64-big' >/dev/null 2>&1; \
-	then echo 'riscv64-unknown-elf-'; \
-	elif riscv64-linux-gnu-objdump -i 2>&1 | grep 'elf64-big' >/dev/null 2>&1; \
-	then echo 'riscv64-linux-gnu-'; \
-	elif riscv64-unknown-linux-gnu-objdump -i 2>&1 | grep 'elf64-big' >/dev/null 2>&1; \
-	then echo 'riscv64-unknown-linux-gnu-'; \
-	else echo "***" 1>&2; \
-	echo "*** Error: Couldn't find a riscv64 version of GCC/binutils." 1>&2; \
-	echo "*** To turn off this error, run 'make TOOLPREFIX= ...'." 1>&2; \
-	echo "***" 1>&2; exit 1; fi)
-endif
 
+TOOLPREFIX = riscv64-linux-gnu-
 # 工具链定义
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)as
@@ -32,11 +20,11 @@ OBJDUMP = $(TOOLPREFIX)objdump
 # 编译选项
 CFLAGS = -Wall -O0 -Werror -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -mcmodel=medany -fno-common -nostdlib -ffunction-sections -fdata-sections
-CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include -I../include -I../include/std
+CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include -I../include
 CFLAGS += -march=rv64gc
 
 # 链接选项
-LDFLAGS = -z max-page-size=4096 -nostdlib -static
+LDFLAGS = -z max-page-size=4096 -nostdlib
 
 # 确保构建目录存在
 $(shell mkdir -p $(DIRS))

@@ -60,6 +60,7 @@ int strncmp(const char *p, const char *q, uint n) {
     return (uchar)*p - (uchar)*q;
 }
 
+
 // 字符串哈希函数，使用 DJB2 算法
 int strhash(const char *str) {
     unsigned long hash = 5381;
@@ -72,8 +73,9 @@ int strhash(const char *str) {
     return (int)(hash & 0x7FFFFFFF); // 保证哈希值是正数
 }
 
-uint32 strlen(const char *p) {
-    const char *start = p; // 记录起始位置
+uint32_t strlen(const char *p)
+{
+    const char *start = p;  // 记录起始位置
     while (*p)
         p++;
     return (p - start);

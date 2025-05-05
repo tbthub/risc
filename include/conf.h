@@ -1,10 +1,15 @@
 #ifndef __CONF_H__
 #define __CONF_H__
 
+
+// #define CONF_MKMOD
+
 // #define CONF_MKFS
 #ifdef CONF_MKFS
 #define DEBUG_FLUSH
 #endif
+
+
 
 #define DEBUGS
 #ifdef DEBUGS
@@ -21,20 +26,20 @@
 // #define DEBUG_RQ           // 显示 IO 请求
 // #define DEBUG_COW          // 显示 COW
 // #define DEBUG_PF           // 显示缺页
-// #define DEBUG_SF_PFMAP  // 显示栈、文件页面映射（因缺页）
+// #define DEBUG_SF_PFMAP    // 显示栈、文件页面映射（因缺页）
 // #define DEBUG_SYSCALL      // 显示来自用户空间的系统调用
 
 #endif
 // TODO
 #define MAX_PATH_LEN 256    // 支持最长路径长度
-#define ARG_MAX 128 * 1024  // 传入参数最长 128K
-#define ENV_MAX 128 * 1024  // 环境变量最长 128K
+#define ARG_MAX (128 * 1024)  // 传入参数最长 128K
+#define ENV_MAX (128 * 1024)  // 环境变量最长 128K
 
-#define USER_TEXT_BASE 0x200000000                                                             // 用户程序代码段基地址 0x200_000_000
+
+#define USER_TEXT_BASE 0x200000000                                                   // 用户程序代码段基地址 0x200_000_000
 #define USER_STACK_SIZE (8 * 1024 * 1024)                                                      // 8 MB 栈
-#define USER_STACK_TOP(tid) (0x200000000 - 0x1000 - (tid) * (USER_STACK_SIZE + 0x1000) - 0x8)  // 用户程序栈顶
+#define USER_STACK_TOP(tid) (USER_TEXT_BASE - 0x1000 - (tid) * (USER_STACK_SIZE + 0x1000) - 0x8)  // 用户程序栈顶
 
-#define USER_TEXT_BASE 0x200000000  // 用户程序代码段基地址 0x200_000_000
 
 // 用户参数页列表占用 1 页(最多 4096 / 8 = 512 个参数，显示包含最后一个 NULL)
 // (暂时固定，要改的话需要该代码 parse_argv )

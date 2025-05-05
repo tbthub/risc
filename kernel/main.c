@@ -27,7 +27,7 @@
 #include "../test/t_head.h"
 volatile static int started = 0;
 extern void init_s();
-
+extern void kmods_init();
 extern void mm_init();
 extern int t_mem_test2();
 extern int t_mem_test1();
@@ -53,13 +53,15 @@ void main() {
         plic_inithart();
         vfs_init();
         init_s();
+        kmods_init();
 
         printk("hart 0 init_s ok\n");
         printk("xv6 kernel is booting\n");
 
         __sync_synchronize();
         started = 1;
-    } else {
+    }
+    else {
         while (started == 0)
             ;
         __sync_synchronize();

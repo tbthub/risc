@@ -8,36 +8,43 @@
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "std/stdio.h"
+#include "core/export.h"
 
 inline void buf_pin(struct buf_head *b)
 {
     sleep_on(&b->lock);
 }
+EXPORT_SYMBOL(buf_pin);
 
 inline void buf_unpin(struct buf_head *b)
 {
     wake_up(&b->lock);
 }
+EXPORT_SYMBOL(buf_unpin);
 
 inline void buf_fixed(struct buf_head *b)
 {
     SET_FLAG(&b->flags, BH_Fixed);
 }
+EXPORT_SYMBOL(buf_fixed);
 
 inline int buf_is_fixed(struct buf_head *b)
 {
     return TEST_FLAG(&b->flags, BH_Fixed);
 }
+EXPORT_SYMBOL(buf_is_fixed);
 
 inline void buf_unfixed(struct buf_head *b)
 {
     CLEAR_FLAG(&b->flags, BH_Fixed);
 }
+EXPORT_SYMBOL(buf_unfixed);
 
 static inline void buf_struct_free(struct buf_head *b)
 {
-    kmem_cache_free(&buf_kmem_cache,b);
+    kmem_cache_free(b);
 }
+EXPORT_SYMBOL(buf_struct_free);
 
 // 初始化 bhash
 void bhash_init(struct bhash_struct *bhash, struct gendisk *gd)
@@ -57,7 +64,7 @@ void bhash_init(struct bhash_struct *bhash, struct gendisk *gd)
 }
 
 // 块号为 blockno 的哈希链条是否为空
-static inline int bhash_empty(struct bhash_struct *bhash, uint32 blockno)
+static inline int bhash_empty(struct bhash_struct *bhash, uint32_t blockno)
 {
     return hash_empty(&bhash->buf_hash_table, blockno);
 }
@@ -167,6 +174,7 @@ struct buf_head *buf_get(struct gendisk *gd, uint blockno)
     atomic_inc(&buf->refcnt);
     return buf;
 }
+EXPORT_SYMBOL(buf_get);
 
 // 仅仅打个脏标记，减少计数,放入脏链。以后由内核线程清理掉不用的，和 LRU 没关系
 void buf_release(struct buf_head *b, int is_dirty)
@@ -196,6 +204,7 @@ void buf_release(struct buf_head *b, int is_dirty)
     }
     // buf_unpin(b);
 }
+EXPORT_SYMBOL(buf_release);
 
 // 从活跃移动到不活跃的,感觉这个函数最好不用，太慢了
 // static void buf_act2ina(struct bhash_struct *bhash, struct buf_head *b)

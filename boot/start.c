@@ -22,7 +22,7 @@ void start()
   // set M Exception Program Counter to main, for mret.
   // requires gcc -mcmodel=medany
   // 当执行 mret 指令时，CPU 将跳转到 mepc 中保存的地址。因此，这里将 mepc 设置为操作系统内核的入口函数 main()。
-  w_mepc((uint64)main);
+  w_mepc((uint64_t)main);
 
   // 禁用分页
   w_satp(0);

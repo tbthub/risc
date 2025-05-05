@@ -17,7 +17,5 @@ _entry:
         add sp, sp, a0
         # jump to start() in start.c
         call start
-        # 测试 trampoline
-        # call trampoline
 spin:
         j spin

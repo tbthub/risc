@@ -2,7 +2,7 @@
 int main()
 {
     char buf[64];
-    fd_t fd = open("/text", O_RDWR);
+    fd_t fd = open("/text", FILE_RDWR);
     read(fd, buf, 64);
     buf[10] = 'H';
     buf[11] = 'E';

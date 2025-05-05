@@ -31,6 +31,8 @@
 #define SYS_pause  23
 #define SYS_sigaction 24
 #define SYS_waitpid 25
+#define SYS_sigret 26
+#define SYS_module 27
 
 
 #endif
