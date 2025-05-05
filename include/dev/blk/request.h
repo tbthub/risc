@@ -22,7 +22,7 @@ struct request
     uint32_t rq_flags;
     // 请求的 bio 链（不含链表头）
     struct bio *bio;
-    uint8 completed;
+    uint8_t completed;
 
     // 这个锁只是用于同步的，并不实现互斥。为什么不直接用信号量呢？
     // 因为“睡眠在这个请求上”、“唤醒等待这个请求完成的线程比较好听”

@@ -24,7 +24,7 @@ extern void syscall();
 extern int alloc_user_stack(struct mm_struct *mm, tid_t tid);
 extern int parse_elf_header(struct elf64_hdr *ehdr, struct thread_info *t, int f);
 extern void page_fault_handler(uint64_t fault_addr, uint64_t scause);
-extern uint64 parse_argv(struct thread_info *t, char *const argv[], char *args_page[]);
+extern uint64_t parse_argv(struct thread_info *t, char *const argv[], char *args_page[]);
 extern void signal_handler(struct signal *s);
 extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 
@@ -85,7 +85,7 @@ static inline void external_intr() {
 }
 
 // 中断
-static inline void intr_handler(uint64 scause) {
+static inline void intr_handler(uint64_t scause) {
     switch (scause) {
     case EXTERNAL_SCAUSE: // 外设
         external_intr();

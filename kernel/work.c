@@ -81,7 +81,7 @@ static __attribute__((noreturn)) void kthread_work_handler()
 
 void work_queue_init()
 {
-    for (uint16 i = 0; i < NCPU; i++) {
+    for (uint16_t i = 0; i < NCPU; i++) {
         sem_init(&work_queue[i].count, 0, "work_count");
         fifo_init(&work_queue[i].queue);
         spin_init(&work_queue[i].lock, "work_lock");

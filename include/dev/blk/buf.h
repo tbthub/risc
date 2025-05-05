@@ -57,7 +57,7 @@ struct bhash_struct
 
 extern void bhash_init(struct bhash_struct *bhash, struct gendisk *gd);
 
-extern struct buf_head *buf_get(struct gendisk *gd, uint blockno);
+extern struct buf_head *buf_get(struct gendisk *gd, uint32_t blockno);
 
 // 注意：下面三个函数会陷入睡眠，不允许持有 bhash 锁
 extern void buf_release(struct buf_head *b, int is_dirty);

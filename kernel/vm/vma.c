@@ -225,7 +225,7 @@ static void vma_gen_file_close(struct mm_struct *mm, struct vm_area_struct *v)
 }
 
 // 堆栈的缺页发生在越界的时候
-static void vma_gen_stack_fault(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr)
+static void vma_gen_stack_fault(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr)
 {
     if (v->vm_end - v->vm_start >= USER_STACK_SIZE)
         panic("stack overhidden\n");  // 杀死
@@ -266,7 +266,7 @@ struct vm_operations_struct vma_gen_ops = {
 // addr：
 // 用户期望的起始虚拟地址。
 // 一般情况下，用户会指定 NULL，由内核决定合适的起始地址。
-int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset)
+int64_t do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, uint32_t offset)
 {
     uint64_t aligned_len;
     struct mm_struct *mm = &myproc()->task->mm;
@@ -293,7 +293,7 @@ int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, 
     if ((void *)addr == NULL)
         v->vm_end = find_free_region_map(mm, aligned_len);
     else
-        v->vm_end = (uint64)addr + aligned_len;
+        v->vm_end = (uint64_t)addr + aligned_len;
     v->vm_start = v->vm_end - aligned_len + 1;
     v->vm_prot = prot;
     v->vm_ops = &vma_file_ops;
@@ -302,10 +302,10 @@ int64 do_mmap(void *addr, uint32_t len, flags64_t prot, flags_t flags, fd_t fd, 
 
     vma_insert(mm, v);
 
-    return (int64)v->vm_start;
+    return (int64_t)v->vm_start;
 }
 
-int64 do_munmap(void *addr, uint32_t len)
+int64_t do_munmap(void *addr, uint32_t len)
 {
     // struct vm_area_struct *v;
     // struct mm_struct *mm = &myproc()->task->mm;

@@ -5,7 +5,7 @@
 #include "dev/blk/blk_dev.h"
 #include "dev/blk/gendisk.h"
 #include "fs/file.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "std/stddef.h"
 

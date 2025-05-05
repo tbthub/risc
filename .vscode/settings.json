@@ -70,7 +70,8 @@
     "export.h": "c",
     "*.bak": "c",
     "khook.h": "c",
-    "kprobe.h": "c"
+    "kprobe.h": "c",
+    "stdint.h": "c"
   },
   "workbench.list.horizontalScrolling": true,
   "files.insertFinalNewline": true

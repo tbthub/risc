@@ -56,7 +56,7 @@ struct signal_struct {
 
 typedef struct {
 	struct list_head list;
-	uint8 info;
+	uint8_t info;
 } siginfo_t;
 
 

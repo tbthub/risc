@@ -2,7 +2,7 @@
 #include "easyfs.h"
 #include "lib/atomic.h"
 #include "lib/math.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "mm/slab.h"
 

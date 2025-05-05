@@ -192,7 +192,7 @@ struct thread_info *kthread_create(struct thread_info *pa, void (*func)(void *),
 }
 EXPORT_SYMBOL(kthread_create);
 
-int64 do_pause() {
+int64_t do_pause() {
     struct thread_info *thread = myproc();
     spin_lock(&thread->lock);
     thread->state = RUNNABLE;

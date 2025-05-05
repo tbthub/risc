@@ -36,7 +36,7 @@ inline uint32_t math_order2(uint32_t size)
     return order;
 }
 
-inline uint32_t math_log(uint32_t num, uint16 base)
+inline uint32_t math_log(uint32_t num, uint16_t base)
 {
     uint32_t result = 0;
 
@@ -54,7 +54,7 @@ inline uint32_t math_log(uint32_t num, uint16 base)
     return result;
 }
 
-inline uint32_t math_pow(uint32_t base, uint16 exponent)
+inline uint32_t math_pow(uint32_t base, uint16_t exponent)
 {
     uint32_t result = 1;
 

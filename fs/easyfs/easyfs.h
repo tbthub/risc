@@ -77,7 +77,7 @@ struct easy_d_inode
 {
     uint32_t i_no;
     enum easy_file_type i_type;
-    uint16 i_devno;              // 如果是设备文件,标识设备号
+    uint16_t i_devno;              // 如果是设备文件,标识设备号
     uint32_t i_size;               // 文件大小
     uint32_t i_addrs[NDIRECT + 1]; // 12个直接 + 1 个间接
 

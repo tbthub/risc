@@ -7,7 +7,7 @@
 // {
 //     for (int i = 0; i < MAX_LEVEL; i++)
 //     {
-//         uint len = list_len(&buddy.free_lists[i]);
+//         uint32_t len = list_len(&buddy.free_lists[i]);
 //         printk("{ L: %d, N: %d }\t", i, len);
 //     }
 //     printk("\n");

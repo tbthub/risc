@@ -8,7 +8,7 @@
 #include "fs/file.h"
 #include "lib/hash.h"
 #include "lib/list.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "std/stddef.h"
@@ -22,7 +22,7 @@
 static struct
 {
     spinlock_t lock;
-    int32 cnt;
+    int32_t cnt;
     struct list_head list;
     uint64_t next_base;
 
@@ -317,7 +317,7 @@ void kmods_init()
         (*k_inits)();
 }
 
-int64 do_module(const char *path, int mode)
+int64_t do_module(const char *path, int mode)
 {
     int res = -1;
     switch (mode) {

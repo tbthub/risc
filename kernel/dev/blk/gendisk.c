@@ -7,7 +7,7 @@
 #include "dev/blk/buf.h"
 #include "dev/blk/flush.h"
 #include "dev/devs.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "core/export.h"
 

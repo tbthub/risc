@@ -17,7 +17,7 @@
 #include "mm/kmalloc.h"
 #include "dev/blk/blk_dev.h"
 #include "dev/devs.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "core/module.h"
 
 #define DISK_SIZE 100 * 1024 * 1024
@@ -51,7 +51,7 @@ static struct disk
     char free[NUM]; // is a descriptor free?
     sleeplock_t free_0;
     // 用于跟踪 used 环的读取进度
-    uint16 used_idx; // we've looked this far in used[2..NUM].
+    uint16_t used_idx; // we've looked this far in used[2..NUM].
 
     // 用于记录正在进行中的磁盘操作的信息。数组索引对应于每个描述符链的头描述符编号
     struct

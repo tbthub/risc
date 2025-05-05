@@ -122,9 +122,9 @@ static inline struct list_head *list_pop(struct list_head *list)
     return tmp;
 }
 
-static inline uint list_len(struct list_head *list)
+static inline uint32_t list_len(struct list_head *list)
 {
-    uint len = 0;
+    uint32_t len = 0;
     struct list_head *pos;
     list_for_each(pos, list)
     {

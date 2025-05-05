@@ -1,6 +1,6 @@
 #include "easyfs.h"
 #include "mm/mm.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "lib/bitmap.h"
 #include "dev/blk/blk_dev.h"
 #include "core/proc.h"

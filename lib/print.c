@@ -41,7 +41,7 @@ void putptr(void *ptr)
 
     // 按十六进制逐位输出，从高位到低位
     for (int i = (sizeof(uptr) * 2) - 1; i >= 0; i--) {
-        uint8 digit = (uptr >> (i * 4)) & 0xF;  // 提取当前位
+        uint8_t digit = (uptr >> (i * 4)) & 0xF;  // 提取当前位
         if (digit < 10)
             putchar('0' + digit);  // 数字0-9
         else

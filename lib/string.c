@@ -11,7 +11,7 @@
  */
 
 // 在 dst 处设置 n 个 c
-void *memset(void *dst, int c, uint64 n) {
+void *memset(void *dst, int c, uint64_t n) {
     char *cdst = (char *)dst;
     int i;
     for (i = 0; i < n; i++)
@@ -19,11 +19,11 @@ void *memset(void *dst, int c, uint64 n) {
     return dst;
 }
 
-void *memcpy(void *dst, const void *src, uint64 n) {
+void *memcpy(void *dst, const void *src, uint64_t n) {
     unsigned char *_dst       = (unsigned char *)dst;
     const unsigned char *_src = (const unsigned char *)src;
 
-    for (uint64 i = 0; i < n; i++)
+    for (uint64_t i = 0; i < n; i++)
         _dst[i] = _src[i];
 
     return _dst; // 返回目标指针
@@ -38,7 +38,7 @@ int strdup(void *dst, const void *src) {
     return len;
 }
 
-int strncpy(void *dst, const void *src, uint16 len) {
+int strncpy(void *dst, const void *src, uint16_t len) {
     char *_dst = (char *)dst;
     char *_src = (char *)src;
     int copied = 0;
@@ -52,7 +52,7 @@ int strncpy(void *dst, const void *src, uint16 len) {
     return copied; // 返回复制的字符数
 }
 
-int strncmp(const char *p, const char *q, uint n) {
+int strncmp(const char *p, const char *q, uint32_t n) {
     while (n > 0 && *p && *p == *q)
         n--, p++, q++;
     if (n == 0)

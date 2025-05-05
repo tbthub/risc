@@ -27,7 +27,7 @@ void push_off() {
 
 // 开中断、减少当前 CPU 的中断层数
 void pop_off() {
-    uint64 sp1 = r_sp();
+    uint64_t sp1 = r_sp();
     // 如果中断已经打开
     if (intr_get()) {
         panic("spinlock pop_off: intr on! hart: %d\n", cpuid());
@@ -42,7 +42,7 @@ void pop_off() {
         intr_on();
     }
 
-    uint64 sp2 = r_sp();
+    uint64_t sp2 = r_sp();
     assert(sp1 == sp2, "sp\n");
 }
 

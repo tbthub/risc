@@ -4,7 +4,7 @@
 #include "core/locks/spinlock.h"
 #include "defs.h"
 #include "lib/list.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/page.h"
 #include "riscv.h"
 #include "std/stddef.h"
@@ -44,7 +44,7 @@ static struct page *find_buddy(const struct page *page, const int order)
 void mm_debug()
 {
     for (int i = 0; i < MAX_LEVEL; i++) {
-        uint len = list_len(&Buddy.free_lists[i]);
+        uint32_t len = list_len(&Buddy.free_lists[i]);
         printk("{ L: %d, N: %d }\t", i, len);
     }
     printk("\n");
@@ -54,7 +54,7 @@ void mm_debug2()
 {
     int free_cnt = 0;
     for (int i = 0; i < MAX_LEVEL; i++) {
-        uint len = list_len(&Buddy.free_lists[i]);
+        uint32_t len = list_len(&Buddy.free_lists[i]);
         free_cnt += (1 << i) * len;
     }
     printk("free mem:%d\n", free_cnt);

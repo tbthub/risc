@@ -60,8 +60,8 @@ struct virtq_desc {
   uint32_t len;
 
   // 指向下一个 desc
-  uint16 flags;
-  uint16 next;
+  uint16_t flags;
+  uint16_t next;
 };
 
 #define VRING_DESC_F_NEXT  1 // chained with another descriptor
@@ -70,10 +70,10 @@ struct virtq_desc {
 // the (entire) avail ring, from the spec.
 // 可用环
 struct virtq_avail {
-  uint16 flags; // always zero
-  uint16 idx;   // driver will write ring[idx] next
-  uint16 ring[NUM]; // descriptor numbers of chain heads
-  uint16 unused;
+  uint16_t flags; // always zero
+  uint16_t idx;   // driver will write ring[idx] next
+  uint16_t ring[NUM]; // descriptor numbers of chain heads
+  uint16_t unused;
 };
 
 // one entry in the "used" ring, with which the
@@ -84,8 +84,8 @@ struct virtq_used_elem {
 };
 
 struct virtq_used {
-  uint16 flags; // always zero
-  uint16 idx;   // device increments when it adds a ring[] entry
+  uint16_t flags; // always zero
+  uint16_t idx;   // device increments when it adds a ring[] entry
   struct virtq_used_elem ring[NUM];
 };
 

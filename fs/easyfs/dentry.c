@@ -1,5 +1,5 @@
 #include "easyfs.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "dev/blk/blk_dev.h"
 #include "mm/kmalloc.h"
 

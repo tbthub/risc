@@ -7,7 +7,7 @@
 #include "dev/blk/buf.h"
 #include "fs/file.h"
 #include "lib/math.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/mm.h"
 #include "mm/page.h"
 #include "param.h"
@@ -93,12 +93,12 @@ static void slab_destory(struct slab *slab)
 }
 
 // 计算满足最少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象的order
-static uint8 calc_slab_order(uint16 obj_size)
+static uint8_t calc_slab_order(uint16_t obj_size)
 {
     // 确保每个 slab 至少容纳 MIN_OBJ_COUNT_PER_PAGE 个对象
     uint32_t require_size = obj_size * MIN_OBJ_COUNT_PER_PAGE;
 
-    uint8 order = 0;
+    uint8_t order = 0;
     uint32_t slab_size = PGSIZE;
 
     while (require_size > slab_size) {
@@ -138,7 +138,7 @@ static int is_slab_full(struct slab *slab, struct kmem_cache *cache)
 // 注：kmem_cache.size 需要已经对齐
 static void cache_cpu_init(struct kmem_cache *cache)
 {
-    uint16 i;
+    uint16_t i;
     struct slab *cpu_slab;
     for (i = 0; i < NCPU; i++) {
         cpu_slab = slab_create(cache);
@@ -157,14 +157,14 @@ static struct slab *kmem_cache_add_slab(struct kmem_cache *cache)
 }
 
 // 初始化缓存池
-void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32_t flags)
+void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16_t size, uint32_t flags)
 {
     spin_init(&cache->lock, "slab");
 
     strncpy(cache->name, name, CACHE_MAX_NAME_LEN);
     cache->flags = flags;
     // TODO 其实我感觉。。。不用对齐也行？这样专用 slab 可以容纳更多
-    cache->size = (uint16)next_power_of_2(size);  // 对齐  
+    cache->size = (uint16_t)next_power_of_2(size);  // 对齐  
     cache->order = calc_slab_order(cache->size);
     cache->count_per_slab = (1 << cache->order) * PGSIZE / cache->size;
     assert(cache->count_per_slab <= FREE_LIST_MAX_LEN, "kmem_cache_create cps:%d\n", cache->count_per_slab);

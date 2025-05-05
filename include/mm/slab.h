@@ -19,9 +19,9 @@ struct kmem_cache
 
     char name[CACHE_MAX_NAME_LEN];
     uint32_t flags;
-    uint16 size;
-    uint8 order;
-    uint16 count_per_slab;
+    uint16_t size;
+    uint8_t order;
+    uint16_t count_per_slab;
 
     struct list_head part_slabs;
     struct list_head full_slabs;
@@ -33,7 +33,7 @@ struct slab
 {
     struct kmem_cache *kc;
     void *objs;
-    uint16 inuse;
+    uint16_t inuse;
     struct list_head list;
     spinlock_t lock;
     
@@ -55,7 +55,7 @@ extern struct kmem_cache vma_kmem_cache;
 // 初始化全局内核缓存
 extern void kmem_cache_init();
 
-extern void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16 size, uint32_t flags);
+extern void kmem_cache_create(struct kmem_cache *cache, const char *name, uint16_t size, uint32_t flags);
 extern void kmem_cache_destory(struct kmem_cache *cache);
 extern void *kmem_cache_alloc(struct kmem_cache *cache);
 extern void kmem_cache_free(void *obj);

@@ -1,5 +1,4 @@
 #include "easyfs.h"
-#include "fs/fs.h"
 #include "dev/blk/blk_dev.h"
 
 

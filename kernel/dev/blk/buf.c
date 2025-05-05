@@ -105,7 +105,7 @@ static inline void bhash_del(struct bhash_struct *bhash, struct buf_head *b)
 }
 
 // 在哈希表中查找特定的缓存块
-static struct buf_head *bhash_find(struct bhash_struct *bhash, uint _blockno)
+static struct buf_head *bhash_find(struct bhash_struct *bhash, uint32_t _blockno)
 {
     struct buf_head *b;
 
@@ -121,7 +121,7 @@ static struct buf_head *bhash_find(struct bhash_struct *bhash, uint _blockno)
 // 尤其注意，获取前需要调用 bhash_find 查找
 // 这个是专门用于申请新 buf_head 的
 // 内存中绝不允许存在两个一样块号的缓存
-static struct buf_head *buf_alloc(struct gendisk *gd, uint blockno)
+static struct buf_head *buf_alloc(struct gendisk *gd, uint32_t blockno)
 {
     // struct bhash_struct *bhash = &gd->bhash;
     struct buf_head *b = (struct buf_head *)kmem_cache_alloc(&buf_kmem_cache);
@@ -145,7 +145,7 @@ static struct buf_head *buf_alloc(struct gendisk *gd, uint blockno)
     return b;
 }
 
-struct buf_head *buf_get(struct gendisk *gd, uint blockno)
+struct buf_head *buf_get(struct gendisk *gd, uint32_t blockno)
 {
     struct buf_head *buf;
     // int creating = 0;

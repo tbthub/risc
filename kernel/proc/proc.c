@@ -28,10 +28,10 @@ static struct
 struct cpu cpus[NCPU];
 struct thread_info *init_t;
 extern void usertrapret() __attribute__((noreturn));
-extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64 fault_addr);
-extern int mappages(pagetable_t pagetable, uint64 va, uint64 pa, uint64 size, int perm);
+extern int vm_stack_load(struct thread_info *t, struct vm_area_struct *v, uint64_t fault_addr);
+extern int mappages(pagetable_t pagetable, uint64_t va, uint64_t pa, uint64_t size, int perm);
 extern void sig_release_all(struct signal *s);
-__attribute__((noreturn)) int64 do_exit(int exit_code);
+__attribute__((noreturn)) int64_t do_exit(int exit_code);
 
 struct thread_info *get_init() {
     return init_t;
@@ -108,7 +108,7 @@ static inline void mm_init(struct mm_struct *mm) {
 // 		return -1;
 // 	}
 // 	int found = -1;
-// 	for (uint32 i = th_table->alloc; i < MAX_THREADS_PER_TASK; i++) {
+// 	for (uint32_t i = th_table->alloc; i < MAX_THREADS_PER_TASK; i++) {
 // 		if (th_table->array[i] == NULL) {
 // 			found = i;
 // 			th_table->alloc = i + 1;
@@ -533,7 +533,7 @@ static void reparent(struct thread_info *t) {
     spin_unlock(&init_t->lock);
 }
 
-__attribute__((noreturn)) int64 do_exit(int exit_code) {
+__attribute__((noreturn)) int64_t do_exit(int exit_code) {
     // (exit) 向所有线程发送 SIGKILL，置 th_table 位
     // (exit) 主线程回收子线程的所有资源（主要是kmalloc这些）
     // -- (所有子线程已死) --

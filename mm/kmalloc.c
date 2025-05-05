@@ -2,7 +2,7 @@
 
 #include "core/export.h"
 #include "lib/math.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/page.h"
 #include "mm/slab.h"
 

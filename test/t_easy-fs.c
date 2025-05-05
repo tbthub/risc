@@ -3,7 +3,7 @@
 // #include "dev/blk/gendisk.h"
 // #include "dev/blk/blk_dev.h"
 // #include "core/timer.h"
-// #include "lib/string.h"
+// #include "std/string.h"
 // #include "../fs/easyfs/easyfs.h"
 // #include "fs/file.h"
 // // 必须等到文件系统初始化完成后才可以测试

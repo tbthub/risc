@@ -30,7 +30,7 @@ static __attribute__((noreturn)) void kswapd(void *args)
         struct vm_area_struct *v = fas->vma;
         struct thread_info *t = fas->thread;
         assert(k_file_mmap_lseek(v->vm_file, v->vm_pgoff * PGSIZE + PGROUNDDOWN(fas->fault_addr - v->vm_start), SEEK_SET) >= 0, "kswapd k_file_mmap_lseek");
-        uint64 *new_page = __alloc_page(0);
+        uint64_t *new_page = __alloc_page(0);
 
         assert(k_file_mmap_read(v->vm_file, new_page, PGSIZE) == PGSIZE, "kswapd k_file_mmap_read");
         // 映射到原来线程的页表去

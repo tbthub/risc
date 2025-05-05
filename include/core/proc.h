@@ -148,7 +148,7 @@ struct thread_info {
     void *args;
     int cpu_affinity;
 
-    uint16 cpu_id; // 用于记录当前线程在哪个核心上运行，这个暂时没想到干啥，先用着
+    uint16_t cpu_id; // 用于记录当前线程在哪个核心上运行，这个暂时没想到干啥，先用着
 
     int exit_code;
 

@@ -9,15 +9,15 @@
 // File header
 struct elf64_hdr
 {
-    uint magic;  // must equal ELF_MAGIC
+    uint32_t magic;  // must equal ELF_MAGIC
     uchar elf[12];
     ushort type;
     ushort machine;
-    uint version;
+    uint32_t version;
     uint64_t entry;
     uint64_t phoff;
     uint64_t shoff;
-    uint flags;
+    uint32_t flags;
     ushort ehsize;
     ushort phentsize;
     ushort phnum;
@@ -50,11 +50,11 @@ struct proghdr
 // RISC-V ELF 相关结构
 typedef uint64_t Elf64_Addr;
 typedef uint64_t Elf64_Off;
-typedef uint16 Elf64_Half;
+typedef uint16_t Elf64_Half;
 typedef uint32_t Elf64_Word;
-typedef int32 Elf64_Sword;
+typedef int32_t Elf64_Sword;
 typedef uint64_t Elf64_Xword;
-typedef int64 Elf64_Sxword;
+typedef int64_t Elf64_Sxword;
 
 #define PT_LOAD 1
 #define SHT_RELA 4

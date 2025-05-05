@@ -10,7 +10,7 @@ typedef struct
 {
     uint64_t *top;
     uint64_t *base;
-    int32 max_size;
+    int32_t max_size;
 }sstack_t;
 
 static inline int sstack_is_empty(sstack_t *ss) {
@@ -24,7 +24,7 @@ static inline int sstack_is_full(sstack_t *ss) {
     return (ss->top - ss->base) == ss->max_size;
 }
 
-static inline void sstack_init(sstack_t *ss, uint64_t *base, int32 max_size)
+static inline void sstack_init(sstack_t *ss, uint64_t *base, int32_t max_size)
 {
     ss->top = ss->base = base;
     ss->max_size = max_size;

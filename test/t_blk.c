@@ -2,7 +2,7 @@
 #include "mm/mm.h"
 #include "dev/blk/blk_dev.h"
 #include "core/timer.h"
-#include "lib/string.h"
+#include "std/string.h"
 
 extern struct block_device my_dev;
 extern struct block_device mvirt_blk_dev;

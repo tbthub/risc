@@ -4,7 +4,7 @@
 #include "core/export.h"
 #include "core/locks/spinlock.h"
 #include "core/module.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "mm/kmalloc.h"
 #include "mm/mm.h"
 #include "riscv.h"
@@ -84,11 +84,11 @@ static void reset_pte_execable(pte_t *pte)
 static void set_probe_jmp_t0(void *entry_func, const void *kprobe_entry)
 {
     uint32_t *patch = (uint32_t *)entry_func;
-    int64 off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
-    int64 hi = (off + 0x800) >> 12;
-    int64 imm_hi = hi & 0xFFFFF;
+    int64_t off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
+    int64_t hi = (off + 0x800) >> 12;
+    int64_t imm_hi = hi & 0xFFFFF;
     patch[0] = (imm_hi << 12) | (5 << 7) | 0x17;  // auipc t0, imm_hi
-    int32 imm_lo = off - (hi << 12);
+    int32_t imm_lo = off - (hi << 12);
     patch[1] = ((uint32_t)imm_lo << 20) | (5 << 15) | (0 << 12) | (5 << 7) | 0x67;
 }
 
@@ -97,11 +97,11 @@ static void set_probe_jmp_t0(void *entry_func, const void *kprobe_entry)
 static void set_probe_jmp_ra(void *entry_func, const void *kprobe_entry)
 {
     uint32_t *patch = (uint32_t *)entry_func;
-    int64 off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
-    int64 hi = (off + 0x800) >> 12;
-    int64 imm_hi = hi & 0xFFFFF;
+    int64_t off = (uint64_t)kprobe_entry - (uint64_t)entry_func;
+    int64_t hi = (off + 0x800) >> 12;
+    int64_t imm_hi = hi & 0xFFFFF;
     patch[0] = (imm_hi << 12) | (1 << 7) | 0x17;  // auipc ra, imm_hi
-    int32 imm_lo = off - (hi << 12);
+    int32_t imm_lo = off - (hi << 12);
     patch[1] = (imm_lo << 20) | (1 << 15) | (0 << 12) | (1 << 7) | 0x67;
 }
 
@@ -163,10 +163,10 @@ void kprobe_clear(struct kprobe *kp)
     if (!kp)
         return;
     int i;
-    uint16 *patch = (uint16 *)kp->src;
+    uint16_t *patch = (uint16_t *)kp->src;
     pte_t *pte = walk(kernel_pagetable, (uint64_t)kp->entry, 0);
     set_pte_writable(pte);
-    int loop = auipc_jalr_len / sizeof(uint16);
+    int loop = auipc_jalr_len / sizeof(uint16_t);
     switch (kp->type) {
     case EXEC_TYPE:
         for (i = 0; i < loop; i++)

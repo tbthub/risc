@@ -1,5 +1,5 @@
 #include "dev/blk/gendisk.h"
-#include "lib/string.h"
+#include "std/string.h"
 #include "dev/devs.h"
 #include "core/export.h"
 #define BLK_SIZE 4096

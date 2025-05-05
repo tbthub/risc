@@ -1,6 +1,6 @@
 #include "core/export.h"
 #include "std/stddef.h"
-#include "lib/string.h"
+#include "std/string.h"
 
 
 struct ksym *alloc_ksym(struct kernel_symbol *sym)

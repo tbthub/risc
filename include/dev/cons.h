@@ -8,9 +8,9 @@
 struct cons_struct {
     spinlock_t lock;
     char buf[INPUT_BUF_SIZE];
-    uint r; // Read index
-    uint w; // Write index
-    uint e; // Edit index
+    uint32_t r; // Read index
+    uint32_t w; // Write index
+    uint32_t e; // Edit index
 };
 
 extern struct cons_struct cons;

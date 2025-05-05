@@ -7,7 +7,7 @@
 #include "mm/kmalloc.h"
 #include "std/stdio.h"
 extern  pid_t do_waitpid(pid_t pid, int *status, int options);
-extern int64 do_exit(int exit_code) __attribute__((noreturn));
+extern int64_t do_exit(int exit_code) __attribute__((noreturn));
 
 //  2 ctrl + b
 static void sigint_handler(int sig)
@@ -132,7 +132,7 @@ static inline int detect_sig_valid(int sig)
 static int std_sig_pop(sigset_t *s)
 {
     int found = -1;
-    for (uint8 i = 0; i < _N_STDSIG; i++) {
+    for (uint8_t i = 0; i < _N_STDSIG; i++) {
         if ((*s & (1 << i)) != 0) {
             found = i;
             *s &= ~(1 << i);  // 擦除信号
@@ -352,13 +352,13 @@ int sig_set_sigaction(struct signal *s, int sig, __sighandler_t handler)
     return 0;
 }
 
-int64 do_sigaction(int sig, __sighandler_t handler)
+int64_t do_sigaction(int sig, __sighandler_t handler)
 {
     struct task_struct *t = myproc()->task;
     return sig_set_sigaction(&t->sigs, sig, handler);
 }
 
-int64 do_sigret()
+int64_t do_sigret()
 {
     struct thread_info *t = myproc();
     memcpy((void *)t->tf, (void *)t->tf->sp, sizeof(*t->tf));

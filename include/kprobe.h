@@ -9,7 +9,7 @@ struct kprobe
     void *page;
     char *src[auipc_jalr_len];
     int type;
-    uint16 *entry;
+    uint16_t *entry;
 };
 
 extern struct kprobe *kprobe_exec(void *entry_func, void *my_func);

@@ -19,7 +19,7 @@ extern __attribute__((noreturn)) int do_exec(const char *path, char *const argv[
 extern void kswapd_init();
 
 extern pid_t do_waitpid(pid_t pid, int *status, int options);
-extern int64 do_module(const char *path, int mode);
+extern int64_t do_module(const char *path, int mode);
 
 // 第一个内核线程
 static void init_thread(void *a)
