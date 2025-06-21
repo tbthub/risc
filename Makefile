@@ -39,7 +39,7 @@ CFLAGS += -mcmodel=medany -fno-common -nostdlib
 CFLAGS += -ffreestanding -nostdlib -nostdinc -I./include
 CFLAGS += -MMD -MP  # 启用自动依赖生成
 
-CFLAGS += -fpatchable-function-entry=4,0
+# CFLAGS += -fpatchable-function-entry=4,0
 
 LDFLAGS = -z max-page-size=4096  
 

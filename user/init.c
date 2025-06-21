@@ -1,9 +1,11 @@
 #include "user.h"
+int a;
 int main()
 {
     pid_t pid;
     while (1) {
         pid = fork();
+        a = 0;
         if (pid > 0)
             waitpid(-1, NULL, 0);
         else if (pid == 0)
